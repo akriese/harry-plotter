@@ -1,5 +1,5 @@
 # %% [markdown]
-# Test
+# Harry Plotter - First Design Sprint
 Try editing this cell by clicking the pencil on the left!
 # %% [javascript]
 const response = await fetch("https://github.com/akriese/harry-plotter/blob/main/data/data.json")
