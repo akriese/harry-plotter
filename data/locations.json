@@ -688,5 +688,17 @@
     "Adresse": "Uferstraße 8/23, 13357 Berlin",
     "Latitude": 52.5518333,
     "Longitude": 13.3744167
+  },
+  {
+    "Institution": "prime time theater",
+    "Adresse": "Müllerstraße 163, 13353 Berlin",
+    "Latitude": 52.54440307,
+    "Longitude": 13.36252
+  },
+  {
+    "Institution": "Brotfabrik",
+    "Adresse": "Caligaripl. 1, 13086 Berlin",
+    "Latitude": 52.55,
+    "Longitude": 13.46666
   }
 ]
