@@ -6,3 +6,6 @@ const response = await fetch("https://raw.githubusercontent.com/akriese/harry-pl
 var data = await response.json();
 console.log(data)
 # %% [javascript]
+const response = await fetch("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
+var loc_data = await response.json();
+console.log(loc_data)
