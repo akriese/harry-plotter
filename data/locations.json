@@ -1,12 +1,12 @@
 [
   {
     "Institution": "Deutsches Theater / Kammerspiele",
-    "Adresse": "Schumannstra?e 13,10117 Berlin",
+    "Adresse": "Schumannstraße 13,10117 Berlin",
     "Latitude": 52.5239167,
     "Longitude": 13.3820833
   },
   {
-    "Institution": "Volksb?hne",
+    "Institution": "Volksbühne",
     "Adresse": "Rosa-Luxemburg-Platz,10178 Berlin",
     "Latitude": 52.52725,
     "Longitude": 13.4123889
@@ -30,14 +30,14 @@
     "Longitude": 13.3861944
   },
   {
-    "Institution": "Schaub?hne am Lehniner Platz",
-    "Adresse": "Kurf?rstendamm 153,10709 Berlin",
+    "Institution": "Schaubühne am Lehniner Platz",
+    "Adresse": "Kurfürstendamm 153,10709 Berlin",
     "Latitude": 52.4986944,
     "Longitude": 13.3028333
   },
   {
     "Institution": "Renaissance Theater",
-    "Adresse": "Knesebeckstra?e 100,10623 Berlin",
+    "Adresse": "Knesebeckstraße 100,10623 Berlin",
     "Latitude": 52.5103056,
     "Longitude": 13.3240833
   },
@@ -55,13 +55,13 @@
   },
   {
     "Institution": "Theater Strahl",
-    "Adresse": "Martin-Luther-Stra?e 77,10825 Berlin",
+    "Adresse": "Martin-Luther-Straße 77,10825 Berlin",
     "Latitude": 52.4883333,
     "Longitude": 13.3451944
   },
   {
     "Institution": "Canstanza Macras",
-    "Adresse": "Klosterstra?e 44,10179 Berlin",
+    "Adresse": "Klosterstraße 44,10179 Berlin",
     "Latitude": 52.5178611,
     "Longitude": 13.4118056
   },
@@ -84,80 +84,80 @@
     "Longitude": 13.3956667
   },
   {
-    "Institution": "Sophiens?le",
-    "Adresse": "Sophienstra?e 18,10178 Berlin",
+    "Institution": "Sophiensæle",
+    "Adresse": "Sophienstraße 18,10178 Berlin",
     "Latitude": 52.5258611,
     "Longitude": 13.4016111
   },
   {
     "Institution": "Theaterdiscounter",
-    "Adresse": "Klosterstra?e 44,10179 Berlin",
+    "Adresse": "Klosterstraße 44,10179 Berlin",
     "Latitude": 52.5177778,
     "Longitude": 13.4121667
   },
   {
     "Institution": "Theater '89",
-    "Adresse": "Torstra?e 216, 10115 Berlin",
+    "Adresse": "Torstraße 216, 10115 Berlin",
     "Latitude": 52.5276389,
     "Longitude": 13.3902222
   },
   {
-    "Institution": "Vaganten B?hne Gemeinn?tzige",
-    "Adresse": "Kantstra?e 12A,10623 Berlin",
+    "Institution": "Vaganten Bühne Gemeinnützige",
+    "Adresse": "Kantstraße 12A,10623 Berlin",
     "Latitude": 52.50575,
     "Longitude": 13.3288333
   },
   {
-    "Institution": "Neuk?llner Oper",
-    "Adresse": "Karl-Marx-Stra?e 131-133,12043 Berlin",
+    "Institution": "Neuköllner Oper",
+    "Adresse": "Karl-Marx-Straße 131-133,12043 Berlin",
     "Latitude": 52.4775556,
     "Longitude": 13.4394722
   },
   {
-    "Institution": "Kleines Theater am S?dwestkorso GmbH",
-    "Adresse": "S?dwestkorso 65,12161 Berlin",
+    "Institution": "Kleines Theater am Südwestkorso GmbH",
+    "Adresse": "Südwestkorso 65,12161 Berlin",
     "Latitude": 52.4733056,
     "Longitude": 13.3223611
   },
   {
-    "Institution": "Ballhaus Naunynstra?e",
-    "Adresse": "Naunynstra?e 27,10997 Berlin",
+    "Institution": "Ballhaus Naunynstraße",
+    "Adresse": "Naunynstraße 27,10997 Berlin",
     "Latitude": 52.502,
     "Longitude": 13.4213333
   },
   {
     "Institution": "Friedrichstadt-Palast",
-    "Adresse": "Friedrichstra?e 107,10117 Berlin",
+    "Adresse": "Friedrichstraße 107,10117 Berlin",
     "Latitude": 52.5239167,
     "Longitude": 13.3888611
   },
   {
     "Institution": "Sasha Waltz & Guests",
-    "Adresse": "Sophienstra?e 3,10178 Berlin",
+    "Adresse": "Sophienstraße 3,10178 Berlin",
     "Latitude": 52.5253611,
     "Longitude": 13.4013333
   },
   {
-    "Institution": "J?disches Theater",
-    "Adresse": "Meinekestra?e 24,10719 Berlin",
+    "Institution": "Jüdisches Theater",
+    "Adresse": "Meinekestraße 24,10719 Berlin",
     "Latitude": 52.5021111,
     "Longitude": 13.3293056
   },
   {
-    "Institution": "B?hnen am K?rf?rstendamm",
-    "Adresse": "Kurf?rstendamm 206,10719 Berlin",
+    "Institution": "Bühnen am Kürfürstendamm",
+    "Adresse": "Kurfürstendamm 206,10719 Berlin",
     "Latitude": 52.5019444,
     "Longitude": 13.3236389
   },
   {
     "Institution": "Schlosspark Theater",
-    "Adresse": "Schlo?stra?e 48,12165 Berlin",
+    "Adresse": "Schloßstraße 48,12165 Berlin",
     "Latitude": 52.4546944,
     "Longitude": 13.3179722
   },
   {
     "Institution": "Deutsche Oper Berlin",
-    "Adresse": "Bismarckstra?e 35,10627 Berlin",
+    "Adresse": "Bismarckstraße 35,10627 Berlin",
     "Latitude": 52.5122222,
     "Longitude": 13.3083333
   },
@@ -169,19 +169,19 @@
   },
   {
     "Institution": "Komische Oper Berlin",
-    "Adresse": "Behrenstra?e 55-57,10117 Berlin",
+    "Adresse": "Behrenstraße 55-57,10117 Berlin",
     "Latitude": 52.5159722,
     "Longitude": 13.3868889
   },
   {
     "Institution": "Staatsballett",
-    "Adresse": "Bismarckstra?e 110,10625 Berlin",
+    "Adresse": "Bismarckstraße 110,10625 Berlin",
     "Latitude": 52.5120556,
     "Longitude": 13.3173611
   },
   {
     "Institution": "Stiftung Berliner Philharmoniker",
-    "Adresse": "Herbert-von-Karajan-Stra?e 1,10785 Berlin",
+    "Adresse": "Herbert-von-Karajan-Straße 1,10785 Berlin",
     "Latitude": 52.5098056,
     "Longitude": 13.3697222
   },
@@ -192,8 +192,8 @@
     "Longitude": 13.3917778
   },
   {
-    "Institution": "Rundfunk-Orchester und -Ch?re GmbH",
-    "Adresse": "Charlottenstra?e 56,10117 Berlin",
+    "Institution": "Rundfunk-Orchester und -Chöre GmbH",
+    "Adresse": "Charlottenstraße 56,10117 Berlin",
     "Latitude": 52.5133611,
     "Longitude": 13.3910833
   },
@@ -205,66 +205,66 @@
   },
   {
     "Institution": "Literaturhaus Berlin",
-    "Adresse": "Fasanenstra?e 23,10719 Berlin",
+    "Adresse": "Fasanenstraße 23,10719 Berlin",
     "Latitude": 52.5021944,
     "Longitude": 13.3268056
   },
   {
     "Institution": "Literaturforum im Brecht-Haus",
-    "Adresse": "Chausseestra?e 125,10115 Berlin",
+    "Adresse": "Chausseestraße 125,10115 Berlin",
     "Latitude": 52.5289722,
     "Longitude": 13.3848889
   },
   {
     "Institution": "literaturWERKstatt berlin",
-    "Adresse": "Knaackstra?e 97,10435 Berlin",
+    "Adresse": "Knaackstraße 97,10435 Berlin",
     "Latitude": 52.5394444,
     "Longitude": 13.4144167
   },
   {
-    "Institution": "LesArt - Berliner Zentrum f?r Kinder- und Jugendliteratur",
-    "Adresse": "Weinmeisterstra?e 5,10178 Berlin",
+    "Institution": "LesArt - Berliner Zentrum für Kinder- und Jugendliteratur",
+    "Adresse": "Weinmeisterstraße 5,10178 Berlin",
     "Latitude": 52.52525,
     "Longitude": 13.4050833
   },
   {
-    "Institution": "ConSense - Ges. zur F?rderung von Kultur mbH (Kulturbrauerei)",
-    "Adresse": "Sch?nhauser Allee 36,10435 Berlin",
+    "Institution": "ConSense - Ges. zur Förderung von Kultur mbH (Kulturbrauerei)",
+    "Adresse": "Schönhauser Allee 36,10435 Berlin",
     "Latitude": 52.5383056,
     "Longitude": 13.413
   },
   {
     "Institution": "RambaZamba e.V.",
-    "Adresse": "Sch?nhauser Allee 36-39,10435 Berlin",
+    "Adresse": "Schönhauser Allee 36-39,10435 Berlin",
     "Latitude": 52.5399444,
     "Longitude": 13.4135833
   },
   {
     "Institution": "ufa-fabrik e.V.",
-    "Adresse": "Viktoriastra?e 10-18,12105 Berlin",
+    "Adresse": "Viktoriastraße 10-18,12105 Berlin",
     "Latitude": 52.4545833,
     "Longitude": 13.3818333
   },
   {
     "Institution": "Neue Babylon Berlin GmbH",
-    "Adresse": "Rosa-Luxemburg-Stra?e 30,10178 Berlin",
+    "Adresse": "Rosa-Luxemburg-Straße 30,10178 Berlin",
     "Latitude": 52.5258611,
     "Longitude": 13.4115
   },
   {
     "Institution": "Stiftung Berlinische Galerie",
-    "Adresse": "Alte Jakobstra?e 124-128, 10969 Berlin",
+    "Adresse": "Alte Jakobstraße 124-128, 10969 Berlin",
     "Latitude": 52.50408,
     "Longitude": 13.39881
   },
   {
-    "Institution": "Stiftung Br?han-Museum",
-    "Adresse": "Schlo?stra?e 1a, 14059 Berlin",
+    "Institution": "Stiftung Bröhan-Museum",
+    "Adresse": "Schloßstraße 1a, 14059 Berlin",
     "Latitude": 52.5189,
     "Longitude": 13.29517
   },
   {
-    "Institution": "Br?cke Museum",
+    "Institution": "Brücke Museum",
     "Adresse": "Bussardsteig 9, 14195 Berlin",
     "Latitude": 52.46682,
     "Longitude": 13.27455
@@ -277,19 +277,19 @@
   },
   {
     "Institution": "Bauhaus-Archiv",
-    "Adresse": "Klingelh?ferstra?e 14, 10785 Berlin",
+    "Adresse": "Klingelhöferstraße 14, 10785 Berlin",
     "Latitude": 52.50607,
     "Longitude": 13.35277
   },
   {
     "Institution": "Stiftung Stadtmuseum Berlin",
-    "Adresse": "Poststra?e 13, 10178 Berlin",
+    "Adresse": "Poststraße 13, 10178 Berlin",
     "Latitude": 52.51608,
     "Longitude": 13.40679
   },
   {
-    "Institution": "Stiftung Dom?ne Dahlem",
-    "Adresse": "K?nigin-Luise-Stra?e 49, 14195 Berlin",
+    "Institution": "Stiftung Domäne Dahlem",
+    "Adresse": "Königin-Luise-Straße 49, 14195 Berlin",
     "Latitude": 52.45842,
     "Longitude": 13.28866
   },
@@ -301,13 +301,13 @@
   },
   {
     "Institution": "Schwules Museum",
-    "Adresse": "L?tzowstra?e 73, 10785 Berlin",
+    "Adresse": "Lützowstraße 73, 10785 Berlin",
     "Latitude": 52.50445,
     "Longitude": 13.3578
   },
   {
     "Institution": "Werkbundarchiv - Museum der Dinge",
-    "Adresse": "Oranienstra?e 25, 10999 Berlin",
+    "Adresse": "Oranienstraße 25, 10999 Berlin",
     "Latitude": 52.50107,
     "Longitude": 13.42066
   },
@@ -325,25 +325,25 @@
   },
   {
     "Institution": "Alte Nationalgalerie - Museumsinsel",
-    "Adresse": "Bodestra?e 1-3, 10178 Berlin",
+    "Adresse": "Bodestraße 1-3, 10178 Berlin",
     "Latitude": 52.51949,
     "Longitude": 13.39883
   },
   {
-    "Institution": "Bodemuseum mit Skulpturensammlung, Museum f?r Byzantinische Kunst und M?nzkabinett - Museumsinsel",
+    "Institution": "Bodemuseum mit Skulpturensammlung, Museum für Byzantinische Kunst und Münzkabinett - Museumsinsel",
     "Adresse": "Am Kupfergruben, 10117 Berlin",
     "Latitude": 52.51551,
     "Longitude": 13.38475
   },
   {
-    "Institution": "Neues Museum mit ?gyptisches Museum, Museum f?r Vor- und Fr?hgeschichte - Museumsinsel",
-    "Adresse": "Bodestra?e 1-3, 10178 Berlin",
+    "Institution": "Neues Museum mit Ägyptisches Museum, Museum für Vor- und Frühgeschichte - Museumsinsel",
+    "Adresse": "Bodestraße 1-3, 10178 Berlin",
     "Latitude": 52.5194,
     "Longitude": 13.39883
   },
   {
-    "Institution": "Pergamonmuseum mit Antikensammlung, Museum f?r Islamische Kunst, Vorderasiatischem Museum, M?nzkabinett - Musuemsinsel",
-    "Adresse": "Bodestra?e 1-3, 10178 Berlin",
+    "Institution": "Pergamonmuseum mit Antikensammlung, Museum für Islamische Kunst, Vorderasiatischem Museum, Münzkabinett - Musuemsinsel",
+    "Adresse": "Bodestraße 1-3, 10178 Berlin",
     "Latitude": 52.5194,
     "Longitude": 13.39883
   },
@@ -355,61 +355,61 @@
   },
   {
     "Institution": "Hamburger Bahnhof - Tiergarten",
-    "Adresse": "Invalidenstra?e 50-51, 10557 Berlin",
+    "Adresse": "Invalidenstraße 50-51, 10557 Berlin",
     "Latitude": 52.52818,
     "Longitude": 13.37149
   },
   {
     "Institution": "Neue Nationalgalerie - Kulturforum",
-    "Adresse": "Potsdamer Stra?e 50, 10785 Berlin",
+    "Adresse": "Potsdamer Straße 50, 10785 Berlin",
     "Latitude": 52.50658,
     "Longitude": 13.36733
   },
   {
-    "Institution": "Gem?ldegalerie - Kulturforum (Zentralkasse) mit Kunstbibliothek und Kupferstichkabinett",
-    "Adresse": "Matth?ikirchplatz, 10785 Berlin",
+    "Institution": "Gemäldegalerie - Kulturforum (Zentralkasse) mit Kunstbibliothek und Kupferstichkabinett",
+    "Adresse": "Matthäikirchplatz, 10785 Berlin",
     "Latitude": 52.50822,
     "Longitude": 13.36734
   },
   {
     "Institution": "Kunstgewerbemuseum - Kulturforum",
-    "Adresse": "Matth?ikirchplatz, 10785 Berlin",
+    "Adresse": "Matthäikirchplatz, 10785 Berlin",
     "Latitude": 52.50822,
     "Longitude": 13.36734
   },
   {
-    "Institution": "Kunstgewerbemuseum - Schloss K?penick",
-    "Adresse": "Alt-K?penick 1, 12557 Berlin",
+    "Institution": "Kunstgewerbemuseum - Schloss Köpenick",
+    "Adresse": "Alt-Köpenick 1, 12557 Berlin",
     "Latitude": 52.44405,
     "Longitude": 13.57291
   },
   {
-    "Institution": "Ethnologisches Museum - Museen Dahlem (Zentralkasse) mit Museum Europ?ischer Kulturen und Museum f?r Asiatische Kunst",
-    "Adresse": "Lansstra?e 8, 14195 Berlin",
+    "Institution": "Ethnologisches Museum - Museen Dahlem (Zentralkasse) mit Museum Europäischer Kulturen und Museum für Asiatische Kunst",
+    "Adresse": "Lansstraße 8, 14195 Berlin",
     "Latitude": 52.45732,
     "Longitude": 13.29288
   },
   {
-    "Institution": "Museum f?r Fotografie - Charlottenburg",
-    "Adresse": "Jebensstra?e 2, 10623 Berlin",
+    "Institution": "Museum für Fotografie - Charlottenburg",
+    "Adresse": "Jebensstraße 2, 10623 Berlin",
     "Latitude": 52.5082,
     "Longitude": 13.33186
   },
   {
     "Institution": "Museum Berggruen - Charlottenburg",
-    "Adresse": "Schlo?stra?e 1, 14059 Berlin",
+    "Adresse": "Schloßstraße 1, 14059 Berlin",
     "Latitude": 52.51895,
     "Longitude": 13.2958
   },
   {
     "Institution": "Sammlung Scharf-Gerstenberg - Charlottenburg",
-    "Adresse": "Schlo?stra?e 70, 14059 Berlin",
+    "Adresse": "Schloßstraße 70, 14059 Berlin",
     "Latitude": 52.51915,
     "Longitude": 13.29684
   },
   {
     "Institution": "Musikinstrumenten-Museum",
-    "Adresse": "Tiergartenstra?e 1, 10785 Berlin",
+    "Adresse": "Tiergartenstraße 1, 10785 Berlin",
     "Latitude": 52.51001,
     "Longitude": 13.3711
   },
@@ -421,7 +421,7 @@
   },
   {
     "Institution": "Humboldt-Box",
-    "Adresse": "Schlo?platz 5, 10178 Berlin",
+    "Adresse": "Schloßplatz 5, 10178 Berlin",
     "Latitude": 52.51599,
     "Longitude": 13.40015
   },
@@ -439,19 +439,19 @@
   },
   {
     "Institution": "Park Glienicke (Schloss; Casino)",
-    "Adresse": "K?nigstra?e 36, 14109 Berlin",
+    "Adresse": "Königstraße 36, 14109 Berlin",
     "Latitude": 52.41123,
     "Longitude": 13.09786
   },
   {
     "Institution": "Jagdschloss Grunewald (Schloss; Jagdzeugmagazin)",
-    "Adresse": "H?ttenweg 100, 14193 Berlin",
+    "Adresse": "Hüttenweg 100, 14193 Berlin",
     "Latitude": 52.46703,
     "Longitude": 13.26148
   },
   {
-    "Institution": "Schloss Sch?nhausen",
-    "Adresse": "Tschaikowskistra?e 1, 13156 Berlin",
+    "Institution": "Schloss Schönhausen",
+    "Adresse": "Tschaikowskistraße 1, 13156 Berlin",
     "Latitude": 52.57838,
     "Longitude": 13.40568
   },
@@ -462,43 +462,43 @@
     "Longitude": 13.3898333
   },
   {
-    "Institution": "Tr?gerverein Haus der Wannseekonferenz",
-    "Adresse": "Am Gro?en Wannsee 56-58,14109 Berlin",
+    "Institution": "Trägerverein Haus der Wannseekonferenz",
+    "Adresse": "Am Großen Wannsee 56-58,14109 Berlin",
     "Latitude": 52.4320556,
     "Longitude": 13.1650278
   },
   {
-    "Institution": "Stiftung Gedenkst?tte Berlin-Hohensch?nhausen",
-    "Adresse": "Genslerstra?e 66,13055 Berlin",
+    "Institution": "Stiftung Gedenkstätte Berlin-Hohenschönhausen",
+    "Adresse": "Genslerstraße 66,13055 Berlin",
     "Latitude": 52.5418056,
     "Longitude": 13.5014167
   },
   {
-    "Institution": "Gedenkst?tte Deutscher Widerstand",
-    "Adresse": "Stauffenbergstra?e 13-14,10785 Berlin",
+    "Institution": "Gedenkstätte Deutscher Widerstand",
+    "Adresse": "Stauffenbergstraße 13-14,10785 Berlin",
     "Latitude": 52.5077222,
     "Longitude": 13.3635
   },
   {
     "Institution": "Stiftung Topographie des Terrors",
-    "Adresse": "Niederkirchnerstra?e 8,10963 Berlin",
+    "Adresse": "Niederkirchnerstraße 8,10963 Berlin",
     "Latitude": 52.5066944,
     "Longitude": 13.3836667
   },
   {
-    "Institution": "Dokumentationszentrum NS-Zwangsarbeit Berlin-Sch?neweide",
+    "Institution": "Dokumentationszentrum NS-Zwangsarbeit Berlin-Schöneweide",
     "Adresse": "Britzer Str. 5,12439 Berlin",
     "Latitude": 52.4531944,
     "Longitude": 13.5180556
   },
   {
     "Institution": "Kunst-Werke Berlin - Institute for Contemporary Art",
-    "Adresse": "Auguststra?e 69,10117 Berlin",
+    "Adresse": "Auguststraße 69,10117 Berlin",
     "Latitude": 52.5268056,
     "Longitude": 13.3949722
   },
   {
-    "Institution": "K?nstlerhaus Bethanien (KHB)",
+    "Institution": "Künstlerhaus Bethanien (KHB)",
     "Adresse": "Kottbusser Str. 10,10999 Berlin",
     "Latitude": 52.4969722,
     "Longitude": 13.4186389
@@ -511,7 +511,7 @@
   },
   {
     "Institution": "Stiftung Zentral- und Landesbibliothek Berlin",
-    "Adresse": "Breite Stra?e 30-36,10178 Berlin",
+    "Adresse": "Breite Straße 30-36,10178 Berlin",
     "Latitude": 52.51525,
     "Longitude": 13.4045
   },
@@ -522,8 +522,8 @@
     "Longitude": 13.31675
   },
   {
-    "Institution": "Theater Thikw?",
-    "Adresse": "Fidicinstra?e 40,10965 Berlin",
+    "Institution": "Theater Thikwà",
+    "Adresse": "Fidicinstraße 40,10965 Berlin",
     "Latitude": 52.4872222,
     "Longitude": 13.3885278
   },
@@ -534,7 +534,7 @@
     "Longitude": 13.4234444
   },
   {
-    "Institution": "Zeitgen?ssische Oper Berlin",
+    "Institution": "Zeitgenössische Oper Berlin",
     "Adresse": "Schwedter Str. 269",
     "Latitude": 52.5326389,
     "Longitude": 13.4120278
@@ -547,13 +547,13 @@
   },
   {
     "Institution": "Schlossplatztheater",
-    "Adresse": "Alt-K?penick 31,12555 Berlin",
+    "Adresse": "Alt-Köpenick 31,12555 Berlin",
     "Latitude": 52.4450556,
     "Longitude": 13.5743611
   },
   {
     "Institution": "Theater o.N.",
-    "Adresse": "Kollwitzstra?e 53,10405 Berlin",
+    "Adresse": "Kollwitzstraße 53,10405 Berlin",
     "Latitude": 52.535,
     "Longitude": 13.4162222
   },
@@ -565,7 +565,7 @@
   },
   {
     "Institution": "Fliegendes Theater",
-    "Adresse": "Urbanstra?e 100,10967 Berlin",
+    "Adresse": "Urbanstraße 100,10967 Berlin",
     "Latitude": 52.4898611,
     "Longitude": 13.4220556
   },
@@ -589,7 +589,7 @@
   },
   {
     "Institution": "Platypus Theater",
-    "Adresse": "Markgrafenstra?e 87, 10969 Berlin",
+    "Adresse": "Markgrafenstraße 87, 10969 Berlin",
     "Latitude": 52.5033889,
     "Longitude": 13.3947222
   },
@@ -601,13 +601,13 @@
   },
   {
     "Institution": "Gob Squad",
-    "Adresse": "Skalitzer Stra?e 59, 10997 Berlin",
+    "Adresse": "Skalitzer Straße 59, 10997 Berlin",
     "Latitude": 52.4997222,
     "Longitude": 13.43625
   },
   {
     "Institution": "English Theatre Berlin",
-    "Adresse": "Fidicinstra?e 40,10965 Berlin",
+    "Adresse": "Fidicinstraße 40,10965 Berlin",
     "Latitude": 52.48725,
     "Longitude": 13.3885
   },
@@ -619,13 +619,13 @@
   },
   {
     "Institution": "Hans Wurst Nachfahren",
-    "Adresse": "Gleditschstra?e 5,10781 Berlin",
+    "Adresse": "Gleditschstraße 5,10781 Berlin",
     "Latitude": 52.4965,
     "Longitude": 13.3554167
   },
   {
     "Institution": "Novoflot",
-    "Adresse": "Wallstra?e 32c, 10179 Berlin",
+    "Adresse": "Wallstraße 32c, 10179 Berlin",
     "Latitude": 52.5110556,
     "Longitude": 13.4113889
   },
@@ -643,7 +643,7 @@
   },
   {
     "Institution": "Tanztage Berlin",
-    "Adresse": "Sophienstra?e 18,10178 Berlin",
+    "Adresse": "Sophienstraße 18,10178 Berlin",
     "Latitude": 52.5258889,
     "Longitude": 13.4016111
   },
@@ -660,14 +660,14 @@
     "Longitude": 13.4607778
   },
   {
-    "Institution": "Heimathafen Neuk?lln",
-    "Adresse": "Karl-Marx-Stra?e 141,12043 Berlin",
+    "Institution": "Heimathafen Neukölln",
+    "Adresse": "Karl-Marx-Straße 141,12043 Berlin",
     "Latitude": 52.4769722,
     "Longitude": 13.4391944
   },
   {
     "Institution": "Tanzfabrik Berlin e.V.",
-    "Adresse": "Uferstra?e 23,13357 Berlin",
+    "Adresse": "Uferstraße 23,13357 Berlin",
     "Latitude": 52.5517778,
     "Longitude": 13.3749444
   },
@@ -679,13 +679,13 @@
   },
   {
     "Institution": "Laborgras",
-    "Adresse": "Gro?beerenstra?e 56E, 10965 Berlin",
+    "Adresse": "Großbeerenstraße 56E, 10965 Berlin",
     "Latitude": 52.4968056,
     "Longitude": 13.4213889
   },
   {
-    "Institution": "ada Studio & B?hne",
-    "Adresse": "Uferstra?e 8/23, 13357 Berlin",
+    "Institution": "ada Studio & Bühne",
+    "Adresse": "Uferstraße 8/23, 13357 Berlin",
     "Latitude": 52.5518333,
     "Longitude": 13.3744167
   }
