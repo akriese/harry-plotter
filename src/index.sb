@@ -1,7 +1,7 @@
 # %% [javascript]
-await import("https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.js") as topojson; 
+await import("https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.js")
 # %% [javascript]
-await import("https://cdnjs.cloudflare.com/ajax/libs/d3/7.6.1/d3.min.js") as d3;
+await import("https://cdnjs.cloudflare.com/ajax/libs/d3/7.6.1/d3.min.js")
 # %% [markdown]
 # Harry Plotter - First Design Sprint
 # %% [javascript]
@@ -31,6 +31,13 @@ for (const [idx, d] of data.entries()) {
   }
 }
 console.log(new_data)
+# %% [javascript]
+var plot_data = [];
+for (i in new_data){
+  var entry = [new_data[i].Kategorie, new_data[i].Latitude, new_data[i].Longitude, new_data[i].zahlen]
+  plot_data.push(entry);
+}
+console.log(plot_data)
 # %% [javascript]
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
@@ -208,12 +215,5 @@ chart = BubbleMap(plot_data, {
   width: 975,
   height: 610
 })
-# %% [javascript]
-var plot_data = [];
-for (i in new_data){
-  var entry = [new_data[i].Kategorie, new_data[i].Latitude, new_data[i].Longitude, new_data[i].zahlen]
-  plot_data.push(entry);
-}
-console.log(plot_data)
 # %% [javascript]
 chart
