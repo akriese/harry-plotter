@@ -1,6 +1,13 @@
+# %% [esm]
+import * as tj from "https://cdn.skypack.dev/pin/topojson@v3.0.2-ovpHjX420lx9YlKkg1QF/mode=imports/optimized/topojson.js"
+console.log(tj)
+import * as d3_ from "https://cdn.skypack.dev/d3@7"
+console.log(d3_)
+export const topojson = tj;
+export const d3 = d3_;
 # %% [javascript]
-await import("https://cdnjs.cloudflare.com/ajax/libs/d3/7.6.1/d3.min.js")
-await import("https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.js")
+const d3 = await import("https://cdn.skypack.dev/d3@7")
+const topojson = await import("https://cdn.skypack.dev/topojson")
 # %% [markdown]
 # Harry Plotter - First Design Sprint
 # %% [markdown]
@@ -113,7 +120,7 @@ function BubbleMap(data, {
   // Construct a path generator.
   const path = d3.geoPath(projection);
 
-  const svg = d3.create("svg")
+  const svg = d3.select("#content").append("svg")
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", [0, 0, width, height])
@@ -188,63 +195,19 @@ berlin_topo
 # %% [javascript]
 berlin_topo.objects.states
 # %% [javascript]
-// copied from https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.js
-// TODO: fix import
-var mesh = function(topology) {
-  return object(topology, meshArcs.apply(this, arguments));
-};
-
-function meshArcs(topology, object$$1, filter) {
-  var arcs, i, n;
-  if (arguments.length > 1) arcs = extractArcs(topology, object$$1, filter);
-  else for (i = 0, arcs = new Array(n = topology.arcs.length); i < n; ++i) arcs[i] = i;
-  return {type: "MultiLineString", arcs: stitch(topology, arcs)};
-}
-
-function extractArcs(topology, object$$1, filter) {
-  var arcs = [],
-      geomsByArc = [],
-      geom;
-
-  function extract0(i) {
-    var j = i < 0 ? ~i : i;
-    (geomsByArc[j] || (geomsByArc[j] = [])).push({i: i, g: geom});
-  }
-
-  function extract1(arcs) {
-    arcs.forEach(extract0);
-  }
-
-  function extract2(arcs) {
-    arcs.forEach(extract1);
-  }
-
-  function extract3(arcs) {
-    arcs.forEach(extract2);
-  }
-  
-  function geometry(o) {
-    switch (geom = o, o.type) {
-      case "GeometryCollection": o.geometries.forEach(geometry); break;
-      case "LineString": extract1(o.arcs); break;
-      case "MultiLineString": case "Polygon": extract2(o.arcs); break;
-      case "MultiPolygon": extract3(o.arcs); break;
-    }
-  }
-
-  geometry(object$$1);
-
-  geomsByArc.forEach(filter == null
-      ? function(geoms) { arcs.push(geoms[0].i); }
-      : function(geoms) { if (filter(geoms[0].g, geoms[geoms.length - 1].g)) arcs.push(geoms[0].i); });
-
-  return arcs;
-}
-# %% [javascript]
 // import error from topojson
-statemesh = mesh(berlin_geo, berlin_topo.objects.states, (a, b) => a !== b)
+statemesh = topojson.mesh(berlin_geo, berlin_topo.objects.states, (a, b) => a !== b)
+# %% [html]
+  <div id="content"></div>
+# %% [css]
+body {
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
 # %% [javascript]
-var chart = BubbleMap(plot_data, { 
+var chart = BubbleMap(plot_data, {
   value: ([, , , zahlen]) => zahlen[0][1],
   position([, Longitude, Latitude, ]){
     return Longitude, Latitude;
@@ -257,4 +220,4 @@ var chart = BubbleMap(plot_data, {
   width: 975,
   height: 610
 })
-chart
+console.log(chart)
