@@ -1,13 +1,8 @@
 # %% [esm]
 import * as tj from "https://cdn.skypack.dev/pin/topojson@v3.0.2-ovpHjX420lx9YlKkg1QF/mode=imports/optimized/topojson.js"
-console.log(tj)
 import * as d3_ from "https://cdn.skypack.dev/d3@7"
-console.log(d3_)
 export const topojson = tj;
 export const d3 = d3_;
-# %% [javascript]
-const d3 = await import("https://cdn.skypack.dev/d3@7")
-const topojson = await import("https://cdn.skypack.dev/topojson")
 # %% [markdown]
 # Harry Plotter - First Design Sprint
 # %% [markdown]
