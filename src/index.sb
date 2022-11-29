@@ -10,6 +10,7 @@ console.log(data)
 const response = await fetch("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
 var loc_data = await response.json();
 console.log(loc_data)
+<<<<<<< HEAD
 # %% [javascript]
 var new_data = {}
 for (const [idx, d] of data.entries()) {
@@ -51,3 +52,5 @@ berlin = {
 # %% [javascript]
 district = new Map(berlin.features.map(d => [d.id, d]))
 
+=======
+>>>>>>> 9b8ea4f6b55ab0c7ba5c0d27d8c4b5592c4b17cf
