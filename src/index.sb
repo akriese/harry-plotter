@@ -241,6 +241,32 @@ console.log(chart)
 let [min, max] = [2011, 2014]
 var dataTime = d3.range(min, max+1)
 
+function redrawChartWithYear(year) {
+  function yearMapper([, , , zahlen]) {
+    zahlen.find(ls => year == ls[0])[1]
+  }
+
+  let contentDiv = document.getElementById("content");
+  let svgDiv = contentDiv.lastElementChild
+  if (svgDiv !== null) {
+    contentDiv.removeChild(svgDiv)
+  }
+
+  var chart = BubbleMap(plot_data, {
+    value: yearMapper, //([, , , zahlen]) => zahlen.find(ls => year == ls[0])[1],
+    position([, Longitude, Latitude, ]){
+      return Longitude, Latitude;
+    },
+    //title([, , , zahlen]) {
+    //  return `${zahlen}`;
+    //},
+    features: berlin_geo,
+    //borders: statemesh, //get statemesh
+    width: 975,
+    height: 610
+  })
+}
+
 var sliderTime = d3SimpleSlider
   .sliderBottom()
   .min(min)
@@ -251,7 +277,7 @@ var sliderTime = d3SimpleSlider
   .tickValues(dataTime)
   .default(min)
   .on('onchange', val => {
-    d3.select('p#value-time').text(val);
+    redrawChartWithYear(val)
   });
 
 var gTime = d3
