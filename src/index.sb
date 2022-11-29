@@ -202,6 +202,14 @@ body {
 }
 
 # %% [javascript]
+// remove old svg if exists
+let contentDiv = document.getElementById("content");
+let svgDiv = contentDiv.lastElementChild
+if (svgDiv !== null) {
+  contentDiv.removeChild(svgDiv)
+}
+
+// plot
 var chart = BubbleMap(plot_data, {
   value: ([, , , zahlen]) => zahlen[0][1],
   position([, Longitude, Latitude, ]){
