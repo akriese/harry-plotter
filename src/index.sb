@@ -43,6 +43,17 @@ for (const [idx, d] of data.entries()) {
     new_data[inst].zahlen.push([d.Jahr, d["Besuche insgesamt"]])
   }
 }
+
+// fill missing years from 2011
+for (const [inst, values] of Object.entries(new_data)) {
+  if (values.zahlen.length == 4) continue;
+  for (let i=0; i<4; i++) {
+    if (values.zahlen.find(([y, b]) => y == i+2011) === undefined) {
+      values.zahlen.push([i+2011, 0]) // year data not in zahlen array, add year with 0 visitors
+    }
+  }
+  values.zahlen.sort((tup1, tup2) => tup1[0] > tup2[0]) // sort new entries by year numbers
+}
 console.log(new_data)
 # %% [javascript]
 var plot_data = [];
