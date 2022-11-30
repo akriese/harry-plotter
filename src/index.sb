@@ -78,7 +78,7 @@ function BubbleMap(data, {
   value = () => undefined, // given d in data, returns the quantitative value
   cat = () => undefined,
   title, // given a datum d, returns the hover text
-  scale = d3.scaleSqrt, // type of radius scale
+  scale = d3.scaleSqrt, // use d3.scaleLog // type of radius scale
   domain, // [0, max] values; input of radius scale; must start at zero
   maxRadius = 40, // maximum radius of bubbles
   width = 640, // outer width, in pixels
@@ -128,7 +128,7 @@ function BubbleMap(data, {
     }
   }
 
- function reset() {
+  function reset() {
     states.transition().style("fill", null);
     svg.transition().duration(750).call(
       zoom.transform,
@@ -177,16 +177,9 @@ function BubbleMap(data, {
       .attr("stroke", "currentColor")
       .attr("d", path(outline));
 
- 	/*svg.append("path")
-      .datum(features)
-      .attr("fill", backgroundFill)
-      .attr("d", path)
-      .attr("cursor", "pointer")
-      .on("click", clicked);
-*/
   const g = svg.append("g");
   const states = g.append("g")
-      .attr("fill", "#444")
+      .attr("fill", backgroundFill)
       .attr("cursor", "pointer")
     .selectAll("path")
     .data(topojson.feature(berlin_topo, berlin_topo.objects.states).features)
@@ -196,8 +189,8 @@ function BubbleMap(data, {
 
   states.append("title")
       .text(d => d.properties.name);
-  /*
-  if (borders != null) svg.append("path")
+
+  if (borders != null) g.append("path")
       .attr("pointer-events", "none")
       .attr("fill", "none")
       .attr("stroke", backgroundStroke)
@@ -206,7 +199,7 @@ function BubbleMap(data, {
       .attr("stroke-width", backgroundStrokeWidth)
       .attr("stroke-opacity", backgroundStrokeOpacity)
       .attr("d", path(borders));
-*/
+
   const legend = svg.append("g")
       .attr("fill", "#777")
       .attr("transform", `translate(${legendX},${legendY})`)
@@ -227,19 +220,19 @@ function BubbleMap(data, {
       .attr("dy", "1.3em")
       .text(radius.tickFormat(4, "s"));
 
-  svg.append("g")
+  const bubbles = g.append("g")
       .attr("fill-opacity", fillOpacity)
       .attr("stroke", stroke)
       .attr("stroke-width", strokeWidth)
       .attr("stroke-opacity", strokeOpacity)
       .selectAll("circle")
       .data(d3.range(data.length)
-      .filter(i => P[i])
-      .sort((i, j) => d3.descending(V[i], V[j])))
+        .filter(i => P[i])
+        .sort((i, j) => d3.descending(V[i], V[j])))
       .join("circle")
       .attr("transform", projection == null
-          ? i => `translate(${P[i]})`
-          : i => `translate(${projection(P[i])})`)
+        ? i => `translate(${P[i]})`
+        : i => `translate(${projection(P[i])})`)
       .attr("r", i => radius(V[i]))
       .attr("fill", i => col[i])
       .attr("stroke", i => col[i])
