@@ -253,13 +253,8 @@ let [min, max] = [2011, 2014]
 var dataTime = d3.range(min, max+1)
 
 function redrawChartWithYear(year) {
-  function yearMapper([cat, , , zahlen]) {
-    console.log(zahlen)
-    if (!Array.isArray(zahlen)) {
-      console.log(cat)
-      return 0;
-    }
-    Array.find(zahlen, ls => year == ls[0])[1]
+  function yearMapper([, , , zahlen]) {
+    zahlen.find((ls) => year == ls[0])[1]
   }
 
   let contentDiv = document.getElementById("content");
