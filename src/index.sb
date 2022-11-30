@@ -283,6 +283,14 @@ function redrawChartWithYear(year) {
   })
 }
 
+// remove old slider on reload
+let sliderDiv = document.getElementById("slider-time");
+let svgDiv = sliderDiv.lastElementChild
+while (svgDiv !== null) {
+  sliderDiv.removeChild(svgDiv)
+  svgDiv = sliderDiv.lastElementChild
+}
+
 var sliderTime = d3SimpleSlider
   .sliderBottom()
   .min(min)
