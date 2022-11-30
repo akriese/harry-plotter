@@ -106,12 +106,8 @@ function BubbleMap(data, {
   const V = d3.map(data, value).map(d => d == null ? NaN : +d);
   const P = d3.map(data, position);
   const T = title == null ? null : d3.map(data, title);
-  const Cat = d3.map(data, cat);
-  var color = d3.scaleOrdinal(data.map(d => d[0]), d3.schemeCategory10).unknown("black");
-  const col = Cat.map(c => color(c));
-  console.log(col)
-  console.log(P)
-  //const C = d3.map(data, col);
+  var color = d3.scaleOrdinal(data.map(d => d[0]), d3.schemeCategory10).unknown("red");
+  const col = d3.map(data, (d) => color(d[0]));
 
   // Compute default domains.
   if (domain === undefined) domain = [0, d3.max(V)];
@@ -226,16 +222,16 @@ function BubbleMap(data, {
       .attr("stroke-opacity", strokeOpacity)
       .selectAll("circle")
       .data(d3.range(data.length)
-        .filter(i => P[i])
-        .sort((i, j) => d3.descending(V[i], V[j])))
-        .join("circle")
-        .attr("transform", projection == null
+      .filter(i => P[i])
+      .sort((i, j) => d3.descending(V[i], V[j])))
+      .join("circle")
+      .attr("transform", projection == null
           ? i => `translate(${P[i]})`
           : i => `translate(${projection(P[i])})`)
-        .attr("r", i => radius(V[i]))
-        .style("fill", col)
-        .attr("stroke", col)
-        .call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
+      .attr("r", i => radius(V[i]))
+      .attr("fill", i => col[i])
+      .attr("stroke", i => col[i])
+      .call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
 
   svg.call(zoom);
 
