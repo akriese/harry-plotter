@@ -206,7 +206,7 @@ berlin_topo.objects.states
 // import error from topojson
 statemesh = topojson.mesh(berlin_geo, berlin_topo.objects.states, (a, b) => a !== b)
 # %% [html]
-  <div id="content"></div>
+<div id="content"></div>
 <link
   rel="stylesheet"
   href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
