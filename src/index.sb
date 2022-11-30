@@ -331,17 +331,7 @@ body {
 let [min, max] = [2011, 2014]
 var dataTime = d3.range(min, max+1)
 
-function redrawChartWithYear(year) {
-  function yearMapper([, , , zahlen]) {
-    return zahlen.find((ls) => year == ls[0])[1]
-  }
-
-  let contentDiv = document.getElementById("content");
-  let svgDiv = contentDiv.lastElementChild
-  if (svgDiv !== null) {
-    contentDiv.removeChild(svgDiv)
-  }
-
+function drawChartWithYear(yearMapper) {
   var chart = BubbleMap(plot_data, {
     value: yearMapper,
     cat: ([category, , , ]) => category,
@@ -360,6 +350,20 @@ function redrawChartWithYear(year) {
     width: 800,
     height: 600
   })
+}
+
+function redrawChartWithYear(year) {
+  function yearMapper([, , , zahlen]) {
+    return zahlen.find((ls) => year == ls[0])[1]
+  }
+
+  let contentDiv = document.getElementById("content");
+  let svgDiv = contentDiv.lastElementChild
+  if (svgDiv !== null) {
+    contentDiv.removeChild(svgDiv)
+  }
+
+  drawChartWithYear(yearMapper);
 }
 
 // remove old slider on reload
