@@ -217,7 +217,7 @@ statemesh = topojson.mesh(berlin_geo, berlin_topo.objects.states, (a, b) => a !=
   <div class="col-sm-2"><p id="value-time"></p></div>
   <div class="col-sm"><div id="slider-time"></div></div>
 </div>
-# %%--- [css]
+# %% [css]
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
