@@ -63,6 +63,7 @@ console.log(plot_data)
 function BubbleMap(data, {
   position = d => d, // given d in data, returns the [longitude, latitude]
   value = () => undefined, // given d in data, returns the quantitative value
+  cat = () => undefined,
   title, // given a datum d, returns the hover text
   scale = d3.scaleSqrt, // type of radius scale
   domain, // [0, max] values; input of radius scale; must start at zero
@@ -79,7 +80,7 @@ function BubbleMap(data, {
   backgroundStrokeOpacity, // stroke width for borders
   backgroundStrokeLinecap = "round", // stroke line cap for borders
   backgroundStrokeLinejoin = "round", // stroke line join for borders
-  fill = "brown", // fill color for bubbles
+  //fill = d => d,// = "brown", // fill color for bubbles
   fillOpacity = 0.5, // fill opacity for bubbles
   stroke = "white", // stroke color for bubbles
   strokeWidth = 0.5, // stroke width for bubbles
@@ -92,6 +93,12 @@ function BubbleMap(data, {
   const V = d3.map(data, value).map(d => d == null ? NaN : +d);
   const P = d3.map(data, position);
   const T = title == null ? null : d3.map(data, title);
+  const Cat = d3.map(data, cat);
+  var color = d3.scaleOrdinal(data.map(d => d[0]), d3.schemeCategory10).unknown("black");
+  const col = Cat.map(c => color(c));
+  console.log(col)
+  console.log(P)
+  //const C = d3.map(data, col);
 
   // Compute default domains.
   if (domain === undefined) domain = [0, d3.max(V)];
@@ -200,21 +207,22 @@ function BubbleMap(data, {
       .text(radius.tickFormat(4, "s"));
 
   svg.append("g")
-      .attr("fill", fill)
       .attr("fill-opacity", fillOpacity)
       .attr("stroke", stroke)
       .attr("stroke-width", strokeWidth)
       .attr("stroke-opacity", strokeOpacity)
-    .selectAll("circle")
-    .data(d3.range(data.length)
+      .selectAll("circle")
+      .data(d3.range(data.length)
         .filter(i => P[i])
         .sort((i, j) => d3.descending(V[i], V[j])))
-    .join("circle")
-      .attr("transform", projection == null
+        .join("circle")
+        .attr("transform", projection == null
           ? i => `translate(${P[i]})`
           : i => `translate(${projection(P[i])})`)
-      .attr("r", i => radius(V[i]))
-      .call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
+        .attr("r", i => radius(V[i]))
+        .style("fill", col) 
+        .attr("stroke", col)
+        .call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
 
   svg.call(zoom);
 
@@ -303,16 +311,21 @@ let contentDiv = document.getElementById("content");
 let svgDiv = contentDiv.lastElementChild
 if (svgDiv !== null) {
   contentDiv.removeChild(svgDiv)
-}
+};
+
 
 // plot
 var chart = BubbleMap(plot_data, {
   value: ([, , , zahlen]) => zahlen[0][1],
+  cat: ([category, , , ]) => category,
   position([, Longitude, Latitude, ]){
     return [Longitude, Latitude];
   },
   //title([, , , zahlen]) {
   //  return `${zahlen}`;
+  //},
+  //fill([category, , , ]){
+  //  return color(category);
   //},
   features: districts_features,
   borders: statemesh,
