@@ -264,7 +264,7 @@ var dataTime = d3.range(min, max+1)
 
 function redrawChartWithYear(year) {
   function yearMapper([, , , zahlen]) {
-    zahlen.find((ls) => year == ls[0])[1]
+    return zahlen.find((ls) => year == ls[0])[1]
   }
 
   let contentDiv = document.getElementById("content");
@@ -274,7 +274,7 @@ function redrawChartWithYear(year) {
   }
 
   var chart = BubbleMap(plot_data, {
-    value: yearMapper, //([, , , zahlen]) => zahlen.find(ls => year == ls[0])[1],
+    value: yearMapper,
     position([, Longitude, Latitude, ]){
       return Longitude, Latitude;
     },
