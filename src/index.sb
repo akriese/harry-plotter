@@ -220,11 +220,16 @@ function BubbleMap(data, {
       .attr("dy", "1.3em")
       .text(radius.tickFormat(4, "s"));
 
+  function bubbleClicked(event, d) {
+    console.log(event, d)
+  }
+
   const bubbles = g.append("g")
       .attr("fill-opacity", fillOpacity)
       .attr("stroke", stroke)
       .attr("stroke-width", strokeWidth)
       .attr("stroke-opacity", strokeOpacity)
+      .attr("cursor", "pointer")
       .selectAll("circle")
       .data(d3.range(data.length)
         .filter(i => P[i])
@@ -236,7 +241,10 @@ function BubbleMap(data, {
       .attr("r", i => radius(V[i]))
       .attr("fill", i => col[i])
       .attr("stroke", i => col[i])
-      .call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
+      .call(T ? circle => circle.append("title").text(i => T[i]) : () => {})
+      .join("path")
+      .on("clicked", bubbleClicked)
+      .attr("d", path);
 
   svg.call(zoom);
 
