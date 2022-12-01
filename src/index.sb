@@ -220,11 +220,11 @@ function BubbleMap(data, {
       .attr("dy", "1.3em")
       .text(radius.tickFormat(4, "s"));
 
-  function bubbleClicked(event, d) {
-    console.log(event, d)
-  }
+  var tooltip = d3.select("#content").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
 
-  const bubbles = g.append("g")
+  var bubbles = g.append("g")
       .attr("fill-opacity", fillOpacity)
       .attr("stroke", stroke)
       .attr("stroke-width", strokeWidth)
@@ -241,10 +241,28 @@ function BubbleMap(data, {
       .attr("r", i => radius(V[i]))
       .attr("fill", i => col[i])
       .attr("stroke", i => col[i])
-      .call(T ? circle => circle.append("title").text(i => T[i]) : () => {})
-      .join("path")
-      .on("clicked", bubbleClicked)
-      .attr("d", path);
+      .attr("visitors", i => V[i])
+      .attr("left", i => projection(P[i])[0])
+      .attr("top", i => projection(P[i])[1])
+      .attr("title", i => T[i])
+      .call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
+
+  bubbles
+      .on("mouseover", function(d) {
+        console.log(d)
+        tooltip.transition().duration(200).style("opacity", .9);
+        const circle = d3.select(this)
+        const [x, y] = [parseInt(circle.attr("left")) + document.getElementById("content").offsetLeft,
+                        parseInt(circle.attr("top")) + document.getElementById("content").offsetTop]
+        tooltip.html(d)
+          .style("left", x + "px")
+          .style("top", y + "px")
+          .html("<b>"+circle.attr("title")+"</b><br>" + "Besucher:innen: " + circle.attr("visitors"));
+        })
+        .on("mouseout", function(d) {
+        tooltip.transition().duration(500).style("opacity", 0);
+      });
+
 
   svg.call(zoom);
 
@@ -291,6 +309,19 @@ body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
   color: #333;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: ;
+  height: 28px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
 }
 # %% [javascript]
 let [min, max] = [2011, 2014]
