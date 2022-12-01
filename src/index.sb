@@ -233,7 +233,7 @@ function BubbleMap(data, {
       .selectAll("circle")
       .data(d3.range(data.length)
         .filter(i => P[i])
-        .sort((i, j) => d3.descending(V[i], V[j])))
+        .sort((i, j) => d3.descending(V[i], V[j]))) // probably needed, so that big circles dont cover small ones
       .join("circle")
       .attr("transform", projection == null
         ? i => `translate(${P[i]})`
@@ -241,12 +241,13 @@ function BubbleMap(data, {
       .attr("r", i => radius(V[i]))
       .attr("fill", i => col[i])
       .attr("stroke", i => col[i])
-      .attr("visitors", i => V[i])
-      .attr("left", i => projection(P[i])[0])
-      .attr("top", i => projection(P[i])[1])
-      .attr("title", i => T[i])
+      .attr("visitors", i => V[i]) // custom attr, we need for the tooltip
+      .attr("left", i => projection(P[i])[0]) // custom attr, we need for the tooltip
+      .attr("top", i => projection(P[i])[1]) // custom attr, we need for the tooltip
+      .attr("title", i => T[i]) // custom attr, we need for the tooltip
       .call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
 
+  // tooltip setting when hovering over bubbles
   bubbles
       .on("mouseover", function(d) {
         console.log(d)
@@ -258,11 +259,10 @@ function BubbleMap(data, {
           .style("left", x + "px")
           .style("top", y + "px")
           .html("<b>"+circle.attr("title")+"</b><br>" + "Besucher:innen: " + circle.attr("visitors"));
-        })
-        .on("mouseout", function(d) {
+      })
+      .on("mouseout", function(d) {
         tooltip.transition().duration(500).style("opacity", 0);
       });
-
 
   svg.call(zoom);
 
