@@ -331,7 +331,6 @@ berlin
 // statemesh should work as it looks like in the bubble map example
 statemesh = topojson.mesh(berlin_topo, berlin_topo.objects.states, (a, b) => a !== b)
 # %% [html]
-
 <div id="content"></div>
 <link
   rel="stylesheet"
@@ -340,7 +339,6 @@ statemesh = topojson.mesh(berlin_topo, berlin_topo.objects.states, (a, b) => a !
   crossorigin="anonymous"
 />
 <div class="row align-items-center">
-  <div class="col-sm-2"><p id="value-time"></p></div>
   <div class="col-sm"><div id="slider-time"></div></div>
 </div>
 # %% [css]
