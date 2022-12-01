@@ -325,8 +325,9 @@ function redrawChartWithYear(year) {
 
   let contentDiv = document.getElementById("content");
   let svgDiv = contentDiv.lastElementChild
-  if (svgDiv !== null) {
+  while (svgDiv !== null) {
     contentDiv.removeChild(svgDiv)
+    svgDiv = contentDiv.lastElementChild
   }
 
   drawChartWithYear(yearMapper);
