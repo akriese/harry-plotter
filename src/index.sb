@@ -63,7 +63,7 @@ for (const [inst, values] of Object.entries(new_data)){
       values.zahlen[j][1] = 1;
     }
   }
-  var entry = [new_data[i].Kategorie, new_data[i].Longitude, new_data[i].Latitude, new_data[i].zahlen];
+  var entry = [inst, values.Kategorie, values.Longitude, values.Latitude, values.zahlen];
   plot_data.push(entry);
 }
 console.log(plot_data)
@@ -106,8 +106,8 @@ function BubbleMap(data, {
   const V = d3.map(data, value).map(d => d == null ? NaN : +d);
   const P = d3.map(data, position);
   const T = title == null ? null : d3.map(data, title);
-  var color = d3.scaleOrdinal(data.map(d => d[0]), d3.schemeCategory10).unknown("red");
-  const col = d3.map(data, (d) => color(d[0]));
+  var color = d3.scaleOrdinal(data.map(d => d[1]), d3.schemeCategory10).unknown("red");
+  const col = d3.map(data, (d) => color(d[1]));
 
   // Compute default domains.
   if (domain === undefined) domain = [1000, 100000];
@@ -299,14 +299,14 @@ var dataTime = d3.range(min, max+1)
 function drawChartWithYear(yearMapper) {
   var chart = BubbleMap(plot_data, {
     value: yearMapper,
-    cat: ([category, , , ]) => category,
-    position([, Longitude, Latitude, ]){
+    cat: ([, category, , , ]) => category,
+    position([, , Longitude, Latitude, ]){
       return [Longitude, Latitude];
     },
-    //title([, , , zahlen]) {
-    //  return `${zahlen}`;
-    //},
-    //fill([category, , , ]){
+    title([inst, , , ,]) {
+      return inst;
+    },
+    //fill([, category, , , ]){
     //  return color(category);
     //},
     features: districts_features,
@@ -319,7 +319,7 @@ function drawChartWithYear(yearMapper) {
 }
 
 function redrawChartWithYear(year) {
-  function yearMapper([, , , zahlen]) {
+  function yearMapper([, , , , zahlen]) {
     return zahlen.find((ls) => year == ls[0])[1]
   }
 
