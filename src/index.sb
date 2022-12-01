@@ -208,10 +208,23 @@ function BubbleMap(data, {
       .data(topojson.feature(berlin_topo, berlin_topo.objects.states).features)
       .join("path")
       .on("click", clickDistrict)
-      .attr("d", path);
+      .attr("d", path)
+      .on("mouseover", function(d) {
+          console.log("on", d)
+          d3.select(this).selectAll("title").transition().duration(200).style("opacity", .8);
+        })
+      .on("mouseout", function(d) {
+        console.log("out", d)
+        d3.select(this).selectAll("title").transition().duration(200).style("opacity", 0.05);
+      })
+      .attr("cursor", "pointer");
 
   states.append("title")
-      .text(d => d.properties.name);
+      .classed("tooltip", true)
+      .text(d => d.properties.id);
+
+  states.append("text")
+      .text(d => d.properties.id);
 
   // district borders
   if (borders != null) g.append("path")
