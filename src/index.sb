@@ -268,8 +268,8 @@ function BubbleMap(data, {
       .attr("visitors", i => yearMapper(V[i], minYear)) // custom attr, we need for the tooltip
       .attr("left", i => projection(P[i])[0]) // custom attr, we need for the tooltip
       .attr("top", i => projection(P[i])[1]) // custom attr, we need for the tooltip
-      .attr("title", i => T[i]) // custom attr, we need for the tooltip
-      .call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
+      .attr("title", i => T[i]); // custom attr, we need for the tooltip
+      //.call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
 
   // tooltip setting when hovering over bubbles
   bubbles
