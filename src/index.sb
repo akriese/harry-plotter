@@ -164,10 +164,14 @@ function BubbleMap(data, {
     const {transform} = event;
     g.attr("transform", transform);
     g.attr("stroke-width", 1 / transform.k);
+    g.attr("currentZoom", transform.k)
+    bubbles
+      .attr("r", i => radius(yearMapper(V[i], minYear)) / transform.k)
+      .attr("stroke-width", strokeWidth / transform.k)
   }
 
   const zoom = d3.zoom()
-      .scaleExtent([1, 8])
+      .scaleExtent([1, 10])
       .on("zoom", zoomed);
 
   // Construct a path generator.
@@ -185,7 +189,9 @@ function BubbleMap(data, {
       .attr("stroke", "currentColor")
       .attr("d", path(outline));
 
-  const g = svg.append("g");
+  const g = svg.append("g")
+    .attr("currentZoom", 1);
+
   const states = g.append("g")
       .attr("fill", backgroundFill)
       .attr("cursor", "pointer")
@@ -276,9 +282,10 @@ function BubbleMap(data, {
 
 
   function updateYear(year) {
+    const currentZoom = g.attr("currentZoom");
     bubbles
       .transition()
-      .attr("r", i => radius(yearMapper(V[i], year)))
+      .attr("r", i => radius(yearMapper(V[i], year)) / currentZoom) // scale radius by the current zoom
       .attr("visitors", i => yearMapper(V[i], year))
       .duration(500)
   }
@@ -361,7 +368,6 @@ div.tooltip {
   pointer-events: none;
 }
 # %% [javascript]
-
 function removeAllChildren(name) {
   const div = document.getElementById(name);
   let child = div.lastElementChild;
