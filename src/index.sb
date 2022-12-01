@@ -78,9 +78,9 @@ function BubbleMap(data, {
   value = () => undefined, // given d in data, returns the quantitative value
   cat = () => undefined,
   title, // given a datum d, returns the hover text
-  scale = d3.scaleLog, // type of radius scale
+  scale = d3.scaleSqrt, //d3.scaleLog, // type of radius scale
   domain, // [0, max] values; input of radius scale; must start at zero
-  maxRadius = 20, // maximum radius of bubbles
+  maxRadius = 30, // maximum radius of bubbles
   width = 640, // outer width, in pixels
   height, // outer height, in pixels
   projection, // a D3 projection; null for pre-projected geometry
@@ -116,8 +116,9 @@ function BubbleMap(data, {
     return zahlen.find((ls) => year == ls[0])[1]
   }
 
+  const maxVisitors = d3.max(V.map(zahlen => Math.max(...zahlen.map(tup => tup[1]))))
   // Compute default domains.
-  if (domain === undefined) domain = [1000, 100000];
+  if (domain === undefined) domain = [1, maxVisitors];
 
   // Construct scales.
   const radius = scale(domain, [1, maxRadius]);
