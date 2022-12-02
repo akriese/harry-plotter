@@ -112,6 +112,7 @@ function BubbleMap(data, {
 
   let [minYear, maxYear] = [2011, 2014];
   var dataTime = d3.range(minYear, maxYear+1);
+  var currentYear = minYear;
 
   function yearMapper(zahlen, year) {
     return zahlen.find((ls) => year == ls[0])[1]
@@ -170,7 +171,7 @@ function BubbleMap(data, {
     g.attr("stroke-width", 1 / transform.k);
     g.attr("currentZoom", transform.k)
     bubbles
-      .attr("r", i => radius(yearMapper(V[i], minYear)) / transform.k)
+      .attr("r", i => radius(yearMapper(V[i], currentYear)) / transform.k)
       .attr("stroke-width", strokeWidth / transform.k)
   }
 
@@ -263,10 +264,10 @@ function BubbleMap(data, {
       .attr("transform", projection == null
         ? i => `translate(${P[i]})`
         : i => `translate(${projection(P[i])})`)
-      .attr("r", i => radius(yearMapper(V[i], minYear)))
+      .attr("r", i => radius(yearMapper(V[i], currentYear)))
       .attr("fill", i => col[i])
       .attr("stroke", i => col[i])
-      .attr("visitors", i => yearMapper(V[i], minYear)) // custom attr, we need for the tooltip
+      .attr("visitors", i => yearMapper(V[i], currentYear)) // custom attr, we need for the tooltip
       .attr("left", i => projection(P[i])[0]) // custom attr, we need for the tooltip
       .attr("top", i => projection(P[i])[1]) // custom attr, we need for the tooltip
       .attr("title", i => T[i]); // custom attr, we need for the tooltip
@@ -293,12 +294,12 @@ function BubbleMap(data, {
   svg.call(zoom);
 
 
-  function updateYear(year) {
+  function updateYearData() {
     const currentZoom = g.attr("currentZoom");
     bubbles
       .transition()
-      .attr("r", i => radius(yearMapper(V[i], year)) / currentZoom) // scale radius by the current zoom
-      .attr("visitors", i => yearMapper(V[i], year))
+      .attr("r", i => radius(yearMapper(V[i], currentYear)) / currentZoom) // scale radius by the current zoom
+      .attr("visitors", i => yearMapper(V[i], currentYear))
       .duration(500)
   }
 
@@ -312,7 +313,8 @@ function BubbleMap(data, {
       .tickValues(dataTime)
       .default(minYear)
       .on('onchange', val => {
-        updateYear(val)
+        currentYear = val;
+        updateYearData()
       });
 
   var gTime = d3.select("#slider-time")
