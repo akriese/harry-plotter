@@ -103,6 +103,7 @@ function BubbleMap(data, {
   const V = d3.map(data, value);//.map(d => d == null ? NaN : +d);
   const P = d3.map(data, position);
   const T = title == null ? null : d3.map(data, title);
+  const C = d3.map(data, d => d[1])
   var color = d3.scaleOrdinal(data.map(d => d[1]), d3.schemeCategory10).unknown("red");
   const col = d3.map(data, (d) => color(d[1]));
 
@@ -260,6 +261,38 @@ function BubbleMap(data, {
       .attr("dy", "1.3em")
       .text(radius.tickFormat(4, "s"));
 
+  const categoryScale = color;
+  const categoryLegend = svg.append("g")
+      .style("font", "9px sans-serif")
+      .selectAll("g")
+      .data(categoryScale.domain())
+      .attr("category", i => color[i])
+      .join("g");
+
+  categoryLegend.append('circle')
+      //.merge(categoryLegend.select('circle'))
+      .attr('r', 10)
+      .attr('cy', (d, i) => i*25+10)
+      .attr('fill', categoryScale)
+      .attr("cursor", "pointer")
+      .attr('transform', (d, i) => `translate(${height/2},${i*25+10}`)
+      .on("click", function(_event, d) {
+        const isHidden = d.style("opacity") == 0.1;
+        console.log(isHidden)
+        d.transition().duration(200).style("opacity", isHidden ? 0.8 : 0.1);
+        bubbles.select().filter((b) => b.attr("category") === d.attr("category"))
+          .each(function() {
+            const thisBubble = d3.select(this);
+            thisBubble.transition().duration(500).style("visibility",
+                      isHidden ? "visible" : "hidden");
+          });
+      });
+
+  categoryLegend.append('text')
+      //.merge(categoryLegend.select('text'))
+      .text(d => d)
+      .attr('y', (d, i) => i*25+10);
+
   // a tooltip that is shown near the bubble that we hover over, displaying information about the data point
   var tooltip = d3.select("#content").append("div")
       .attr("class", "tooltip")
@@ -286,7 +319,8 @@ function BubbleMap(data, {
       .attr("visitors", i => yearMapper(V[i], currentYear)) // custom attr, we need for the tooltip
       .attr("left", i => projection(P[i])[0]) // custom attr, we need for the tooltip
       .attr("top", i => projection(P[i])[1]) // custom attr, we need for the tooltip
-      .attr("title", i => T[i]); // custom attr, we need for the tooltip
+      .attr("title", i => T[i]) // custom attr, we need for the tooltip
+      .attr("category", i => C[i]); // custom attr, we need for interactive category legend
       //.call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
 
   // tooltip setting when hovering over bubbles
