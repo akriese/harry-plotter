@@ -213,11 +213,9 @@ function BubbleMap(data, {
       .on("click", clickDistrict)
       .attr("d", path)
       .on("mouseover", function(d) {
-          console.log("on", d)
           d3.select(this).selectAll("title").transition().duration(200).style("opacity", .8);
-        })
+      })
       .on("mouseout", function(d) {
-        console.log("out", d)
         d3.select(this).selectAll("title").transition().duration(200).style("opacity", 0.05);
       })
       .attr("cursor", "pointer");
