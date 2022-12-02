@@ -293,8 +293,8 @@ function BubbleMap(data, {
         tooltip.transition().duration(200).style("opacity", .9);
         const circle = d3.select(this);
         // TODO: take into account current zoom and zoom position
-        const [x, y] = [parseInt(circle.attr("left")) + document.getElementById("content").offsetLeft,
-                        parseInt(circle.attr("top")) + document.getElementById("content").offsetTop];
+        const [x, y] = [parseFloat(circle.attr("left")) + document.getElementById("content").offsetLeft,
+                        parseFloat(circle.attr("top")) + document.getElementById("content").offsetTop]
         const v = circle.attr("visitors");
         const visitorText = isNaN(v) ? "Keine Besucher:innen" : ("Besucher:innen: " +  v);
         tooltip.html(d)
@@ -306,9 +306,8 @@ function BubbleMap(data, {
         tooltip.transition().duration(500).style("opacity", 0);
       });
 
-  svg.call(zoom);
 
-
+  // callback of the slider onchange, changes the radius of the bubbles accoring to their new values
   function updateYearData() {
     const currentZoom = g.attr("currentZoom");
     bubbles
@@ -318,6 +317,7 @@ function BubbleMap(data, {
       .duration(500)
   }
 
+  // the year slider, onchange changes the displayed year data
   var sliderTime = d3SimpleSlider
       .sliderBottom()
       .min(minYear)
@@ -332,6 +332,7 @@ function BubbleMap(data, {
         updateYearData()
       });
 
+  // drawing the slider
   var gTime = d3.select("#slider-time")
       .append('svg')
       .attr('width', 500)
@@ -340,7 +341,7 @@ function BubbleMap(data, {
       .attr('transform', 'translate(30,30)');
 
   gTime.call(sliderTime);
-
+  svg.call(zoom);
   return Object.assign(svg.node(), {scales: {radius}});
 }
 # %% [javascript]
@@ -391,8 +392,8 @@ body {
 div.tooltip {
   position: absolute;
   text-align: center;
-  width: ;
-  height: 28px;
+  width: fit-content;
+  height: fit-content;
   padding: 2px;
   font: 12px sans-serif;
   background: lightsteelblue;
