@@ -30,6 +30,8 @@ var new_data = {}
 for (const [idx, d] of data.entries()) {
   var inst = d.Institution
   //console.log(inst)
+  const year = parseInt(d.Jahr)
+  const visitors = parseInt(Math.max(1, d["Besuche insgesamt"]))
   if (!(inst in new_data)) {
     loc = loc_data.find(l => l.Institution === inst)
     //console.log(loc)
@@ -37,10 +39,10 @@ for (const [idx, d] of data.entries()) {
       Kategorie: d.Kategorie,
       Latitude: loc.Latitude,
       Longitude: loc.Longitude,
-      zahlen: [[d.Jahr, Math.max(1, d["Besuche insgesamt"])]]
+      zahlen: [[year, visitors]]
     }
   } else {
-    new_data[inst].zahlen.push([d.Jahr, Math.max(1, d["Besuche insgesamt"])])
+    new_data[inst].zahlen.push([year, visitors])
   }
 }
 
@@ -58,7 +60,7 @@ console.log(new_data)
 # %% [javascript]
 var plot_data = [];
 for (const [inst, values] of Object.entries(new_data)){
-  var entry = [inst, values.Kategorie, values.Longitude, values.Latitude, values.zahlen];
+  var entry = [inst, values.Kategorie, parseFloat(values.Longitude), parseFloat(values.Latitude), values.zahlen];
   plot_data.push(entry);
 }
 console.log(plot_data)
