@@ -297,7 +297,7 @@ function BubbleMap(data, {
         // TODO: take into account current zoom and zoom position
         const [x, y] = [parseFloat(circle.attr("left")) + document.getElementById("content").offsetLeft,
                         parseFloat(circle.attr("top")) + document.getElementById("content").offsetTop]
-        const v = circle.attr("visitors");
+        const v = parseInt(circle.attr("visitors"));
         const visitorText = isNaN(v) ? "Keine Besucher:innen" : ("Besucher:innen: " +  v.toLocaleString("de-DE"));
         tooltip.html(d)
           .style("left", x + "px")
