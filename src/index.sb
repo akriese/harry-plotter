@@ -47,9 +47,9 @@ for (const [idx, d] of data.entries()) {
 // fill missing years from 2011
 for (const [inst, values] of Object.entries(new_data)) {
   if (values.zahlen.length == 4) continue;
-  for (let i=0; i<4; i++) {
-    if (values.zahlen.find(([y, b]) => y == i+2011) === undefined) {
-      values.zahlen.push([i+2011, 1]) // year data not in zahlen array, add year with 0 visitors
+  for (let year=2011; year<=2014; year++) {
+    if (values.zahlen.find(([y, b]) => y == year) === undefined) {
+      values.zahlen.push([year, NaN]) // year data not in zahlen array, add year with NaN
     }
   }
   values.zahlen.sort((tup1, tup2) => tup1[0] > tup2[0]) // sort new entries by year numbers
@@ -58,12 +58,6 @@ console.log(new_data)
 # %% [javascript]
 var plot_data = [];
 for (const [inst, values] of Object.entries(new_data)){
-  for (j in values.zahlen) {
-    // check for NaN, as all strings are converted to NaN in cell above
-    if (isNaN(values.zahlen[j][1])) {
-      values.zahlen[j][1] = 1;
-    }
-  }
   var entry = [inst, values.Kategorie, values.Longitude, values.Latitude, values.zahlen];
   plot_data.push(entry);
 }
