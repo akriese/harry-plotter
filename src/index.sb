@@ -313,10 +313,10 @@ function BubbleMap(data, {
   function updateYearData() {
     const currentZoom = g.attr("currentZoom");
     bubbles
+      .attr("visitors", i => yearMapper(V[i], currentYear)) // has to be set before the transition
       .transition()
-      .attr("r", i => makeRadius(V[i]) / currentZoom) // scale radius by the current zoom
-      .attr("visitors", i => yearMapper(V[i], currentYear))
       .duration(500)
+      .attr("r", i => makeRadius(V[i]) / currentZoom) // scale radius by the current zoom
   }
 
   // the year slider, onchange changes the displayed year data
