@@ -108,11 +108,18 @@ function BubbleMap(data, {
   var dataTime = d3.range(minYear, maxYear+1);
   var currentYear = minYear;
 
+  // function returning the visitor number of a datapoint for the given year
   function yearMapper(zahlen, year) {
     return zahlen.find((ls) => year == ls[0])[1]
   }
 
-  const maxVisitors = d3.max(V.map(zahlen => Math.max(...zahlen.map(tup => tup[1]))))
+  // radius function handling NaN's
+  function makeRadius(zahlen) {
+    const value = yearMapper(zahlen, currentYear)
+    return isNaN(value) ? 0.5 : radius(value);
+  }
+
+  const maxVisitors = d3.max(V.map(zahlen => Math.max(...zahlen.map(tup => isNaN(tup[1]) ? 0 : tup[1]))))
   // Compute default domains.
   if (domain === undefined) domain = [1, maxVisitors];
 
@@ -165,7 +172,7 @@ function BubbleMap(data, {
     g.attr("stroke-width", 1 / transform.k);
     g.attr("currentZoom", transform.k)
     bubbles
-      .attr("r", i => radius(yearMapper(V[i], currentYear)) / transform.k)
+      .attr("r", i => makeRadius(V[i]) / transform.k)
       .attr("stroke-width", strokeWidth / transform.k)
   }
 
@@ -258,7 +265,7 @@ function BubbleMap(data, {
       .attr("transform", projection == null
         ? i => `translate(${P[i]})`
         : i => `translate(${projection(P[i])})`)
-      .attr("r", i => radius(yearMapper(V[i], currentYear)))
+      .attr("r", i => makeRadius(V[i]))
       .attr("fill", i => col[i])
       .attr("stroke", i => col[i])
       .attr("visitors", i => yearMapper(V[i], currentYear)) // custom attr, we need for the tooltip
@@ -270,16 +277,17 @@ function BubbleMap(data, {
   // tooltip setting when hovering over bubbles
   bubbles
       .on("mouseover", function(d) {
-        console.log(d)
         tooltip.transition().duration(200).style("opacity", .9);
-        const circle = d3.select(this)
+        const circle = d3.select(this);
         // TODO: take into account current zoom and zoom position
         const [x, y] = [parseInt(circle.attr("left")) + document.getElementById("content").offsetLeft,
-                        parseInt(circle.attr("top")) + document.getElementById("content").offsetTop]
+                        parseInt(circle.attr("top")) + document.getElementById("content").offsetTop];
+        const v = circle.attr("visitors");
+        const visitorText = isNaN(v) ? "Keine Besucher:innen" : ("Besucher:innen: " +  v);
         tooltip.html(d)
           .style("left", x + "px")
           .style("top", y + "px")
-          .html("<b>"+circle.attr("title")+"</b><br>" + "Besucher:innen: " + circle.attr("visitors"));
+          .html("<b>"+circle.attr("title")+"</b><br>" + visitorText);
       })
       .on("mouseout", function(d) {
         tooltip.transition().duration(500).style("opacity", 0);
@@ -292,7 +300,7 @@ function BubbleMap(data, {
     const currentZoom = g.attr("currentZoom");
     bubbles
       .transition()
-      .attr("r", i => radius(yearMapper(V[i], currentYear)) / currentZoom) // scale radius by the current zoom
+      .attr("r", i => makeRadius(V[i]) / currentZoom) // scale radius by the current zoom
       .attr("visitors", i => yearMapper(V[i], currentYear))
       .duration(500)
   }
