@@ -58,8 +58,9 @@ console.log(new_data)
 # %% [javascript]
 var plot_data = [];
 for (const [inst, values] of Object.entries(new_data)){
-  for(j in values.zahlen){
-    if(values.zahlen[j][1] == '-' || values.zahlen[j][1] == 'geschlossen'){
+  for (j in values.zahlen) {
+    // check for NaN, as all strings are converted to NaN in cell above
+    if (isNaN(values.zahlen[j][1])) {
       values.zahlen[j][1] = 1;
     }
   }
