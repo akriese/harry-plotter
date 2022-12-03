@@ -18,18 +18,21 @@ export const d3SimpleSlider = d3S;
 \
 
 # %% [javascript]
-const response = await fetch("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
-var data = await response.json();
-console.log(data)
+async function fetchJson(url) {
+  return await fetch(url).then(response => response.json())
+}
 # %% [javascript]
-const response = await fetch("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
-var loc_data = await response.json();
+var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
+var loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
+console.log(data)
 console.log(loc_data)
 # %% [javascript]
 var new_data = {}
 for (const [idx, d] of data.entries()) {
   var inst = d.Institution
   //console.log(inst)
+  const year = parseInt(d.Jahr)
+  const visitors = parseInt(Math.max(1, d["Besuche insgesamt"]))
   if (!(inst in new_data)) {
     loc = loc_data.find(l => l.Institution === inst)
     //console.log(loc)
@@ -37,19 +40,19 @@ for (const [idx, d] of data.entries()) {
       Kategorie: d.Kategorie,
       Latitude: loc.Latitude,
       Longitude: loc.Longitude,
-      zahlen: [[d.Jahr, Math.max(1, d["Besuche insgesamt"])]]
+      zahlen: [[year, visitors]]
     }
   } else {
-    new_data[inst].zahlen.push([d.Jahr, Math.max(1, d["Besuche insgesamt"])])
+    new_data[inst].zahlen.push([year, visitors])
   }
 }
 
 // fill missing years from 2011
 for (const [inst, values] of Object.entries(new_data)) {
   if (values.zahlen.length == 4) continue;
-  for (let i=0; i<4; i++) {
-    if (values.zahlen.find(([y, b]) => y == i+2011) === undefined) {
-      values.zahlen.push([i+2011, 1]) // year data not in zahlen array, add year with 0 visitors
+  for (let year=2011; year<=2014; year++) {
+    if (values.zahlen.find(([y, b]) => y == year) === undefined) {
+      values.zahlen.push([year, NaN]) // year data not in zahlen array, add year with NaN
     }
   }
   values.zahlen.sort((tup1, tup2) => tup1[0] > tup2[0]) // sort new entries by year numbers
@@ -58,17 +61,63 @@ console.log(new_data)
 # %% [javascript]
 var plot_data = [];
 for (const [inst, values] of Object.entries(new_data)){
-  for(j in values.zahlen){
-    if(values.zahlen[j][1] == '-' || values.zahlen[j][1] == 'geschlossen'){
-      values.zahlen[j][1] = 1;
-    }
-  }
-  var entry = [inst, values.Kategorie, values.Longitude, values.Latitude, values.zahlen];
+  var entry = [inst, values.Kategorie, parseFloat(values.Longitude), parseFloat(values.Latitude), values.zahlen];
   plot_data.push(entry);
 }
 console.log(plot_data)
 # %% [markdown]
 ## Define plot function
+# %% [javascript]
+colorLegend = (selection, props) => {
+  const {
+    colorScale,
+    circleRadius,
+    spacing,
+    textOffset,
+    backgroundRectWidth
+  } = props;
+
+  const backgroundRect = selection.selectAll('rect')
+    .data([null]);
+  const n = colorScale.domain().length;
+  backgroundRect.enter().append('rect')
+    .merge(backgroundRect)
+      .attr('x', -circleRadius * 2)
+      .attr('y', -circleRadius * 2)
+      .attr('rx', circleRadius * 2)
+      .attr('width', backgroundRectWidth)
+      .attr('height', spacing * n + circleRadius * 2)
+      .attr('fill', 'white')
+      .attr('opacity', 0.8);
+
+  const groups = selection.selectAll('.legend')
+    .data(colorScale.domain());
+  const groupsEnter = groups
+    .enter().append('g')
+      .attr('class', 'legend')
+      .attr('category', d => d)
+      .style("opacity", 0.8);
+  groupsEnter
+    .merge(groups)
+      .attr('transform', (d, i) =>
+        `translate(0, ${i * spacing})`
+      )
+      .attr("cursor", "pointer");
+  groups.exit().remove();
+
+  groupsEnter.append('circle')
+    .merge(groups.select('circle'))
+      .attr('r', circleRadius)
+      .attr('fill', colorScale);
+
+  groupsEnter.append('text')
+    .merge(groups.select('text'))
+      // cut off long category names
+      .text(d => d.length > 29 ? d.substr(0, 27) + '...' : d)
+      .attr('dy', '0.32em')
+      .attr('x', textOffset);
+}
+
 # %% [javascript]
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
@@ -106,17 +155,26 @@ function BubbleMap(data, {
   const V = d3.map(data, value);//.map(d => d == null ? NaN : +d);
   const P = d3.map(data, position);
   const T = title == null ? null : d3.map(data, title);
+  const C = d3.map(data, d => d[1])
   var color = d3.scaleOrdinal(data.map(d => d[1]), d3.schemeCategory10).unknown("red");
   const col = d3.map(data, (d) => color(d[1]));
 
   let [minYear, maxYear] = [2011, 2014];
   var dataTime = d3.range(minYear, maxYear+1);
+  var currentYear = minYear;
 
+  // function returning the visitor number of a datapoint for the given year
   function yearMapper(zahlen, year) {
     return zahlen.find((ls) => year == ls[0])[1]
   }
 
-  const maxVisitors = d3.max(V.map(zahlen => Math.max(...zahlen.map(tup => tup[1]))))
+  // radius function handling NaN's
+  function makeRadius(zahlen) {
+    const value = yearMapper(zahlen, currentYear)
+    return isNaN(value) ? 0.5 : radius(value);
+  }
+
+  const maxVisitors = d3.max(V.map(zahlen => Math.max(...zahlen.map(tup => isNaN(tup[1]) ? 0 : tup[1]))))
   // Compute default domains.
   if (domain === undefined) domain = [1, maxVisitors];
 
@@ -151,7 +209,7 @@ function BubbleMap(data, {
     const [[x0, y0], [x1, y1]] = path.bounds(d);
     event.stopPropagation();
     states.transition().style("fill", null);
-    d3.select(this).transition().style("fill", "red");
+    d3.select(this).transition().style("fill", "#cecece");
     svg.transition().duration(750).call(
       zoom.transform,
       d3.zoomIdentity
@@ -169,7 +227,7 @@ function BubbleMap(data, {
     g.attr("stroke-width", 1 / transform.k);
     g.attr("currentZoom", transform.k)
     bubbles
-      .attr("r", i => radius(yearMapper(V[i], minYear)) / transform.k)
+      .attr("r", i => makeRadius(V[i]) / transform.k)
       .attr("stroke-width", strokeWidth / transform.k)
   }
 
@@ -185,13 +243,20 @@ function BubbleMap(data, {
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", [0, 0, width, height])
-      .attr("style", "width: 100%; height: auto; height: intrinsic;")
-      .on("click", reset);
+      .attr("style", "width: 100%; height: auto; height: intrinsic;");
 
   if (outline != null) svg.append("path")
       .attr("fill", "white")
       .attr("stroke", "currentColor")
       .attr("d", path(outline));
+
+  // dummy rectangle, preventing that a click on the legend is propagated to the gloabl svg too
+  // https://stackoverflow.com/questions/70262042/d3-svg-click-event-and-circle-click-event-overlapping
+  const bg = svg.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("fill", "white")
+    .on("click", reset);
 
   // a global graph object, that we add the legend, states, borders, bubbles to
   const g = svg.append("g")
@@ -205,10 +270,21 @@ function BubbleMap(data, {
       .data(topojson.feature(berlin_topo, berlin_topo.objects.states).features)
       .join("path")
       .on("click", clickDistrict)
-      .attr("d", path);
+      .attr("d", path)
+      .on("mouseover", function(d) {
+          d3.select(this).selectAll("title").transition().duration(200).style("opacity", .8);
+      })
+      .on("mouseout", function(d) {
+        d3.select(this).selectAll("title").transition().duration(200).style("opacity", 0.05);
+      })
+      .attr("cursor", "pointer");
 
   states.append("title")
-      .text(d => d.properties.name);
+      .classed("tooltip", true)
+      .text(d => d.properties.id);
+
+  states.append("text")
+      .text(d => d.properties.id);
 
   // district borders
   if (borders != null) g.append("path")
@@ -242,6 +318,47 @@ function BubbleMap(data, {
       .attr("dy", "1.3em")
       .text(radius.tickFormat(4, "s"));
 
+  const legendWidth = 190
+  const categoryLegendG = svg.append('g')
+    .attr('transform', `translate(${width-legendWidth},20)`);
+
+  categoryLegendG.call(colorLegend, {
+    colorScale: color,
+    circleRadius: 8,
+    spacing: 20,
+    textOffset: 12,
+    backgroundRectWidth: legendWidth
+  });
+
+  categoryLegendG.selectAll(".legend")
+      .on("click", function(_event, d) {
+        const thisLegend = d3.select(this);
+        const isHidden = thisLegend.style("opacity") == 0.1;
+        const cat = thisLegend.attr("category");
+        thisLegend
+          .transition()
+          .duration(200)
+          .style("opacity", isHidden ? 0.8 : 0.1);
+        bubbles.filter(i => C[i] === cat)
+          .style("visibility", i => isHidden ? "visible" : "hidden");
+      })
+      .on("contextmenu", function (d, i) {
+        d3.event.preventDefault();
+        // react on right-clicking
+        const thisLegend = d3.select(this);
+        const cat = thisLegend.attr("category");
+        thisLegend
+          .transition()
+          .duration(200)
+          .style("opacity", 0.8);
+        // set only bubbles of selected category to visible
+        bubbles.filter(i => C[i] === cat)
+          .style("visibility", "visible");
+        // hide all other bubbles
+        bubbles.filter(i => C[i] !== cat)
+          .style("visibility", "hidden");
+      });
+
   // a tooltip that is shown near the bubble that we hover over, displaying information about the data point
   var tooltip = d3.select("#content").append("div")
       .attr("class", "tooltip")
@@ -262,76 +379,92 @@ function BubbleMap(data, {
       .attr("transform", projection == null
         ? i => `translate(${P[i]})`
         : i => `translate(${projection(P[i])})`)
-      .attr("r", i => radius(yearMapper(V[i], minYear)))
+      .attr("r", i => makeRadius(V[i]))
       .attr("fill", i => col[i])
       .attr("stroke", i => col[i])
-      .attr("visitors", i => yearMapper(V[i], minYear)) // custom attr, we need for the tooltip
+      .attr("visitors", i => yearMapper(V[i], currentYear)) // custom attr, we need for the tooltip
       .attr("left", i => projection(P[i])[0]) // custom attr, we need for the tooltip
       .attr("top", i => projection(P[i])[1]) // custom attr, we need for the tooltip
-      .attr("title", i => T[i]); // custom attr, we need for the tooltip
+      .attr("title", i => T[i]) // custom attr, we need for the tooltip
+      .attr("category", i => C[i]); // custom attr, we need for interactive category legend
       //.call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
 
   // tooltip setting when hovering over bubbles
   bubbles
       .on("mouseover", function(d) {
-        console.log(d)
         tooltip.transition().duration(200).style("opacity", .9);
-        const circle = d3.select(this)
+        const circle = d3.select(this);
         // TODO: take into account current zoom and zoom position
-        const [x, y] = [parseInt(circle.attr("left")) + document.getElementById("content").offsetLeft,
-                        parseInt(circle.attr("top")) + document.getElementById("content").offsetTop]
+        const [x, y] = [parseFloat(circle.attr("left")) + document.getElementById("content").offsetLeft,
+                        parseFloat(circle.attr("top")) + document.getElementById("content").offsetTop]
+        const v = parseInt(circle.attr("visitors"));
+        const visitorText = isNaN(v) ? "Keine Besucher:innen" : ("Besucher:innen: " +  v.toLocaleString("de-DE"));
         tooltip.html(d)
           .style("left", x + "px")
           .style("top", y + "px")
-          .html("<b>"+circle.attr("title")+"</b><br>" + "Besucher:innen: " + circle.attr("visitors"));
+          .html("<b>"+circle.attr("title")+"</b><br>" + visitorText);
       })
       .on("mouseout", function(d) {
         tooltip.transition().duration(500).style("opacity", 0);
       });
 
-  svg.call(zoom);
 
-
-  function updateYear(year) {
+  // callback of the slider onchange, changes the radius of the bubbles accoring to their new values
+  function updateYearData() {
     const currentZoom = g.attr("currentZoom");
     bubbles
+      .attr("visitors", i => yearMapper(V[i], currentYear)) // has to be set before the transition
       .transition()
-      .attr("r", i => radius(yearMapper(V[i], year)) / currentZoom) // scale radius by the current zoom
-      .attr("visitors", i => yearMapper(V[i], year))
       .duration(500)
+      .attr("r", i => makeRadius(V[i]) / currentZoom) // scale radius by the current zoom
   }
 
+  // the year slider, onchange changes the displayed year data
+  const sliderWidth = 500
   var sliderTime = d3SimpleSlider
       .sliderBottom()
       .min(minYear)
       .max(maxYear)
       .step(1)
-      .width(300)
+      .width(sliderWidth)
       .tickFormat(d3.format('d'))
       .tickValues(dataTime)
       .default(minYear)
       .on('onchange', val => {
-        updateYear(val)
+        currentYear = val;
+        updateYearData()
       });
 
-  var gTime = d3.select("#slider-time")
-      .append('svg')
-      .attr('width', 500)
+  // drawing the slider (inside the svg, at the bottom)
+  var gTime = svg.append("g")
+      .attr('width', width)
       .attr('height', 100)
-      .append('g')
-      .attr('transform', 'translate(30,30)');
+      .attr('transform', `translate(${width/2-sliderWidth/2},${height-40})`);
 
   gTime.call(sliderTime);
 
+  // background for slider, making it more visible while zooming
+  const timeBBox = gTime.node().getBBox();
+  gTime.append("rect").lower()
+      .attr("x", timeBBox.x-5)
+      .attr("y", timeBBox.y-5)
+      .attr("width", timeBBox.width+10)
+      .attr("height", timeBBox.height+10)
+      .attr("fill", "white")
+      .style("opacity", 0.4)
+      .attr("rx", 15);
+
+  svg.call(zoom);
   return Object.assign(svg.node(), {scales: {radius}});
 }
 # %% [javascript]
 // fetched from https://raw.githubusercontent.com/m-hoerz/berlin-shapes/master/berliner-bezirke.geojson
 // equivalent to bubblemap nation
-var districts_features = await fetch("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.geojson").then(resp => resp.json())
+var districts_features = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.geojson")
 console.log(districts_features)
 # %% [javascript]
-var berlin_topo = await fetch("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.topojson").then(response => response.json())
+
+var berlin_topo = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.topojson")
 berlin_topo
 # %% [javascript]
 var berlin = {
@@ -373,14 +506,26 @@ body {
 div.tooltip {
   position: absolute;
   text-align: center;
-  width: ;
-  height: 28px;
+  width: fit-content;
+  height: fit-content;
   padding: 2px;
   font: 12px sans-serif;
   background: lightsteelblue;
   border: 0px;
   border-radius: 8px;
   pointer-events: none;
+}
+
+/* Style of category legend text and circles */
+.legend text {
+  font-size: 0.8em;
+  fill: black;
+  font-family: sans-serif;
+}
+
+.legend circle {
+  stroke: black;
+  stroke-opacity: 0.5;
 }
 # %% [javascript]
 function removeAllChildren(name) {
@@ -411,7 +556,7 @@ var chart = BubbleMap(plot_data, {
   features: districts_features,
   borders: statemesh,
   projection: d3.geoMercator().fitExtent([[-100, 180],[800, 500]], statemesh),
-  width: 800,
+  width: 900,
   height: 600
 })
 console.log(chart);
