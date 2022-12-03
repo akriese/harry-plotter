@@ -41,6 +41,8 @@ var new_data = {}
 for (const [idx, d] of data.entries()) {
   var inst = d.Institution
   //console.log(inst)
+  const year = parseInt(d.Jahr)
+  const visitors = parseInt(Math.max(1, d["Besuche insgesamt"]))
   if (!(inst in new_data)) {
     loc = loc_data.find(l => l.Institution === inst)
     //console.log(loc)
@@ -48,19 +50,19 @@ for (const [idx, d] of data.entries()) {
       Kategorie: d.Kategorie,
       Latitude: loc.Latitude,
       Longitude: loc.Longitude,
-      zahlen: [[d.Jahr, Math.max(1, d["Besuche insgesamt"])]]
+      zahlen: [[year, visitors]]
     }
   } else {
-    new_data[inst].zahlen.push([d.Jahr, Math.max(1, d["Besuche insgesamt"])])
+    new_data[inst].zahlen.push([year, visitors])
   }
 }
 
 // fill missing years from 2011
 for (const [inst, values] of Object.entries(new_data)) {
   if (values.zahlen.length == 4) continue;
-  for (let i=0; i<4; i++) {
-    if (values.zahlen.find(([y, b]) => y == i+2011) === undefined) {
-      values.zahlen.push([i+2011, 1]) // year data not in zahlen array, add year with 0 visitors
+  for (let year=2011; year<=2014; year++) {
+    if (values.zahlen.find(([y, b]) => y == year) === undefined) {
+      values.zahlen.push([year, NaN]) // year data not in zahlen array, add year with NaN
     }
   }
   values.zahlen.sort((tup1, tup2) => tup1[0] > tup2[0]) // sort new entries by year numbers
@@ -69,12 +71,7 @@ console.log(new_data)
 # %% [javascript]
 var plot_data = [];
 for (const [inst, values] of Object.entries(new_data)){
-  for(j in values.zahlen){
-    if(values.zahlen[j][1] == '-' || values.zahlen[j][1] == 'geschlossen'){
-      values.zahlen[j][1] = 1;
-    }
-  }
-  var entry = [inst, values.Kategorie, values.Longitude, values.Latitude, values.zahlen];
+  var entry = [inst, values.Kategorie, parseFloat(values.Longitude), parseFloat(values.Latitude), values.zahlen];
   plot_data.push(entry);
 }
 console.log(plot_data)
@@ -122,12 +119,20 @@ function BubbleMap(data, {
 
   let [minYear, maxYear] = [2011, 2014];
   var dataTime = d3.range(minYear, maxYear+1);
+  var currentYear = minYear;
 
+  // function returning the visitor number of a datapoint for the given year
   function yearMapper(zahlen, year) {
     return zahlen.find((ls) => year == ls[0])[1]
   }
 
-  const maxVisitors = d3.max(V.map(zahlen => Math.max(...zahlen.map(tup => tup[1]))))
+  // radius function handling NaN's
+  function makeRadius(zahlen) {
+    const value = yearMapper(zahlen, currentYear)
+    return isNaN(value) ? 0.5 : radius(value);
+  }
+
+  const maxVisitors = d3.max(V.map(zahlen => Math.max(...zahlen.map(tup => isNaN(tup[1]) ? 0 : tup[1]))))
   // Compute default domains.
   if (domain === undefined) domain = [1, maxVisitors];
 
@@ -180,7 +185,7 @@ function BubbleMap(data, {
     g.attr("stroke-width", 1 / transform.k);
     g.attr("currentZoom", transform.k)
     bubbles
-      .attr("r", i => radius(yearMapper(V[i], minYear)) / transform.k)
+      .attr("r", i => makeRadius(V[i]) / transform.k)
       .attr("stroke-width", strokeWidth / transform.k)
   }
 
@@ -215,52 +220,24 @@ function BubbleMap(data, {
       .selectAll("path")
       .data(topojson.feature(berlin_topo, berlin_topo.objects.states).features)
       .join("path")
-      .on("click", clickDistrict);
-
-  // states.append("title");
-    
-  g.selectAll("text")
-  		.data(topojson.feature(berlin_topo, berlin_topo.objects.states).features)
-    	.enter()
-        .append("svg:text")
-        .attr("x", function(d){
-            return path.centroid(d)[0];
+      .on("click", clickDistrict)
+      .attr("d", path)
+      .on("mouseover", function(d) {
+          console.log("on", d)
+          d3.select(this).selectAll("title").transition().duration(200).style("opacity", .8);
         })
-        .attr("y", function(d){
-            return  path.centroid(d)[1];
-        })
-        .attr("text-anchor","middle")
-        .attr('font-size','9pt')
-    	.text(function(d){
-            return d.properties.id;
-        });
+      .on("mouseout", function(d) {
+        console.log("out", d)
+        d3.select(this).selectAll("title").transition().duration(200).style("opacity", 0.05);
+      })
+      .attr("cursor", "pointer");
 
-  // district objects that are clickable to zoom into a state
-  // const states = g.append("g")
-  //     .attr("fill", backgroundFill)
-  //     .attr("cursor", "pointer")
-  //     .selectAll("path")
-  //     .data(topojson.feature(berlin_topo, berlin_topo.objects.states).features)
-  //     .join("path")
-  //     .on("click", clickDistrict)
-  //     .attr("d", path)
-  //     .on("mouseover", function(d) {
-  //         console.log("on", d)
-  //         d3.select(this).selectAll("title").transition().duration(200).style("opacity", .8);
-  //       })
-  //     .on("mouseout", function(d) {
-  //       console.log("out", d)
-  //       d3.select(this).selectAll("title").transition().duration(200).style("opacity", 0.05);
-  //     })
-  //     .attr("cursor", "pointer");
+  states.append("title")
+      .classed("tooltip", true)
+      .text(d => d.properties.id);
 
-  // states.append("title")
-  //     .classed("tooltip", true)
-  //     .text(d => d.properties.id);
-
-  // states.append("text")
-  //     .text(d => d.properties.id);
-      
+  states.append("text")
+      .text(d => d.properties.id);
 
   // district borders
   if (borders != null) g.append("path")
@@ -314,10 +291,10 @@ function BubbleMap(data, {
       .attr("transform", projection == null
         ? i => `translate(${P[i]})`
         : i => `translate(${projection(P[i])})`)
-      .attr("r", i => radius(yearMapper(V[i], minYear)))
+      .attr("r", i => makeRadius(V[i]))
       .attr("fill", i => col[i])
       .attr("stroke", i => col[i])
-      .attr("visitors", i => yearMapper(V[i], minYear)) // custom attr, we need for the tooltip
+      .attr("visitors", i => yearMapper(V[i], currentYear)) // custom attr, we need for the tooltip
       .attr("left", i => projection(P[i])[0]) // custom attr, we need for the tooltip
       .attr("top", i => projection(P[i])[1]) // custom attr, we need for the tooltip
       .attr("title", i => T[i]); // custom attr, we need for the tooltip
@@ -326,33 +303,34 @@ function BubbleMap(data, {
   // tooltip setting when hovering over bubbles
   bubbles
       .on("mouseover", function(d) {
-        console.log(d)
         tooltip.transition().duration(200).style("opacity", .9);
-        const circle = d3.select(this)
+        const circle = d3.select(this);
         // TODO: take into account current zoom and zoom position
-        const [x, y] = [parseInt(circle.attr("left")) + document.getElementById("content").offsetLeft,
-                        parseInt(circle.attr("top")) + document.getElementById("content").offsetTop]
+        const [x, y] = [parseFloat(circle.attr("left")) + document.getElementById("content").offsetLeft,
+                        parseFloat(circle.attr("top")) + document.getElementById("content").offsetTop]
+        const v = circle.attr("visitors");
+        const visitorText = isNaN(v) ? "Keine Besucher:innen" : ("Besucher:innen: " +  v.toLocaleString("de-DE"));
         tooltip.html(d)
           .style("left", x + "px")
           .style("top", y + "px")
-          .html("<b>"+circle.attr("title")+"</b><br>" + "Besucher:innen: " + circle.attr("visitors"));
+          .html("<b>"+circle.attr("title")+"</b><br>" + visitorText);
       })
       .on("mouseout", function(d) {
         tooltip.transition().duration(500).style("opacity", 0);
       });
 
-  svg.call(zoom);
 
-
-  function updateYear(year) {
+  // callback of the slider onchange, changes the radius of the bubbles accoring to their new values
+  function updateYearData() {
     const currentZoom = g.attr("currentZoom");
     bubbles
       .transition()
-      .attr("r", i => radius(yearMapper(V[i], year)) / currentZoom) // scale radius by the current zoom
-      .attr("visitors", i => yearMapper(V[i], year))
+      .attr("r", i => makeRadius(V[i]) / currentZoom) // scale radius by the current zoom
+      .attr("visitors", i => yearMapper(V[i], currentYear))
       .duration(500)
   }
 
+  // the year slider, onchange changes the displayed year data
   var sliderTime = d3SimpleSlider
       .sliderBottom()
       .min(minYear)
@@ -363,9 +341,11 @@ function BubbleMap(data, {
       .tickValues(dataTime)
       .default(minYear)
       .on('onchange', val => {
-        updateYear(val)
+        currentYear = val;
+        updateYearData()
       });
 
+  // drawing the slider
   var gTime = d3.select("#slider-time")
       .append('svg')
       .attr('width', 500)
@@ -374,7 +354,7 @@ function BubbleMap(data, {
       .attr('transform', 'translate(30,30)');
 
   gTime.call(sliderTime);
-
+  svg.call(zoom);
   return Object.assign(svg.node(), {scales: {radius}});
 }
 # %% [javascript]
@@ -425,8 +405,8 @@ body {
 div.tooltip {
   position: absolute;
   text-align: center;
-  width: ;
-  height: 28px;
+  width: fit-content;
+  height: fit-content;
   padding: 2px;
   font: 12px sans-serif;
   background: lightsteelblue;
