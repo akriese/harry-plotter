@@ -245,6 +245,11 @@ function BubbleMap(data, {
       .attr("viewBox", [0, 0, width, height])
       .attr("style", "width: 100%; height: auto; height: intrinsic;");
 
+  if (outline != null) svg.append("path")
+      .attr("fill", "white")
+      .attr("stroke", "currentColor")
+      .attr("d", path(outline));
+
   // dummy rectangle, preventing that a click on the legend is propagated to the gloabl svg too
   // https://stackoverflow.com/questions/70262042/d3-svg-click-event-and-circle-click-event-overlapping
   const bg = svg.append("rect")
@@ -252,11 +257,6 @@ function BubbleMap(data, {
     .attr("height", height)
     .attr("fill", "white")
     .on("click", reset);
-
-  if (outline != null) svg.append("path")
-      .attr("fill", "white")
-      .attr("stroke", "currentColor")
-      .attr("d", path(outline));
 
   // a global graph object, that we add the legend, states, borders, bubbles to
   const g = svg.append("g")
