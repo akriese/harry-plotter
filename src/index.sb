@@ -18,12 +18,13 @@ export const d3SimpleSlider = d3S;
 \
 
 # %% [javascript]
-const response = await fetch("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
-var data = await response.json();
-console.log(data)
+async function fetchJson(url) {
+  return await fetch(url).then(response => response.json())
+}
 # %% [javascript]
-const response = await fetch("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
-var loc_data = await response.json();
+const data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
+const loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
+console.log(data)
 console.log(loc_data)
 # %% [javascript]
 var new_data = {}
@@ -449,10 +450,11 @@ function BubbleMap(data, {
 # %% [javascript]
 // fetched from https://raw.githubusercontent.com/m-hoerz/berlin-shapes/master/berliner-bezirke.geojson
 // equivalent to bubblemap nation
-var districts_features = await fetch("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.geojson").then(resp => resp.json())
+var districts_features = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.geojson")
 console.log(districts_features)
 # %% [javascript]
-var berlin_topo = await fetch("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.topojson").then(response => response.json())
+
+var berlin_topo = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.topojson")
 berlin_topo
 # %% [javascript]
 var berlin = {
