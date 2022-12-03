@@ -67,6 +67,57 @@ console.log(plot_data)
 # %% [markdown]
 ## Define plot function
 # %% [javascript]
+colorLegend = (selection, props) => {
+  const {
+    colorScale,
+    circleRadius,
+    spacing,
+    textOffset,
+    backgroundRectWidth
+  } = props;
+
+  const backgroundRect = selection.selectAll('rect')
+    .data([null]);
+  const n = colorScale.domain().length;
+  backgroundRect.enter().append('rect')
+    .merge(backgroundRect)
+      .attr('x', -circleRadius * 2)
+      .attr('y', -circleRadius * 2)
+      .attr('rx', circleRadius * 2)
+      .attr('width', backgroundRectWidth)
+      .attr('height', spacing * n + circleRadius * 2)
+      .attr('fill', 'white')
+      .attr('opacity', 0.8);
+
+  const groups = selection.selectAll('.legend')
+    .data(colorScale.domain());
+  const groupsEnter = groups
+    .enter().append('g')
+      .attr('class', 'legend')
+      .attr('category', d => d)
+      .style("opacity", 0.8);
+  groupsEnter
+    .merge(groups)
+      .attr('transform', (d, i) =>
+        `translate(0, ${i * spacing})`
+      )
+      .attr("cursor", "pointer");
+  groups.exit().remove();
+
+  groupsEnter.append('circle')
+    .merge(groups.select('circle'))
+      .attr('r', circleRadius)
+      .attr('fill', colorScale);
+
+  groupsEnter.append('text')
+    .merge(groups.select('text'))
+      // cut off long category names
+      .text(d => d.length > 29 ? d.substr(0, 27) + '...' : d)
+      .attr('dy', '0.32em')
+      .attr('x', textOffset);
+}
+
+# %% [javascript]
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/bubble-map
@@ -260,36 +311,46 @@ function BubbleMap(data, {
       .text(radius.tickFormat(4, "s"));
 
   const categoryScale = color;
-  const categoryLegend = svg.append("g")
-      .style("font", "9px sans-serif")
-      .selectAll("g")
-      .data(categoryScale.domain())
-      .attr("category", i => color[i])
-      .join("g");
+  const legendWidth = 190
+  const categoryLegendG = svg.append('g')
+    .attr('transform', `translate(${width-legendWidth},20)`);
 
-  categoryLegend.append('circle')
-      //.merge(categoryLegend.select('circle'))
-      .attr('r', 10)
-      .attr('cy', (d, i) => i*25+10)
-      .attr('fill', categoryScale)
-      .attr("cursor", "pointer")
-      .attr('transform', (d, i) => `translate(${height/2},${i*25+10}`)
+  categoryLegendG.call(colorLegend, {
+    colorScale: categoryScale,
+    circleRadius: 8,
+    spacing: 20,
+    textOffset: 12,
+    backgroundRectWidth: legendWidth
+  });
+
+  categoryLegendG.selectAll(".legend")
       .on("click", function(_event, d) {
-        const isHidden = d.style("opacity") == 0.1;
-        console.log(isHidden)
-        d.transition().duration(200).style("opacity", isHidden ? 0.8 : 0.1);
-        bubbles.select().filter((b) => b.attr("category") === d.attr("category"))
-          .each(function() {
-            const thisBubble = d3.select(this);
-            thisBubble.transition().duration(500).style("visibility",
-                      isHidden ? "visible" : "hidden");
-          });
+        const thisLegend = d3.select(this);
+        const isHidden = thisLegend.style("opacity") == 0.1;
+        const cat = thisLegend.attr("category");
+        thisLegend
+          .transition()
+          .duration(200)
+          .style("opacity", isHidden ? 0.8 : 0.1);
+        bubbles.filter(i => C[i] === cat)
+          .style("visibility", i => isHidden ? "visible" : "hidden");
+      })
+      .on("contextmenu", function (d, i) {
+        d3.event.preventDefault();
+        // react on right-clicking
+        const thisLegend = d3.select(this);
+        const cat = thisLegend.attr("category");
+        thisLegend
+          .transition()
+          .duration(200)
+          .style("opacity", 0.8);
+        // set only bubbles of selected category to visible
+        bubbles.filter(i => C[i] === cat)
+          .style("visibility", "visible");
+        // hide all other bubbles
+        bubbles.filter(i => C[i] !== cat)
+          .style("visibility", "hidden");
       });
-
-  categoryLegend.append('text')
-      //.merge(categoryLegend.select('text'))
-      .text(d => d)
-      .attr('y', (d, i) => i*25+10);
 
   // a tooltip that is shown near the bubble that we hover over, displaying information about the data point
   var tooltip = d3.select("#content").append("div")
@@ -434,6 +495,18 @@ div.tooltip {
   border: 0px;
   border-radius: 8px;
   pointer-events: none;
+}
+
+/* Style of category legend text and circles */
+.legend text {
+  font-size: 0.8em;
+  fill: black;
+  font-family: sans-serif;
+}
+
+.legend circle {
+  stroke: black;
+  stroke-opacity: 0.5;
 }
 # %% [javascript]
 function removeAllChildren(name) {
