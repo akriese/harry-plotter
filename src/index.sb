@@ -318,13 +318,12 @@ function BubbleMap(data, {
       .attr("dy", "1.3em")
       .text(radius.tickFormat(4, "s"));
 
-  const categoryScale = color;
   const legendWidth = 190
   const categoryLegendG = svg.append('g')
     .attr('transform', `translate(${width-legendWidth},20)`);
 
   categoryLegendG.call(colorLegend, {
-    colorScale: categoryScale,
+    colorScale: color,
     circleRadius: 8,
     spacing: 20,
     textOffset: 12,
