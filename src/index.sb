@@ -24,8 +24,17 @@ async function fetchJson(url) {
 # %% [javascript]
 var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
 var loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
+var berlin_topo = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.topojson")
+
+// fetched from https://raw.githubusercontent.com/m-hoerz/berlin-shapes/master/berliner-bezirke.geojson
+// equivalent to bubblemap nation
+var districts_features = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.geojson")
+
+
 console.log(data)
 console.log(loc_data)
+console.log(berlin_topo)
+console.log(districts_features)
 # %% [javascript]
 var new_data = {}
 for (const [idx, d] of data.entries()) {
@@ -65,6 +74,21 @@ for (const [inst, values] of Object.entries(new_data)){
   plot_data.push(entry);
 }
 console.log(plot_data)
+# %% [javascript]
+var berlin = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      properties: {},
+      geometry: topojson.merge(berlin_topo, berlin_topo.objects.states.geometries)
+    }
+  ]
+}
+berlin
+# %% [javascript]
+// statemesh should work as it looks like in the bubble map example
+statemesh = topojson.mesh(berlin_topo, berlin_topo.objects.states, (a, b) => a !== b)
 # %% [markdown]
 ## Define plot function
 # %% [javascript]
@@ -457,30 +481,6 @@ function BubbleMap(data, {
   svg.call(zoom);
   return Object.assign(svg.node(), {scales: {radius}});
 }
-# %% [javascript]
-// fetched from https://raw.githubusercontent.com/m-hoerz/berlin-shapes/master/berliner-bezirke.geojson
-// equivalent to bubblemap nation
-var districts_features = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.geojson")
-console.log(districts_features)
-# %% [javascript]
-
-var berlin_topo = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.topojson")
-berlin_topo
-# %% [javascript]
-var berlin = {
-  type: "FeatureCollection",
-  features: [
-    {
-      type: "Feature",
-      properties: {},
-      geometry: topojson.merge(berlin_topo, berlin_topo.objects.states.geometries)
-    }
-  ]
-}
-berlin
-# %% [javascript]
-// statemesh should work as it looks like in the bubble map example
-statemesh = topojson.mesh(berlin_topo, berlin_topo.objects.states, (a, b) => a !== b)
 # %% [html]
 <!-- Main div for the map svg -->
 <div id="content"></div>
