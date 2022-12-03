@@ -421,12 +421,13 @@ function BubbleMap(data, {
   }
 
   // the year slider, onchange changes the displayed year data
+  const sliderWidth = 500
   var sliderTime = d3SimpleSlider
       .sliderBottom()
       .min(minYear)
       .max(maxYear)
       .step(1)
-      .width(300)
+      .width(sliderWidth)
       .tickFormat(d3.format('d'))
       .tickValues(dataTime)
       .default(minYear)
@@ -435,15 +436,25 @@ function BubbleMap(data, {
         updateYearData()
       });
 
-  // drawing the slider
-  var gTime = d3.select("#slider-time")
-      .append('svg')
-      .attr('width', 500)
+  // drawing the slider (inside the svg, at the bottom)
+  var gTime = svg.append("g")
+      .attr('width', width)
       .attr('height', 100)
-      .append('g')
-      .attr('transform', 'translate(30,30)');
+      .attr('transform', `translate(${width/2-sliderWidth/2},${height-40})`);
 
   gTime.call(sliderTime);
+
+  // background for slider, making it more visible while zooming
+  const timeBBox = gTime.node().getBBox();
+  gTime.append("rect").lower()
+      .attr("x", timeBBox.x-5)
+      .attr("y", timeBBox.y-5)
+      .attr("width", timeBBox.width+10)
+      .attr("height", timeBBox.height+10)
+      .attr("fill", "white")
+      .style("opacity", 0.4)
+      .attr("rx", 15);
+
   svg.call(zoom);
   return Object.assign(svg.node(), {scales: {radius}});
 }
