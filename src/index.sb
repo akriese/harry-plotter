@@ -516,6 +516,14 @@ div.tooltip {
   pointer-events: none;
 }
 
+.axis text,
+.slider text {
+  font: 13px sans-serif;
+}
+.slider text {
+  font-weight: bold;
+}
+
 /* Style of category legend text and circles */
 .legend text {
   font-size: 0.8em;
