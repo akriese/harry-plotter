@@ -22,8 +22,8 @@ async function fetchJson(url) {
   return await fetch(url).then(response => response.json())
 }
 # %% [javascript]
-const data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
-const loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
+var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
+var loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
 console.log(data)
 console.log(loc_data)
 # %% [javascript]
