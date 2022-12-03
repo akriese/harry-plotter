@@ -557,7 +557,7 @@ var chart = BubbleMap(plot_data, {
   features: districts_features,
   borders: statemesh,
   projection: d3.geoMercator().fitExtent([[-100, 180],[800, 500]], statemesh),
-  width: 800,
+  width: 900,
   height: 600
 })
 console.log(chart);
