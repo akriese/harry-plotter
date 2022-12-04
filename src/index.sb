@@ -10,10 +10,7 @@ import * as d3S from 'https://cdn.skypack.dev/d3-simple-slider';
 export const topojson = tj;
 export const d3 = d3_;
 export const d3SimpleSlider = d3S;
-# %%--- [markdown]
-# properties:
-#   top_hidden: true
-# ---%%
+# %% [markdown]
 # Attraktivität der Kultureinrichtungen in Berlin
 
 Um die Frage zu beantworten, ob in allen Berliner Bezirken attraktive Kultureinrichtungen vorhanden sind, haben wir die folgende Abbildung erstellt. Wir hoffen, dass sie Ihnen die Entscheidung erleichtern kann, welche Bezirke möglicherweise zusätzliche Mittel oder Unterstützung benötigen.
