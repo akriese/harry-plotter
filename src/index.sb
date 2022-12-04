@@ -1,6 +1,11 @@
-# %% [esm]
+# %%--- [esm]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 import * as tj from "https://cdn.skypack.dev/pin/topojson@v3.0.2-ovpHjX420lx9YlKkg1QF/mode=imports/optimized/topojson.js"
-import * as d3_ from "https://cdn.skypack.dev/d3@7"
+import * as d3_ from "https://cdn.skypack.dev/d3@7.6.0"
 import * as d3S from 'https://cdn.skypack.dev/d3-simple-slider';
 export const topojson = tj;
 export const d3 = d3_;
@@ -18,23 +23,96 @@ Wie könnte man die Attraktivität von Kultureinrichtungen definieren? Wir denke
 
 \
 Um eine noch fundiertere Entscheidung treffen zu können, sollte jedoch auch berücksichtigt werden, dass einige Kultureinrichtungen aufgrund geringerer Kapazitäten oder saisonaler Gegebenheiten (z. B. ein Freibad) weniger Besucher haben könnten, was sie nicht unbedingt weniger attraktiv macht. Ein weiterer Aspekt, den es zu berücksichtigen gilt, ist, dass unterschiedliche Bevölkerungsdichten in verschiedenen Bezirken unterschiedliche Anforderungen an die Anzahl attraktiver kultureller Einrichtungen mit sich bringen sollten.
-# %% [markdown]
+# %%--- [html]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
+<!-- Main div for the map svg -->
+<div id="content"></div>
+
+<!-- We need this stylesheet for the slider below. -->
+<link
+  rel="stylesheet"
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+  crossorigin="anonymous"
+/>
+<!-- Slider div -->
+<div class="row align-items-center">
+  <div class="col-sm"><div id="slider-time"></div></div>
+</div>
+# %%--- [css]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
+body {
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: fit-content;
+  height: fit-content;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.axis text,
+.slider text {
+  font: 13px sans-serif;
+}
+.slider text {
+  font-weight: bold;
+}
+
+/* Style of category legend text and circles */
+.legend text {
+  font-size: 0.8em;
+  fill: black;
+  font-family: sans-serif;
+}
+
+.legend circle {
+  stroke: black;
+  stroke-opacity: 0.5;
+}
+# %%--- [markdown]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 # Harry Plotter - First Design Sprint
-# %% [markdown]
+
 ## Load data
 
-* load cleaned cultural facility json data
-* load locations
+* [load cleaned cultural facility json data]()
+* [load locations]()
 * change format
 * prepare data for plotting
 
 \
 
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 async function fetchJson(url) {
   return await fetch(url).then(response => response.json())
 }
-# %% [javascript]
+
 var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
 var loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
 var berlin_topo = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.topojson")
@@ -48,7 +126,12 @@ console.log(data)
 console.log(loc_data)
 console.log(berlin_topo)
 console.log(districts_features)
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 var new_data = {}
 for (const [idx, d] of data.entries()) {
   var inst = d.Institution
@@ -80,14 +163,24 @@ for (const [inst, values] of Object.entries(new_data)) {
   values.zahlen.sort((tup1, tup2) => tup1[0] > tup2[0]) // sort new entries by year numbers
 }
 console.log(new_data)
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 var plot_data = [];
 for (const [inst, values] of Object.entries(new_data)){
   var entry = [inst, values.Kategorie, parseFloat(values.Longitude), parseFloat(values.Latitude), values.zahlen];
   plot_data.push(entry);
 }
 console.log(plot_data)
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 var berlin = {
   type: "FeatureCollection",
   features: [
@@ -99,12 +192,26 @@ var berlin = {
   ]
 }
 berlin
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 // statemesh should work as it looks like in the bubble map example
 statemesh = topojson.mesh(berlin_topo, berlin_topo.objects.states, (a, b) => a !== b)
-# %% [markdown]
+# %%--- [markdown]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 ## Define plot function
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 colorLegend = (selection, props) => {
   const {
     colorScale,
@@ -155,7 +262,12 @@ colorLegend = (selection, props) => {
       .attr('x', textOffset);
 }
 
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/bubble-map
@@ -494,61 +606,12 @@ function BubbleMap(data, {
   svg.call(zoom);
   return Object.assign(svg.node(), {scales: {radius}});
 }
-# %% [html]
-<!-- Main div for the map svg -->
-<div id="content"></div>
-
-<!-- We need this stylesheet for the slider below. -->
-<link
-  rel="stylesheet"
-  href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
-  crossorigin="anonymous"
-/>
-<!-- Slider div -->
-<div class="row align-items-center">
-  <div class="col-sm"><div id="slider-time"></div></div>
-</div>
-# %% [css]
-body {
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
-  font-size: 14px;
-  color: #333;
-}
-
-div.tooltip {
-  position: absolute;
-  text-align: center;
-  width: fit-content;
-  height: fit-content;
-  padding: 2px;
-  font: 12px sans-serif;
-  background: lightsteelblue;
-  border: 0px;
-  border-radius: 8px;
-  pointer-events: none;
-}
-
-.axis text,
-.slider text {
-  font: 13px sans-serif;
-}
-.slider text {
-  font-weight: bold;
-}
-
-/* Style of category legend text and circles */
-.legend text {
-  font-size: 0.8em;
-  fill: black;
-  font-family: sans-serif;
-}
-
-.legend circle {
-  stroke: black;
-  stroke-opacity: 0.5;
-}
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 function removeAllChildren(name) {
   const div = document.getElementById(name);
   let child = div.lastElementChild;
