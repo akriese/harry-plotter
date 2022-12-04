@@ -6,6 +6,19 @@ export const topojson = tj;
 export const d3 = d3_;
 export const d3SimpleSlider = d3S;
 # %% [markdown]
+# Attraktivität der Kultureinrichtungen in Berlin
+
+Um die Frage zu beantworten, ob in allen Berliner Bezirken attraktive Kultureinrichtungen vorhanden sind, haben wir die folgende Abbildung erstellt. Wir hoffen, dass sie Ihnen die Entscheidung erleichtern kann, welche Bezirke möglicherweise zusätzliche Mittel oder Unterstützung benötigen.
+
+\
+In unserer Abbildung sehen Sie eine Karte von Berlin, auf der jede Kultureinrichtung als Blase dargestellt ist. Die Größe der Blase gibt Auskunft über die Anzahl der jährlichen Besucher einer bestimmten Einrichtung, und ihre Farbe zeigt an, zu welcher Kategorie diese Einrichtung gehört. Mit dem Schieberegler am unteren Rand der Abbildung können wir steuern, welches Jahr wir uns ansehen wollen.
+
+\
+Wie könnte man die Attraktivität von Kultureinrichtungen definieren? Wir denken, dass es nicht nur auf eine hohe Besucherzahl ankommt, sondern auch auf eine große Vielfalt an verschiedenen Kultureinrichtungen. Daher würden Bezirke mit nur wenigen Blasen oder nur einer Farbe von Blasen als unattraktiv angesehen werden. In unserer Abbildung können wir sehr schön sehen, wo dies der Fall ist. Die Bezirke Spandau, Pankow, Reinickendorf und Marzahn-Hellersdorf haben, wenn überhaupt, nur sehr wenige Kultureinrichtungen und die vorhandenen sind nicht sehr gut besucht. Daraus könnte man schließen, dass sie von einer weiteren Förderung profitieren würden.
+
+\
+Um eine noch fundiertere Entscheidung treffen zu können, sollte jedoch auch berücksichtigt werden, dass einige Kultureinrichtungen aufgrund geringerer Kapazitäten oder saisonaler Gegebenheiten (z. B. ein Freibad) weniger Besucher haben könnten, was sie nicht unbedingt weniger attraktiv macht. Ein weiterer Aspekt, den es zu berücksichtigen gilt, ist, dass unterschiedliche Bevölkerungsdichten in verschiedenen Bezirken unterschiedliche Anforderungen an die Anzahl attraktiver kultureller Einrichtungen mit sich bringen sollten.
+# %% [markdown]
 # Harry Plotter - First Design Sprint
 # %% [markdown]
 ## Load data
