@@ -26,7 +26,6 @@ Um eine noch fundiertere Entscheidung treffen zu können, sollte jedoch auch ber
 # %%--- [html]
 # properties:
 #   run_on_load: true
-#   bottom_hidden: true
 #   top_hidden: true
 # ---%%
 <!-- Main div for the map svg -->
