@@ -1,5 +1,6 @@
 # %%--- [esm]
 # properties:
+#   bottom_hidden: true
 #   top_hidden: true
 #   run_on_load: true
 # ---%%
@@ -9,28 +10,94 @@ import * as d3S from 'https://cdn.skypack.dev/d3-simple-slider';
 export const topojson = tj;
 export const d3 = d3_;
 export const d3SimpleSlider = d3S;
-# %% [markdown]
-# Attractiveness of Cultural Facilities in Berlin
-
-\
-In order to answer the question of whether attractive cultural facilities are available in all Berlin districts, we have created the figure below. We hope it can facilitate your decision making process, as to which districts might need additional funding or assistance.
-
-\
-In our figure you can see a map of Berlin, with each cultural facility being represented as a bubble. The size of the bubble tells us the number of annual visitors of a given facility and its color represents what category this facility belongs to. By operating the slider at the bottom of the figure we can control what year we want to have a look at.
-
-\
-How could one define attractiveness of cultural facilities? We think what matters is not only a high number of visitors, but also high variety of different cultural facilities. Hence, districts with only few bubbles or only one color of bubbles would be considered lacking in attractiveness. In our figure we can quite nicely see, where this is the case. The districts of Spandau, Pankow, Reinickendorf and Marzahn-Hellersdorf have very few - if any - cultural facilities, and the ones they do have are not very well visited. Hence, one might conclude, they would benefit from further funding.
-
-\
-It should be noted, however, that for an even more informed decision one should also take into account that some cultural facilities might have lower numbers of visitors because of lower capacity or them being inherently seasonal (eg. an outdoor pool), which would not necessarily make them less attractive. Another aspect to consider is that different degrees of population density in different districts should entail different requirements for the number of attractive cultural facilities.
 # %%--- [markdown]
 # properties:
 #   top_hidden: true
 # ---%%
+# Attraktivität der Kultureinrichtungen in Berlin
+
+Um die Frage zu beantworten, ob in allen Berliner Bezirken attraktive Kultureinrichtungen vorhanden sind, haben wir die folgende Abbildung erstellt. Wir hoffen, dass sie Ihnen die Entscheidung erleichtern kann, welche Bezirke möglicherweise zusätzliche Mittel oder Unterstützung benötigen.
+
+\
+In unserer Abbildung sehen Sie eine Karte von Berlin, auf der jede Kultureinrichtung als Blase dargestellt ist. Die Größe der Blase gibt Auskunft über die Anzahl der jährlichen Besucher einer bestimmten Einrichtung, und ihre Farbe zeigt an, zu welcher Kategorie diese Einrichtung gehört. Mit dem Schieberegler am unteren Rand der Abbildung können wir steuern, welches Jahr wir uns ansehen wollen.
+
+\
+Wie könnte man die Attraktivität von Kultureinrichtungen definieren? Wir denken, dass es nicht nur auf eine hohe Besucherzahl ankommt, sondern auch auf eine große Vielfalt an verschiedenen Kultureinrichtungen. Daher würden Bezirke mit nur wenigen Blasen oder nur einer Farbe von Blasen als unattraktiv angesehen werden. In unserer Abbildung können wir sehr schön sehen, wo dies der Fall ist. Die Bezirke Spandau, Pankow, Reinickendorf und Marzahn-Hellersdorf haben, wenn überhaupt, nur sehr wenige Kultureinrichtungen und die vorhandenen sind nicht sehr gut besucht. Daraus könnte man schließen, dass sie von einer weiteren Förderung profitieren würden.
+
+\
+Um eine noch fundiertere Entscheidung treffen zu können, sollte jedoch auch berücksichtigt werden, dass einige Kultureinrichtungen aufgrund geringerer Kapazitäten oder saisonaler Gegebenheiten (z. B. ein Freibad) weniger Besucher haben könnten, was sie nicht unbedingt weniger attraktiv macht. Ein weiterer Aspekt, den es zu berücksichtigen gilt, ist, dass unterschiedliche Bevölkerungsdichten in verschiedenen Bezirken unterschiedliche Anforderungen an die Anzahl attraktiver kultureller Einrichtungen mit sich bringen sollten.
+# %%--- [html]
+# properties:
+#   run_on_load: true
+#   top_hidden: true
+# ---%%
+<!-- Main div for the map svg -->
+<div id="content"></div>
+
+<!-- We need this stylesheet for the slider below. -->
+<link
+  rel="stylesheet"
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+  crossorigin="anonymous"
+/>
+<!-- Slider div -->
+<div class="row align-items-center">
+  <div class="col-sm"><div id="slider-time"></div></div>
+</div>
+# %%--- [css]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
+body {
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: fit-content;
+  height: fit-content;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.axis text,
+.slider text {
+  font: 13px sans-serif;
+}
+.slider text {
+  font-weight: bold;
+}
+
+/* Style of category legend text and circles */
+.legend text {
+  font-size: 0.8em;
+  fill: black;
+  font-family: sans-serif;
+}
+
+.legend circle {
+  stroke: black;
+  stroke-opacity: 0.5;
+}
+# %%--- [markdown]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 ## Load data
 
-* load cleaned cultural facility json data
-* load locations
+* [load cleaned cultural facility json data]()
+* [load locations]()
 * change format
 * prepare data for plotting
 
@@ -38,18 +105,14 @@ It should be noted, however, that for an even more informed decision one should 
 
 # %%--- [javascript]
 # properties:
+#   bottom_hidden: true
 #   top_hidden: true
 #   run_on_load: true
 # ---%%
 async function fetchJson(url) {
   return await fetch(url).then(response => response.json())
 }
-# %%--- [javascript]
-# properties:
-#   top_hidden: true
-#   bottom_hidden: true
-#   run_on_load: true
-# ---%%
+
 var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
 var loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
 var berlin_topo = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.topojson")
@@ -137,7 +200,11 @@ berlin
 # ---%%
 // statemesh should work as it looks like in the bubble map example
 statemesh = topojson.mesh(berlin_topo, berlin_topo.objects.states, (a, b) => a !== b)
-# %% [markdown]
+# %%--- [markdown]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 ## Define plot function
 # %%--- [javascript]
 # properties:
@@ -538,69 +605,6 @@ function BubbleMap(data, {
 
   svg.call(zoom);
   return Object.assign(svg.node(), {scales: {radius}});
-}
-# %%--- [html]
-# properties:
-#   run_on_load: true
-#   top_hidden: true
-# ---%%
-<!-- Main div for the map svg -->
-<div id="content"></div>
-
-<!-- We need this stylesheet for the slider below. -->
-<link
-  rel="stylesheet"
-  href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
-  crossorigin="anonymous"
-/>
-<!-- Slider div -->
-<div class="row align-items-center">
-  <div class="col-sm"><div id="slider-time"></div></div>
-</div>
-# %%--- [css]
-# properties:
-#   run_on_load: true
-#   bottom_hidden: true
-#   top_hidden: true
-# ---%%
-body {
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
-  font-size: 14px;
-  color: #333;
-}
-
-div.tooltip {
-  position: absolute;
-  text-align: center;
-  width: fit-content;
-  height: fit-content;
-  padding: 2px;
-  font: 12px sans-serif;
-  background: lightsteelblue;
-  border: 0px;
-  border-radius: 8px;
-  pointer-events: none;
-}
-
-.axis text,
-.slider text {
-  font: 13px sans-serif;
-}
-.slider text {
-  font-weight: bold;
-}
-
-/* Style of category legend text and circles */
-.legend text {
-  font-size: 0.8em;
-  fill: black;
-  font-family: sans-serif;
-}
-
-.legend circle {
-  stroke: black;
-  stroke-opacity: 0.5;
 }
 # %%--- [javascript]
 # properties:
