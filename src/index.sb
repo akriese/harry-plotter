@@ -25,6 +25,7 @@ It should be noted, however, that for an even more informed decision one should 
 # %%--- [markdown]
 # properties:
 #   top_hidden: true
+#   collapsed: true
 # ---%%
 ## Load data
 
@@ -39,6 +40,7 @@ It should be noted, however, that for an even more informed decision one should 
 # properties:
 #   top_hidden: true
 #   run_on_load: true
+#   collapsed: true
 # ---%%
 async function fetchJson(url) {
   return await fetch(url).then(response => response.json())
@@ -48,6 +50,7 @@ async function fetchJson(url) {
 #   top_hidden: true
 #   bottom_hidden: true
 #   run_on_load: true
+#   collapsed: true
 # ---%%
 var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
 var loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
@@ -67,6 +70,7 @@ console.log(districts_features)
 #   run_on_load: true
 #   bottom_hidden: true
 #   top_hidden: true
+#   collapsed: true
 # ---%%
 var new_data = {}
 for (const [idx, d] of data.entries()) {
@@ -104,6 +108,7 @@ console.log(new_data)
 #   run_on_load: true
 #   bottom_hidden: true
 #   top_hidden: true
+#   collapsed: true
 # ---%%
 var plot_data = [];
 for (const [inst, values] of Object.entries(new_data)){
@@ -116,6 +121,7 @@ console.log(plot_data)
 #   run_on_load: true
 #   bottom_hidden: true
 #   top_hidden: true
+#   collapsed: true
 # ---%%
 var berlin = {
   type: "FeatureCollection",
@@ -133,10 +139,15 @@ berlin
 #   run_on_load: true
 #   bottom_hidden: true
 #   top_hidden: true
+#   collapsed: true
 # ---%%
 // statemesh should work as it looks like in the bubble map example
 statemesh = topojson.mesh(berlin_topo, berlin_topo.objects.states, (a, b) => a !== b)
-# %% [markdown]
+# %%--- [markdown]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 ## Define plot function
 # %%--- [javascript]
 # properties:
@@ -199,6 +210,7 @@ colorLegend = (selection, props) => {
 #   run_on_load: true
 #   bottom_hidden: true
 #   top_hidden: true
+#   collapsed: true
 # ---%%
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
@@ -541,6 +553,7 @@ function BubbleMap(data, {
 # %%--- [html]
 # properties:
 #   run_on_load: true
+#   collapsed: true
 #   top_hidden: true
 # ---%%
 <!-- Main div for the map svg -->
@@ -562,6 +575,7 @@ function BubbleMap(data, {
 #   run_on_load: true
 #   bottom_hidden: true
 #   top_hidden: true
+#   collapsed: true
 # ---%%
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
@@ -606,6 +620,7 @@ div.tooltip {
 #   run_on_load: true
 #   bottom_hidden: true
 #   top_hidden: true
+#   collapsed: true
 # ---%%
 function removeAllChildren(name) {
   const div = document.getElementById(name);
@@ -639,4 +654,3 @@ var chart = BubbleMap(plot_data, {
   height: 600
 })
 console.log(chart);
-
