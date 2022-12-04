@@ -1,4 +1,8 @@
-# %% [esm]
+# %%--- [esm]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 import * as tj from "https://cdn.skypack.dev/pin/topojson@v3.0.2-ovpHjX420lx9YlKkg1QF/mode=imports/optimized/topojson.js"
 import * as d3_ from "https://cdn.skypack.dev/d3@7.6.0"
 import * as d3S from 'https://cdn.skypack.dev/d3-simple-slider';
@@ -18,7 +22,10 @@ How could one define attractiveness of cultural facilities? We think what matter
 
 \
 It should be noted, however, that for an even more informed decision one should also take into account that some cultural facilities might have lower numbers of visitors because of lower capacity or them being inherently seasonal (eg. an outdoor pool), which would not necessarily make them less attractive. Another aspect to consider is that different degrees of population density in different districts should entail different requirements for the number of attractive cultural facilities.
-# %% [markdown]
+# %%--- [markdown]
+# properties:
+#   top_hidden: true
+# ---%%
 ## Load data
 
 * load cleaned cultural facility json data
@@ -28,11 +35,20 @@ It should be noted, however, that for an even more informed decision one should 
 
 \
 
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 async function fetchJson(url) {
   return await fetch(url).then(response => response.json())
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
 var loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
 var berlin_topo = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.topojson")
@@ -46,7 +62,12 @@ console.log(data)
 console.log(loc_data)
 console.log(berlin_topo)
 console.log(districts_features)
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 var new_data = {}
 for (const [idx, d] of data.entries()) {
   var inst = d.Institution
@@ -78,14 +99,24 @@ for (const [inst, values] of Object.entries(new_data)) {
   values.zahlen.sort((tup1, tup2) => tup1[0] > tup2[0]) // sort new entries by year numbers
 }
 console.log(new_data)
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 var plot_data = [];
 for (const [inst, values] of Object.entries(new_data)){
   var entry = [inst, values.Kategorie, parseFloat(values.Longitude), parseFloat(values.Latitude), values.zahlen];
   plot_data.push(entry);
 }
 console.log(plot_data)
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 var berlin = {
   type: "FeatureCollection",
   features: [
@@ -97,12 +128,22 @@ var berlin = {
   ]
 }
 berlin
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 // statemesh should work as it looks like in the bubble map example
 statemesh = topojson.mesh(berlin_topo, berlin_topo.objects.states, (a, b) => a !== b)
 # %% [markdown]
 ## Define plot function
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 colorLegend = (selection, props) => {
   const {
     colorScale,
@@ -153,7 +194,12 @@ colorLegend = (selection, props) => {
       .attr('x', textOffset);
 }
 
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/bubble-map
@@ -492,7 +538,11 @@ function BubbleMap(data, {
   svg.call(zoom);
   return Object.assign(svg.node(), {scales: {radius}});
 }
-# %% [html]
+# %%--- [html]
+# properties:
+#   run_on_load: true
+#   top_hidden: true
+# ---%%
 <!-- Main div for the map svg -->
 <div id="content"></div>
 
@@ -507,7 +557,12 @@ function BubbleMap(data, {
 <div class="row align-items-center">
   <div class="col-sm"><div id="slider-time"></div></div>
 </div>
-# %% [css]
+# %%--- [css]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
@@ -546,7 +601,12 @@ div.tooltip {
   stroke: black;
   stroke-opacity: 0.5;
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 function removeAllChildren(name) {
   const div = document.getElementById(name);
   let child = div.lastElementChild;
@@ -579,3 +639,4 @@ var chart = BubbleMap(plot_data, {
   height: 600
 })
 console.log(chart);
+
