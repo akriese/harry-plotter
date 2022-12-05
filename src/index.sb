@@ -450,7 +450,8 @@ function BubbleMap(data, {
       .attr("text-anchor", "middle")
       .style("font", "10px sans-serif")
       .selectAll("g")
-      .data(radius.ticks(4).slice(1))
+      .data([50000, 400000, 1000000])
+      //.data(radius.ticks(4).slice(1))
       .join("g");
 
   legend.append("circle")
@@ -462,7 +463,8 @@ function BubbleMap(data, {
   legend.append("text")
       .attr("y", d => -2 * radius(d))
       .attr("dy", "1.3em")
-      .text(radius.tickFormat(4, "s"));
+      //.text(radius.tickFormat(4, "s"));
+      .text(d => (d == 50000) ? "50k" : d == 400000 ? "0.4M" : "1M")
 
   const legendWidth = 190
   const categoryLegendG = svg.append('g')
