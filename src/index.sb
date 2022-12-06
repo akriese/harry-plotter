@@ -490,21 +490,20 @@ function BubbleMap(data, {
         bubbles.filter(i => C[i] === cat)
           .style("visibility", i => isHidden ? "visible" : "hidden");
       })
-      .on("contextmenu", function (d, i) {
-        d3.event.preventDefault();
+      .on("contextmenu", function (event, i) {
+        event.preventDefault();
         // react on right-clicking
         const thisLegend = d3.select(this);
         const cat = thisLegend.attr("category");
-        thisLegend
-          .transition()
-          .duration(200)
-          .style("opacity", 0.8);
         // set only bubbles of selected category to visible
         bubbles.filter(i => C[i] === cat)
           .style("visibility", "visible");
         // hide all other bubbles
         bubbles.filter(i => C[i] !== cat)
           .style("visibility", "hidden");
+        // "hide" all other legend entries
+        categoryLegendG.selectAll(".legend")
+          .style("opacity", d_ => d_ === cat ? 0.8 : 0.1)
       });
 
   // a tooltip that is shown near the bubble that we hover over, displaying information about the data point
@@ -643,4 +642,3 @@ var chart = BubbleMap(plot_data, {
   height: 600
 })
 console.log(chart);
-
