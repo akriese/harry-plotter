@@ -1,3 +1,10 @@
-# %% [markdown]
-https://tsb-opendata.s3.eu-central-1.amazonaws.com/lor_bezirksregionen_2021/lor_bezirksregionen_2021.geojson
+# %% [javascript]
+async function fetchJson(url) {
+  return await fetch(url).then(response => response.json())
+}
 
+var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/data_2021.json")
+
+// district features https://tsb-opendata.s3.eu-central-1.amazonaws.com/lor_bezirksregionen_2021/lor_bezirksregionen_2021.geojson
+var berlin_lor_topo = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/lor_bezirksregionen_2021.topojson")
+berlin_lor_topo
