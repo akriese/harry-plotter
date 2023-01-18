@@ -110,7 +110,10 @@ berlin
 # %% [javascript]
 // statemesh should work as it looks like in the bubble map example
 statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b) => a !== b)
-# %% [html]
+# %%--- [html]
+# properties:
+#   top_hidden: true
+# ---%%
 <!-- Main div for the map svg -->
 <div id="content"></div>
 
@@ -125,7 +128,10 @@ statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b
 <div class="row align-items-center">
   <div class="col-sm"><div id="slider-time"></div></div>
 </div>
-# %% [css]
+# %%--- [css]
+# properties:
+#   top_hidden: true
+# ---%%
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
