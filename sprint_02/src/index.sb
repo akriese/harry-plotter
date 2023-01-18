@@ -235,7 +235,6 @@ function Map(data, {
   width = 640, // outer width, in pixels
   height, // outer height, in pixels
   projection, // a D3 projection; null for pre-projected geometry
-  features, // a GeoJSON feature collection for the background
   borders, // a GeoJSON object for stroking borders
   outline = projection && projection.rotate ? {type: "Sphere"} : null, // a GeoJSON object for the background
   backgroundFill = "#e0e0e0", // fill color for background
@@ -570,8 +569,7 @@ function removeAllChildren(name) {
   }
 }
 
-// remove old slider and map on reload
-removeAllChildren("slider-time");
+// remove old map on reload
 removeAllChildren("content");
 
 var chart = Map(plot_data, {
