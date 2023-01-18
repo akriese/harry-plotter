@@ -16,6 +16,86 @@ var berlin_lor_topo = await fetchJson("https://raw.githubusercontent.com/akriese
 berlin_lor_topo
 
 # %% [javascript]
+data[0]
+# %% [javascript]
+/// Collection of functions that grab certain parts of the given data
+
+// get numbers of how many accidents had e.g. cars involved
+function getInvolvedNumbers(data) {
+  var involved = ["IstRad", "IstPkw", "IstFuss", "IstKrad", "IstGkfz", "IstSonstige"]
+  var results = {}
+  for (x of involved) {
+    results[x] = 0
+  }
+
+  for (accident of data) {
+    for (x of involved) {
+      results[x] += accident[x] ? 1 : 0
+    }
+  }
+
+  return results
+}
+
+
+/// Apply a filter on the overall data and return the chosen set
+function filterData(data, {
+  lor = undefined, // int describing the focused lor; undefined means the whole city is focused
+  days = [], // list of ints, representing week days of chosen accidents; empty list means no filter
+  graveness = undefined, // int describing the chosen accidents with certain graveness (1,2,3); undefined means no filter
+  involved = [] // list of strings, which kind parties are involved in an accident; empty means no filter
+}) {
+  return data.filter(
+      accident => {
+        if (lor !== undefined && accident.lor !== lor) {
+          return false;
+        }
+
+        if (days.length != 0 && !(accident.UWOCHENTAG in days)) {
+          return false;
+        }
+
+        if (graveness !== undefined && accident.UKATEGORIE != graveness) {
+          return false;
+        }
+
+        if (involved.length != 0) {
+          var skip = false
+          for (inv of involved) {
+            if (!accident[inv]) {
+              skip = true;
+              break
+            }
+          }
+
+          // if some required entity is not involved, we continue
+          if (skip) {
+            return false;
+          }
+        }
+        return true;
+      }
+  );
+}
+
+# %% [javascript]
+// trying out the filter function
+function measureFiltering(filter) {
+  console.time()
+  var result = filterData(data, filter)
+  console.timeEnd()
+  console.log(result.length)
+  return result
+}
+
+measureFiltering({ graveness: 1 })
+measureFiltering({ graveness: 2, involved: ["IstRad", "IstKrad"] })
+measureFiltering({ graveness: 2, involved: ["IstRad"], days: [1,2,5,6] })
+measureFiltering({ graveness: 2, days: [1,2,5,6] })
+getInvolvedNumbers(measureFiltering({ graveness: 1, involved: ["IstRad"], days: [1,2,5,6] }))
+
+
+# %% [javascript]
 var berlin = {
   type: "FeatureCollection",
   features: [
