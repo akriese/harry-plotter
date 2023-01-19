@@ -20,6 +20,58 @@ data[0]
 # %% [javascript]
 /// Collection of functions that grab certain parts of the given data
 
+// general function to count occurences of a category in one data property
+// property: name of the property to count in
+// categories: list of categories whose counts in property get returned
+function countCategoryOccurences(data, property, categories) {
+  var counter = {}
+  for (c of categories) {
+    counter[c] = 0
+  }
+
+  const propArr = data.map(accident => accident[property])
+  for (p of propArr) {
+    counter[p]++
+  }
+
+  return counter
+}
+
+// count graveness
+function countGraveness(data) {
+  return countCategoryOccurences(data, "UKATEGORIE", [1, 2, 3])
+}
+
+// count accident types
+function countAccidentTypes(data) {
+  return countCategoryOccurences(data, "UTYP1", [1, 2, 3, 4, 5, 6, 7])
+}
+
+// extract accident time data
+// mode: one of {"single", "array", "day_arrays"} defines how the data is returned
+function getDaysAndHours(data, mode="single") {
+  var filtered = data.map(accident => ({ day: accident.UWOCHENTAG, hour: accident.STUNDE }));
+  if (mode === "single") return filtered;
+  if (mode === "array" ) {
+    return {
+      day: filtered.map(acc => acc.day),
+      hour: filtered.map(acc => acc.hour),
+    }
+  }
+
+  // else: day_arrays
+  var result = {}
+  for (day of [1,2,3,4,5,6,7]) {
+    result[day] = []
+  }
+
+  for (p of filtered) {
+    result[p.day].push(p.hour)
+  }
+
+  return result
+}
+
 // get numbers of how many accidents had e.g. cars involved
 function getInvolvedNumbers(data) {
   var involved = ["IstRad", "IstPkw", "IstFuss", "IstKrad", "IstGkfz", "IstSonstige"]
@@ -36,8 +88,7 @@ function getInvolvedNumbers(data) {
 
   return results
 }
-
-
+# %% [javascript]
 /// Apply a filter on the overall data and return the chosen set
 function filterData(data, {
   lor = undefined, // int describing the focused lor; undefined means the whole city is focused
@@ -93,8 +144,7 @@ measureFiltering({ graveness: 2, involved: ["IstRad", "IstKrad"] })
 measureFiltering({ graveness: 2, involved: ["IstRad"], days: [1,2,5,6] })
 measureFiltering({ graveness: 2, days: [1,2,5,6] })
 getInvolvedNumbers(measureFiltering({ graveness: 1, involved: ["IstRad"], days: [1,2,5,6] }))
-
-
+getDaysAndHours(data, mode="day_arrays")
 # %% [javascript]
 var berlin = {
   type: "FeatureCollection",
@@ -587,4 +637,3 @@ var chart = Map(plot_data, {
   height: 600
 })
 console.log(chart);
-
