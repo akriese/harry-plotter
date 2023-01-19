@@ -46,38 +46,38 @@ function filterData(data, {
   involved = [] // list of strings, which kind parties are involved in an accident; empty means no filter
 }) {
   return data.filter(
-      accident => {
-        if (lor !== undefined && accident.lor !== lor) {
-          return false;
-        }
-
-        if (days.length != 0 && !(accident.UWOCHENTAG in days)) {
-          return false;
-        }
-
-        if (graveness !== undefined && accident.UKATEGORIE != graveness) {
-          return false;
-        }
-
-        if (involved.length != 0) {
-          var skip = false
-          for (inv of involved) {
-            if (!accident[inv]) {
-              skip = true;
-              break
-            }
-          }
-
-          // if some required entity is not involved, we continue
-          if (skip) {
-            return false;
-          }
-        }
-        return true;
+    accident => {
+      if (lor !== undefined && accident.lor !== lor) {
+        return false
       }
+
+      if (days.length != 0 && !(accident.UWOCHENTAG in days)) {
+        return false
+      }
+
+      if (graveness !== undefined && accident.UKATEGORIE != graveness) {
+        return false
+      }
+
+      if (involved.length != 0) {
+        var skip = false
+        for (inv of involved) {
+          if (!accident[inv]) {
+            skip = true
+            break
+          }
+        }
+
+        // if some required entity is not involved, we continue
+        if (skip) {
+          return false
+        }
+      }
+
+      return true
+    }
   );
 }
-
 # %% [javascript]
 // trying out the filter function
 function measureFiltering(filter) {
