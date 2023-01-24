@@ -575,19 +575,19 @@ function removeAllChildren(name) {
 // remove old map on reload
 removeAllChildren("content");
 
+// use this projection (found on https://stackoverflow.com/questions/73779158/how-can-i-translate-position-of-d3-symbol-on-wsg84-coropleth-map)
+var projection = projection = d3.geoIdentity()
+  .reflectY(true)
+  .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
+
 var chart = AccidentMap(data, {
-  //value: (data) => data[4], // just return the zahlen entry from plot_data
-  //cat: ([, category, , , ]) => category,
-  //position([, , Longitude, Latitude, ]){
-  //  return [Longitude, Latitude];
-  //},
-  //title([inst, , , ,]) {
-  //  return inst;
-  //},
   borders: statemesh,
-  projection: d3.geoMercator().fitExtent([[-100, 180],[800, 500]], statemesh),
+  projection: projection,
   topo: berlin_lor_topo,
-  width: 900,
-  height: 600
+  width: 1500,
+  height: 1000
 })
 console.log(chart);
+# %% [javascript]
+var d = data[0]
+projection([d.XGCSWGS84, d.YGCSWGS84])
