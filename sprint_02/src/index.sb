@@ -146,18 +146,6 @@ measureFiltering({ graveness: 2, days: [1,2,5,6] })
 getInvolvedNumbers(measureFiltering({ graveness: 1, involved: ["IstRad"], days: [1,2,5,6] }))
 getDaysAndHours(data, mode="day_arrays")
 # %% [javascript]
-var berlin = {
-  type: "FeatureCollection",
-  features: [
-    {
-      type: "Feature",
-      properties: {},
-      geometry: topojson.merge(berlin_lor_topo, berlin_lor_topo.objects.states.geometries)
-    }
-  ]
-}
-berlin
-# %% [javascript]
 // statemesh should work as it looks like in the bubble map example
 statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b) => a !== b)
 # %%--- [html]
@@ -166,22 +154,7 @@ statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b
 # ---%%
 <!-- Main div for the map svg -->
 <div id="content"></div>
-
-<!-- We need this stylesheet for the slider below. -->
-<link
-  rel="stylesheet"
-  href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
-  crossorigin="anonymous"
-/>
-<!-- Slider div -->
-<div class="row align-items-center">
-  <div class="col-sm"><div id="slider-time"></div></div>
-</div>
-# %%--- [css]
-# properties:
-#   top_hidden: true
-# ---%%
+# %% [css]
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
@@ -275,10 +248,10 @@ colorLegend = (selection, props) => {
 // Released under the ISC license.
 // https://observablehq.com/@d3/bubble-map
 function Map(data, {
-  position = d => d, // given d in data, returns the [longitude, latitude]
-  value = () => undefined, // given d in data, returns the quantitative value
-  cat = () => undefined,
-  title, // given a datum d, returns the hover text
+  //position = d => d, // given d in data, returns the [longitude, latitude]
+  //value = () => undefined, // given d in data, returns the quantitative value
+  //cat = () => undefined,
+  //title, // given a datum d, returns the hover text
   scale = d3.scaleSqrt, //d3.scaleLog, // type of radius scale
   domain, // [0, max] values; input of radius scale; must start at zero
   //maxRadius = 30, // maximum radius of accidentDots
@@ -293,7 +266,7 @@ function Map(data, {
   backgroundStrokeOpacity, // stroke width for borders
   backgroundStrokeLinecap = "round", // stroke line cap for borders
   backgroundStrokeLinejoin = "round", // stroke line join for borders
-  fill = d => d,// = "brown", // fill color for accidentDots
+  //fill = d => d,// = "brown", // fill color for accidentDots
   fillOpacity = 0.5, // fill opacity for accidentDots
   //stroke = "white", // stroke color for accidentDots
   //strokeWidth = 0.5, // stroke width for accidentDots
@@ -302,23 +275,23 @@ function Map(data, {
   //legendY = height - 10,
 } = {}) {
   // Compute values.
-  const I = d3.map(data, (_, i) => i);
-  const V = d3.map(data, value);//.map(d => d == null ? NaN : +d);
-  const P = d3.map(data, position);
-  const T = title == null ? null : d3.map(data, title);
-  const C = d3.map(data, d => d[1])
+  //const I = d3.map(data, (_, i) => i);
+  //const V = d3.map(data, d => data[i]); //.map(d => d == null ? NaN : +d);
+  const P = d3.map(data, d => [d.XGCSWGS84, d.YGCSWGS84]); // given d in data, returns the [longitude, latitude]
+  //const T = title == null ? null : d3.map(data, title);
+  //const C = d3.map(data, d => d[1])
   // TODO: colorscheme for LOR coloring
   //var color = d3.scaleOrdinal(data.map(d => d[1]), d3.schemeCategory10).unknown("red");
   //const col = d3.map(data, (d) => color(d[1]));
 
   //let [minYear, maxYear] = [2011, 2014];
-  var dataTime = d3.range(minYear, maxYear+1);
-  var currentYear = minYear;
+  //var dataTime = d3.range(minYear, maxYear+1);
+  //var currentYear = minYear;
 
   // function returning the visitor number of a datapoint for the given year
-  function yearMapper(zahlen, year) {
-    return zahlen.find((ls) => year == ls[0])[1]
-  }
+  //function yearMapper(zahlen, year) {
+  //  return zahlen.find((ls) => year == ls[0])[1]
+  //}
 
   // radius function handling NaN's
   /*
@@ -328,9 +301,9 @@ function Map(data, {
     return isNaN(value) ? 0.5 : radius(value);
   }*/
 
-  const maxLorAccidents = d3.max(V.map(zahlen => Math.max(...zahlen.map(tup => isNaN(tup[1]) ? 0 : tup[1]))))
+  //const maxLorAccidents = d3.max(V.map(zahlen => Math.max(...zahlen.map(tup => isNaN(tup[1]) ? 0 : tup[1]))))
   // Compute default domains.
-  if (domain === undefined) domain = [1, maxLorAccidents];
+  //if (domain === undefined) domain = [1, maxLorAccidents];
 
   // TODO: Use accident number Colorscale. Construct scales.
   //const radius = scale(domain, [1, maxRadius]);
@@ -382,7 +355,7 @@ function Map(data, {
     g.attr("currentZoom", transform.k)
     accidentDots
       //.attr("r", i => makeRadius(V[i]) / transform.k)
-      .attr("stroke-width", strokeWidth / transform.k)
+      .attr("stroke-width", strokeWidth / transform.k);
       // TODO: Change opacity if zoomed out a lot
   }
 
@@ -536,18 +509,18 @@ function Map(data, {
       .attr("cursor", "pointer")
       .selectAll("circle")
       .data(d3.range(data.length)
-        .filter(i => P[i])
-        .sort((i, j) => d3.descending(V[i], V[j]))) // probably needed, so that big circles dont cover small ones
+        .filter(i => P[i]))
+        //.sort((i, j) => d3.descending(V[i], V[j]))) // probably needed, so that big circles dont cover small ones
       .join("circle")
       .attr("transform", projection == null
         ? i => `translate(${P[i]})`
         : i => `translate(${projection(P[i])})`)
       .attr("r", 4)
-      .attr("fill", i => col[i])
-      .attr("stroke", i => col[i])
+      //.attr("fill", i => col[i])
+      //.attr("stroke", i => col[i])
       //.attr("visitors", i => yearMapper(V[i], currentYear)) // custom attr, we need for the tooltip
       .attr("left", i => projection(P[i])[0]) // custom attr, we need for the tooltip
-      .attr("top", i => projection(P[i])[1]) // custom attr, we need for the tooltip
+      .attr("top", i => projection(P[i])[1]); // custom attr, we need for the tooltip
       //.attr("title", i => T[i]) // custom attr, we need for the tooltip
       //.attr("category", i => C[i]); // custom attr, we need for interactive category legend
       //.call(T ? circle => circle.append("title").text(i => T[i]) : () => {});
@@ -580,48 +553,11 @@ function Map(data, {
     accidentDots
       //.attr("visitors", i => yearMapper(V[i], currentYear)) // has to be set before the transition
       .transition()
-      .duration(500)
+      .duration(500);
       // TODO: change visibility if necessary
       //.attr("r", i => makeRadius(V[i]) / currentZoom) // scale radius by the current zoom
   }
 
-  // the year slider, onchange changes the displayed year data
-  /*
-  const sliderWidth = 500
-  var sliderTime = d3SimpleSlider
-      .sliderBottom()
-      .min(minYear)
-      .max(maxYear)
-      .step(1)
-      .width(sliderWidth)
-      .tickFormat(d3.format('d'))
-      .tickValues(dataTime)
-      .default(minYear)
-      .on('onchange', val => {
-        currentYear = val;
-        updateYearData()
-      });
-
-
-  // drawing the slider (inside the svg, at the bottom)
-  var gTime = svg.append("g")
-      .attr('width', width)
-      .attr('height', 100)
-      .attr('transform', `translate(${width/2-sliderWidth/2},${height-40})`);
-
-  gTime.call(sliderTime);
-
-  // background for slider, making it more visible while zooming
-  const timeBBox = gTime.node().getBBox();
-  gTime.append("rect").lower()
-      .attr("x", timeBBox.x-5)
-      .attr("y", timeBBox.y-5)
-      .attr("width", timeBBox.width+10)
-      .attr("height", timeBBox.height+10)
-      .attr("fill", "white")
-      .style("opacity", 0.4)
-      .attr("rx", 15);
-  */
   svg.call(zoom);
   //return Object.assign(svg.node(), {scales: {radius}});
 }
@@ -638,15 +574,15 @@ function removeAllChildren(name) {
 // remove old map on reload
 removeAllChildren("content");
 
-var chart = Map(plot_data, {
-  value: (data) => data[4], // just return the zahlen entry from plot_data
-  cat: ([, category, , , ]) => category,
-  position([, , Longitude, Latitude, ]){
-    return [Longitude, Latitude];
-  },
-  title([inst, , , ,]) {
-    return inst;
-  },
+var chart = Map(data, {
+  //value: (data) => data[4], // just return the zahlen entry from plot_data
+  //cat: ([, category, , , ]) => category,
+  //position([, , Longitude, Latitude, ]){
+  //  return [Longitude, Latitude];
+  //},
+  //title([inst, , , ,]) {
+  //  return inst;
+  //},
   borders: statemesh,
   projection: d3.geoMercator().fitExtent([[-100, 180],[800, 500]], statemesh),
   width: 900,
