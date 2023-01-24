@@ -247,7 +247,7 @@ colorLegend = (selection, props) => {
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/bubble-map
-function Map(data, {
+function AccidentMap(data, {
   //position = d => d, // given d in data, returns the [longitude, latitude]
   //value = () => undefined, // given d in data, returns the quantitative value
   //cat = () => undefined,
@@ -260,6 +260,7 @@ function Map(data, {
   projection, // a D3 projection; null for pre-projected geometry
   borders, // a GeoJSON object for stroking borders
   outline = projection && projection.rotate ? {type: "Sphere"} : null, // a GeoJSON object for the background
+  topo,
   backgroundFill = "#e0e0e0", // fill color for background
   backgroundStroke = "white", // stroke color for borders
   backgroundStrokeWidth, // stroke width for borders
@@ -395,7 +396,7 @@ function Map(data, {
       .attr("fill", backgroundFill)
       .attr("cursor", "pointer")
       .selectAll("path")
-      .data(topojson.feature(berlin_topo, berlin_topo.objects.states).features)
+      .data(topojson.feature(topo, topo.objects.states).features)
       .join("path")
       .on("click", clickDistrict)
       .attr("d", path)
@@ -574,7 +575,7 @@ function removeAllChildren(name) {
 // remove old map on reload
 removeAllChildren("content");
 
-var chart = Map(data, {
+var chart = AccidentMap(data, {
   //value: (data) => data[4], // just return the zahlen entry from plot_data
   //cat: ([, category, , , ]) => category,
   //position([, , Longitude, Latitude, ]){
@@ -585,6 +586,7 @@ var chart = Map(data, {
   //},
   borders: statemesh,
   projection: d3.geoMercator().fitExtent([[-100, 180],[800, 500]], statemesh),
+  topo: berlin_lor_topo,
   width: 900,
   height: 600
 })
