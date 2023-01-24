@@ -505,7 +505,7 @@ function AccidentMap(data, {
   var accidentDots = g.append("g")
       .attr("fill-opacity", fillOpacity)
       //.attr("stroke", stroke)
-      //.attr("stroke-width", strokeWidth)
+      .attr("stroke-width", 2)
       //.attr("stroke-opacity", strokeOpacity)
       .attr("cursor", "pointer")
       .selectAll("circle")
