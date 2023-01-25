@@ -33,6 +33,18 @@ for (i in data) {
   data[i].coords = from32to33([data[i].LINREFX, data[i].LINREFY])
 }
 # %% [javascript]
+// Precompute list of involved per accident
+for (i in data) {
+  var arr = []
+  for (const [key, value] of Object.entries(data[i])) {
+    if (key.startsWith("Ist") && value === true) {
+      arr.push(key.replace("Ist", ""))
+    }
+  }
+  data[i].Beteiligte = arr
+}
+
+# %% [javascript]
 data[1]
 # %% [javascript]
 /// Collection of functions that grab certain parts of the given data
