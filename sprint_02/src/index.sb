@@ -365,6 +365,13 @@ function AccidentMap(data, {
 
   // click on a district to focus on it
   function clickDistrict(event, d) {
+    if (d.focused !== undefined && d.focused === true) {
+      reset()
+      d.focused = false;
+      return
+    }
+    // else
+    d.focused = true;
     const [[x0, y0], [x1, y1]] = path.bounds(d);
     event.stopPropagation();
     states.transition().style("fill", null);
@@ -389,6 +396,7 @@ function AccidentMap(data, {
       .attr("r", i => 4 / transform.k)
       .attr("stroke-width", 2 / transform.k);
       // TODO: Change opacity if zoomed out a lot
+    // TODO: remove colors of LORs when zoomed in
   }
 
   const zoom = d3.zoom()
@@ -542,7 +550,6 @@ function AccidentMap(data, {
       .selectAll("circle")
       .data(d3.range(data.length)
         .filter(i => P[i]))
-        //.sort((i, j) => d3.descending(V[i], V[j]))) // probably needed, so that big circles dont cover small ones
       .join("circle")
       .attr("transform", projection == null
         ? i => `translate(${P[i]})`
