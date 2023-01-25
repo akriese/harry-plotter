@@ -1,24 +1,39 @@
 # %% [esm]
 import * as tj from "https://cdn.skypack.dev/pin/topojson@v3.0.2-ovpHjX420lx9YlKkg1QF/mode=imports/optimized/topojson.js"
 import * as d3_ from "https://cdn.skypack.dev/d3@7.6.0"
+import proj from 'https://cdn.skypack.dev/proj4'
 export const topojson = tj;
 export const d3 = d3_;
-
+export const proj4 = proj;
 # %% [javascript]
 async function fetchJson(url) {
   return fetch(url).then(response => response.json())
 }
 
-// LINREF coordinates in "WGS 84 / UTM zone 33N" (https://epsg.io/32633)
+// LINREF coordinates in "ETRS89 / UTM zone 32N" (https://epsg.io/25832-1149)
 var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/data_2021.json")
 
 // district features https://tsb-opendata.s3.eu-central-1.amazonaws.com/lor_bezirksregionen_2021/lor_bezirksregionen_2021.geojson
-// coordinates in "ETRS89 / UTM zone 32N" (https://epsg.io/25832-1149)
+// coordinates in "WGS 84 / UTM zone 33N" (https://epsg.io/32633)
+// says https://www.stadtentwicklung.berlin.de/planen/basisdaten_stadtentwicklung/lor/de/download.shtml
 var berlin_lor_topo = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/lor_bezirksregionen_2021.topojson")
 berlin_lor_topo
 
 # %% [javascript]
-data[0]
+/// We define the two different coordinate systems for proj4
+proj4.defs([["EPSG:32632","+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs +type=crs"],
+           ["EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"]]);
+function from32to33(coords) {
+  return proj4("EPSG:32632", "EPSG:32633", coords)
+}
+
+// ... and assign each data point a new parameter 'coords' holding x AND y value
+// these coordinates now match the coordinates that are used by the topojson file :)
+for (i in data) {
+  data[i].coords = from32to33([data[i].LINREFX, data[i].LINREFY])
+}
+# %% [javascript]
+data[1]
 # %% [javascript]
 /// Collection of functions that grab certain parts of the given data
 
@@ -281,7 +296,7 @@ function AccidentMap(data, {
   //const I = d3.map(data, (_, i) => i);
   //const V = d3.map(data, d => data[i]); //.map(d => d == null ? NaN : +d);
   //const P = d3.map(data, d => [d.XGCSWGS84, d.YGCSWGS84]); // given d in data, returns the [longitude, latitude]
-  const P = d3.map(data, d => [d.LINREFX, d.LINREFY]); // given d in data, returns the [longitude, latitude]
+  const P = d3.map(data, d => d.coords); // given d in data, returns the [longitude, latitude]
   //const T = title == null ? null : d3.map(data, title);
   //const C = d3.map(data, d => d[1])
   // TODO: colorscheme for LOR coloring
