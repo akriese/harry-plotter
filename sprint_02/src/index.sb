@@ -373,13 +373,13 @@ function AccidentMap(data, {
     g.attr("stroke-width", 1 / transform.k);
     g.attr("currentZoom", transform.k)
     accidentDots
-      //.attr("r", i => makeRadius(V[i]) / transform.k)
-      .attr("stroke-width", strokeWidth / transform.k);
+      .attr("r", i => 4 / transform.k)
+      .attr("stroke-width", 2 / transform.k);
       // TODO: Change opacity if zoomed out a lot
   }
 
   const zoom = d3.zoom()
-      .scaleExtent([1, 10])
+      .scaleExtent([1, 100])
       .on("zoom", zoomed);
 
   // Construct a path generator.
