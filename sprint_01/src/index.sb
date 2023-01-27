@@ -110,8 +110,8 @@ async function fetchJson(url) {
   return await fetch(url).then(response => response.json())
 }
 
-var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/data.json")
-var loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/data/locations.json")
+var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_01/data/data.json")
+var loc_data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_01/data/locations.json")
 var berlin_topo = await fetchJson("https://raw.githubusercontent.com/funkeinteraktiv/Berlin-Geodaten/master/berlin_bezirke.topojson")
 
 // fetched from https://raw.githubusercontent.com/m-hoerz/berlin-shapes/master/berliner-bezirke.geojson
