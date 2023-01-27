@@ -562,6 +562,7 @@ function AccidentMap(data, {
 
   // tooltip setting when hovering over accidentDots
   // TODO: Show accident info on hover
+  //test
   accidentDots
       .on("mouseover", function(d) {
         tooltip.transition().duration(200).style("opacity", .9);
