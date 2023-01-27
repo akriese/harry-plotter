@@ -2,9 +2,33 @@
 import * as tj from "https://cdn.skypack.dev/pin/topojson@v3.0.2-ovpHjX420lx9YlKkg1QF/mode=imports/optimized/topojson.js"
 import * as d3_ from "https://cdn.skypack.dev/d3@7.6.0"
 import proj from 'https://cdn.skypack.dev/proj4'
+import leaflet from 'https://cdn.skypack.dev/leaflet'
 export const topojson = tj;
 export const d3 = d3_;
 export const proj4 = proj;
+export const L = leaflet;
+# %% [html]
+<body>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+   <div id="map">
+ </div>
+</body>
+# %% [css]
+#map {
+  height: 500px;
+  width: 500px;
+}
+.leaflet-popup-content h2{
+  font-size: 20px;
+  text-decoration: underline;
+}
+# %% [javascript]
+map.remove()
+# %% [javascript]
+const map = L.map('map').setView([51.505, -0.09], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19
+}).addTo(map);
 # %% [javascript]
 async function fetchJson(url) {
   return fetch(url).then(response => response.json())
