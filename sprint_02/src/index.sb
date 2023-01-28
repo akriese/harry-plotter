@@ -84,7 +84,7 @@ for (f of LorWGS.features) {
 }
 
 # %% [javascript]
-const markersCluster = L.markerClusterGroup();
+const markersCluster = L.markerClusterGroup({showCoverageOnHover: false});
 
 data.forEach(d => {
   markersCluster.addLayer(L.marker([d.YGCSWGS84, d.XGCSWGS84]))
