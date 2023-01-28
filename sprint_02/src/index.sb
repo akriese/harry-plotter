@@ -348,44 +348,54 @@ function LeafletAccidentMap(data, {
   var projBounds = [proj4(topoCoordSystem, "WGS84", boundsArr[0]).reverse(),
                     proj4(topoCoordSystem, "WGS84", boundsArr[1]).reverse()]
 
+  const mod = { initBounds: projBounds }
+
   // draw map
-  var map = L.map(divName).fitBounds(projBounds);
+  mod.map = L.map(divName).fitBounds(projBounds);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: minZoom,
     maxZoom: maxZoom,
-  }).addTo(map);
+  }).addTo(mod.map);
 
   // LOR polygons
-  var polygons = states.features.map(f =>
+  mod.states = states.features.map(f =>
     L.polygon(f.geometry.coordinates[0])
       .bindTooltip(stateTitle(f))
-      .addTo(map)
+      .addTo(mod.map)
   );
 
-  const module = { map: map, states: polygons, markerClusters: undefined }
-  module.update = (data) => {
+  mod.markersCluster = undefined
+  mod.update = function(data) {
     // TODO: update polygon colors
+    console.log(this)
 
     // remove marker cluster layer if existent
-    if (module.markerClusters) module.map.removeLayer(module.markerClusters)
+    if (this.markersCluster !== undefined) {
+      console.log("deleting old")
+      this.map.removeLayer(this.markersCluster)
+      delete this.markersCluster
+    }
 
     // set accidentMarkers
-    const markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
+    this.markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
 
     data.forEach(d => {
       const dot = L
         .marker(dotCoords(d).reverse())
         .bindTooltip(tooltipContent(d))
-      markersCluster.addLayer(dot)
+      this.markersCluster.addLayer(dot)
     })
 
-    map.addLayer(markersCluster);
-    module.markerClusters = markersCluster;
+    console.log(this.markersCluster)
+
+    this.map.addLayer(this.markersCluster);
+    console.log("hello there")
+    console.log(this)
   }
 
-  module.update(data)
+  mod.update(data)
 
-  return module;
+  return mod;
 
   // Create dots with d3
   /*
@@ -410,10 +420,12 @@ var module = LeafletAccidentMap(data, {
   tooltipContent: acc => makeTooltipContent(acc),
   stateTitle: f => f.properties.BZR_NAME,
 })
+
+// try out update
+module.update(filterData(data, { days: [1] }))
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
-delete module
-map.remove()
+//module.map.remove()
 # %% [javascript]
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
