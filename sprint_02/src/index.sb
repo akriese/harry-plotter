@@ -213,7 +213,10 @@ var projection = d3.geoIdentity()
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
   <div id=mother></div>
 </body>
-# %% [css]
+# %%--- [css]
+# properties:
+#   top_hidden: true
+# ---%%
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
@@ -258,7 +261,10 @@ div.tooltip {
   stroke: black;
   stroke-opacity: 0.5;
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+# ---%%
 colorLegend = (selection, props) => {
   const {
     colorScale,
@@ -307,6 +313,22 @@ colorLegend = (selection, props) => {
       .text(d => d.length > 29 ? d.substr(0, 27) + '...' : d)
       .attr('dy', '0.32em')
       .attr('x', textOffset);
+}
+# %% [javascript]
+function makeTooltipContent(accident) {
+  const info = accident
+  const persons = "<b>Beteiligte:</b> " + info.Beteiligte.join(", ")
+  const dateTime = "<b>Monat:</b> " + info.UMONAT + "; <b>Wochentag:</b> " + info.UWOCHENTAG + "; <b>Stunde:</b> " + info.USTUNDE;
+  const gs = ["Tödlich", "Schwer", "Leicht"]
+  const graveness = "<b>Schweregrad:</b> " + gs[info.UKATEGORIE - 1]
+  const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
+                        "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
+                        "Unfall im Längsverkehr", "Sonstiger Unfall"]
+
+    return "<b>" + accidentTypes[info.UTYP1 - 1] + "</b><br>"
+               + dateTime + "<br>"
+               + persons + "<br>"
+               + graveness + "<br>";
 }
 # %% [javascript]
 function LeafletAccidentMap(data, {
