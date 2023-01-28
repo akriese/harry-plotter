@@ -357,14 +357,19 @@ function LeafletAccidentMap(data, {
 
   // LOR polygons
   for (f of states.features) {
-    var polygon = L.polygon(f.geometry.coordinates[0]).bindTooltip("LOR").addTo(map);
+    var polygon = L.polygon(f.geometry.coordinates[0])
+      .bindTooltip(stateTitle(f))
+      .addTo(map);
   }
 
   // accidentMarkers
   const markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
 
   data.forEach(d => {
-    markersCluster.addLayer(L.marker(dotCoords(d).reverse()))
+    const dot = L
+      .marker(dotCoords(d).reverse())
+      .bindTooltip(tooltipContent(d))
+    markersCluster.addLayer(dot)
   })
 
   map.addLayer(markersCluster);
