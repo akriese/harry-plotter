@@ -9,100 +9,6 @@ export const d3 = d3_;
 export const proj4 = proj;
 export const L = leaflet;
 export const Lm = leafletMarkercluster;
-# %% [html]
-<body>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-  <div id=mother> </div>
-</body>
-# %% [css]
-#mother {
-  height: 1000px;
-  width: 1000px
-}
-
-.leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
-  background-color: #fff0;
-}
-
-.leaflet-popup-content h2{
-  font-size: 20px;
-  text-decoration: underline;
-}
-# %% [javascript]
-var LorAreas = topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states)
-console.log(LorAreas)
-
-var LorWGS = { type: "FeatureCollection"}
-LorWGS.features = LorAreas.features.map(feature => ({
-  type: "Feature",
-  properties: feature.properties,
-  geometry: {
-    type: "Polygon",
-    coordinates: [feature.geometry.coordinates[0].map(coords => {
-      const [x, y] = proj4("EPSG:32633", "WGS84", coords)
-      return [y, x];
-    })]
-  }
-}))
-
-console.log(LorWGS)
-
-var projection = d3.geoIdentity()
-  .reflectY(true)
-  .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
-# %% [javascript]
-var bounds = topojson.bbox(berlin_lor_topo)
-var boundsArr = [bounds.slice(0, 2), bounds.slice(2, 4)]
-
-var projBounds = [proj4("EPSG:32633", "WGS84", boundsArr[0]).reverse(),
-                  proj4("EPSG:32633", "WGS84", boundsArr[1]).reverse()]
-console.log(projBounds)
-# %% [javascript]
-// Remove old map if there was one
-removeAllChildren("mother")
-
-var map = L.map("mother").setView([51.505, -0.09], 5).fitBounds(projBounds);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  minZoom: 11,
-  maxZoom: 19,
-}).addTo(map);
-
-let LorAreasLayer = L.geoJson(LorAreas, { //instantiates a new geoJson layer using built in geoJson handling
-  weight: 2, //Attributes of polygons including the weight of boundaries and colors of map.
-  color: "#432",
-})//.bindPopup(function (Layer) { //binds a popup when clicking on each polygon to access underlying data
- // return Layer.feature.properties.BZR_NAME;
-//})
-//.addTo(map); //Adds the layer to the map.
-# %% [javascript]
-map.fitBounds(projBounds)
-# %% [javascript]
-for (f of LorWGS.features) {
-  var polygon = L.polygon(f.geometry.coordinates[0]).addTo(map);
-}
-
-# %% [javascript]
-const markersCluster = L.markerClusterGroup({showCoverageOnHover: false});
-
-data.forEach(d => {
-  markersCluster.addLayer(L.marker([d.YGCSWGS84, d.XGCSWGS84]))
-})
-
-map.addLayer( markersCluster );
-
-# %% [javascript]
-L.svg({clickable:true}).addTo(map)
-var [dots, P] = AccidentMap(data, {
-  borders: statemesh,
-  getCoordinates: d => ([d.XGCSWGS84, d.YGCSWGS84]),
-  projection: d3.geoMercator(),
-  topo: berlin_lor_topo,
-  width: 1500,
-  height: 1000,
-  map: map
-  //overlay: d3.select(map.getPanes().overlayPane).select('svg').attr("pointer-events", "auto")
-})
 # %% [javascript]
 async function fetchJson(url) {
   return fetch(url).then(response => response.json())
@@ -274,19 +180,58 @@ measureFiltering({ graveness: 2, days: [1,2,5,6] })
 getInvolvedNumbers(measureFiltering({ graveness: 1, involved: ["IstRad"], days: [1,2,5,6] }))
 getDaysAndHours(data, mode="day_arrays")
 # %% [javascript]
+// Berlin topographies
+var LorAreas = topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states)
+
+// creating an LOR topo object with WGS84 as coordinate system
+var LorWGS = { type: "FeatureCollection"}
+LorWGS.features = LorAreas.features.map(feature => ({
+  type: "Feature",
+  properties: feature.properties,
+  geometry: {
+    type: "Polygon",
+    coordinates: [feature.geometry.coordinates[0].map(coords => {
+      const [x, y] = proj4("EPSG:32633", "WGS84", coords)
+      return [y, x];
+    })]
+  }
+}))
+
+// TODO: probably not needed anymore since we are now using leaflets polygon function
 // statemesh should work as it looks like in the bubble map example
-statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b) => a !== b)
-# %%--- [html]
-# properties:
-#   top_hidden: true
-# ---%%
+//statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b) => a !== b)
+
+var projection = d3.geoIdentity()
+  .reflectY(true)
+  .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
+# %% [html]
 <!-- Main div for the map svg -->
 <div id="content"></div>
+
+<body>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+  <div id=mother></div>
+</body>
 # %% [css]
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
   color: #333;
+}
+
+#mother {
+  height: 1000px;
+  width: 1000px
+}
+
+.leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
+  background-color: #fff0;
+}
+
+.leaflet-popup-content h2 {
+  font-size: 20px;
+  text-decoration: underline;
 }
 
 div.tooltip {
@@ -300,14 +245,6 @@ div.tooltip {
   border: 0px;
   border-radius: 8px;
   pointer-events: none;
-}
-
-.axis text,
-.slider text {
-  font: 13px sans-serif;
-}
-.slider text {
-  font-weight: bold;
 }
 
 /* Style of category legend text and circles */
@@ -371,6 +308,68 @@ colorLegend = (selection, props) => {
       .attr('dy', '0.32em')
       .attr('x', textOffset);
 }
+# %% [javascript]
+function LeafletAccidentMap(data, {
+  topo,
+  topoCoordSystem = "EPSG:32633",
+  divName = "mother",
+  minZoom = 11,
+  maxZoom = 19,
+  states,
+  dotCoords = d => ([d.XGCSWGS84, d.YGCSWGS84]),
+}) {
+  // get topo bounds and convert them to WGS84
+  var bounds = topojson.bbox(topo)
+  var boundsArr = [bounds.slice(0, 2), bounds.slice(2, 4)]
+  var projBounds = [proj4(topoCoordSystem, "WGS84", boundsArr[0]).reverse(),
+                    proj4(topoCoordSystem, "WGS84", boundsArr[1]).reverse()]
+
+  // Remove old map if there was one
+  //removeAllChildren(divName)
+
+  // draw map
+  var map = L.map(divName).fitBounds(projBounds);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    minZoom: minZoom,
+    maxZoom: maxZoom,
+  }).addTo(map);
+
+  // LOR polygons
+  for (f of states.features) {
+    var polygon = L.polygon(f.geometry.coordinates[0]).bindTooltip("LOR").addTo(map);
+  }
+
+  // accidentMarkers
+  const markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
+
+  data.forEach(d => {
+    markersCluster.addLayer(L.marker(dotCoords(d).reverse()))
+  })
+
+  map.addLayer(markersCluster);
+
+  return map;
+
+  // Create dots with d3
+  /*
+  L.svg({clickable:true}).addTo(map)
+  var [dots, P] = AccidentMap(data, {
+    borders: statemesh,
+    getCoordinates: d => ([d.XGCSWGS84, d.YGCSWGS84]),
+    projection: d3.geoMercator(),
+    topo: berlin_lor_topo,
+    width: 1500,
+    height: 1000,
+    map: map
+    //overlay: d3.select(map.getPanes().overlayPane).select('svg').attr("pointer-events", "auto")
+  })
+  */
+}
+# %% [javascript]
+var map = LeafletAccidentMap(data, {
+  topo: berlin_lor_topo,
+  states: LorWGS,
+})
 # %% [javascript]
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
