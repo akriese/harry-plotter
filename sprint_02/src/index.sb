@@ -338,16 +338,15 @@ function LeafletAccidentMap(data, {
   minZoom = 11,
   maxZoom = 19,
   states,
-  dotCoords = d => ([d.XGCSWGS84, d.YGCSWGS84]),
+  stateTitle,
+  tooltipContent,
+  dotCoords,
 }) {
   // get topo bounds and convert them to WGS84
   var bounds = topojson.bbox(topo)
   var boundsArr = [bounds.slice(0, 2), bounds.slice(2, 4)]
   var projBounds = [proj4(topoCoordSystem, "WGS84", boundsArr[0]).reverse(),
                     proj4(topoCoordSystem, "WGS84", boundsArr[1]).reverse()]
-
-  // Remove old map if there was one
-  //removeAllChildren(divName)
 
   // draw map
   var map = L.map(divName).fitBounds(projBounds);
@@ -391,7 +390,13 @@ function LeafletAccidentMap(data, {
 var map = LeafletAccidentMap(data, {
   topo: berlin_lor_topo,
   states: LorWGS,
+  dotCoords: d => ([d.XGCSWGS84, d.YGCSWGS84]),
+  tooltipContent: acc => makeTooltipContent(acc),
+  stateTitle: f => f.properties.BZR_NAME,
 })
+# %% [javascript]
+// Uncomment and execute to be able to reload the map
+//map.remove()
 # %% [javascript]
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
