@@ -10,25 +10,53 @@ export const L = leaflet;
 # %% [html]
 <body>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
-   <div id="map">
- </div>
+<div id=mother> </div>
 </body>
 # %% [css]
 #map {
   height: 500px;
   width: 500px;
 }
+
+#mother {
+  height: 500px;
+  width: 500px
+}
+
 .leaflet-popup-content h2{
   font-size: 20px;
   text-decoration: underline;
 }
 # %% [javascript]
-map.remove()
+var LorAreas = topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states)
+console.log(LorAreas)
+
+var projection = d3.geoIdentity()
+  .reflectY(true)
+  .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
 # %% [javascript]
-const map = L.map('map').setView([51.505, -0.09], 5);
+var bounds = topojson.bbox(berlin_lor_topo)
+var boundsArr = [bounds.slice(0, 2), bounds.slice(2, 4)]
+
+var projBounds = [proj4("EPSG:32633", "WGS84", boundsArr[0]),
+				  proj4("EPSG:32633", "WGS84", boundsArr[1])]
+# %% [javascript]
+// Remove old map if there was one
+removeAllChildren("mother")
+if (map !== undefined) map.remove();
+
+var map = L.map("mother").setView([51.505, -0.09], 5).fitBounds(projBounds);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19
 }).addTo(map);
+
+let LorAreasLayer = L.geoJson(LorAreas, { //instantiates a new geoJson layer using built in geoJson handling
+  weight: 2, //Attributes of polygons including the weight of boundaries and colors of map.
+  color: "#432",
+})//.bindPopup(function (Layer) { //binds a popup when clicking on each polygon to access underlying data
+ // return Layer.feature.properties.BZR_NAME;
+//})
+//.addTo(map); //Adds the layer to the map.
 # %% [javascript]
 async function fetchJson(url) {
   return fetch(url).then(response => response.json())
@@ -46,7 +74,8 @@ berlin_lor_topo
 # %% [javascript]
 /// We define the two different coordinate systems for proj4
 proj4.defs([["EPSG:32632","+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs +type=crs"],
-           ["EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"]]);
+           ["EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"],
+           ["WGS84","+proj=longlat +datum=WGS84 +no_defs +type=crs"]]);
 function from32to33(coords) {
   return proj4("EPSG:32632", "EPSG:32633", coords)
 }
