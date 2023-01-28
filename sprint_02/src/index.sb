@@ -342,7 +342,7 @@ function LeafletAccidentMap(data, {
   tooltipContent,
   dotCoords,
 }) {
-  // get topo bounds and convert them to WGS84
+  // get topo bounds and convert them to WGS84, but with LatLong format (x and y switched)
   var bounds = topojson.bbox(topo)
   var boundsArr = [bounds.slice(0, 2), bounds.slice(2, 4)]
   var projBounds = [proj4(topoCoordSystem, "WGS84", boundsArr[0]).reverse(),
@@ -356,25 +356,36 @@ function LeafletAccidentMap(data, {
   }).addTo(map);
 
   // LOR polygons
-  for (f of states.features) {
-    var polygon = L.polygon(f.geometry.coordinates[0])
+  var polygons = states.features.map(f =>
+    L.polygon(f.geometry.coordinates[0])
       .bindTooltip(stateTitle(f))
-      .addTo(map);
+      .addTo(map)
+  );
+
+  const module = { map: map, states: polygons, markerClusters: undefined }
+  module.update = (data) => {
+    // TODO: update polygon colors
+
+    // remove marker cluster layer if existent
+    if (module.markerClusters) module.map.removeLayer(module.markerClusters)
+
+    // set accidentMarkers
+    const markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
+
+    data.forEach(d => {
+      const dot = L
+        .marker(dotCoords(d).reverse())
+        .bindTooltip(tooltipContent(d))
+      markersCluster.addLayer(dot)
+    })
+
+    map.addLayer(markersCluster);
+    module.markerClusters = markersCluster;
   }
 
-  // accidentMarkers
-  const markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
+  module.update(data)
 
-  data.forEach(d => {
-    const dot = L
-      .marker(dotCoords(d).reverse())
-      .bindTooltip(tooltipContent(d))
-    markersCluster.addLayer(dot)
-  })
-
-  map.addLayer(markersCluster);
-
-  return map;
+  return module;
 
   // Create dots with d3
   /*
@@ -392,7 +403,7 @@ function LeafletAccidentMap(data, {
   */
 }
 # %% [javascript]
-var map = LeafletAccidentMap(data, {
+var module = LeafletAccidentMap(data, {
   topo: berlin_lor_topo,
   states: LorWGS,
   dotCoords: d => ([d.XGCSWGS84, d.YGCSWGS84]),
@@ -401,7 +412,8 @@ var map = LeafletAccidentMap(data, {
 })
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
-//map.remove()
+delete module
+map.remove()
 # %% [javascript]
 // Copyright 2022 Observable, Inc.
 // Released under the ISC license.
