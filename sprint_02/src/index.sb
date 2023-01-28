@@ -3,13 +3,16 @@ import * as tj from "https://cdn.skypack.dev/pin/topojson@v3.0.2-ovpHjX420lx9YlK
 import * as d3_ from "https://cdn.skypack.dev/d3@7.6.0"
 import proj from 'https://cdn.skypack.dev/proj4'
 import leaflet from 'https://cdn.skypack.dev/leaflet'
+import leafletMarkercluster from 'https://cdn.skypack.dev/leaflet.markercluster';
 export const topojson = tj;
 export const d3 = d3_;
 export const proj4 = proj;
 export const L = leaflet;
+export const Lm = leafletMarkercluster;
 # %% [html]
 <body>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
   <div id=mother> </div>
 </body>
 # %% [css]
@@ -78,6 +81,16 @@ map.fitBounds(projBounds)
 for (f of LorWGS.features) {
   var polygon = L.polygon(f.geometry.coordinates[0]).addTo(map);
 }
+
+# %% [javascript]
+const markersCluster = L.markerClusterGroup();
+
+data.forEach(d => {
+  markersCluster.addLayer(L.marker([d.YGCSWGS84, d.XGCSWGS84]))
+})
+
+map.addLayer( markersCluster );
+
 # %% [javascript]
 L.svg({clickable:true}).addTo(map)
 var [dots, P] = AccidentMap(data, {
