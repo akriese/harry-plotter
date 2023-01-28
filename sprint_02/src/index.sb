@@ -57,7 +57,7 @@ var bounds = topojson.bbox(berlin_lor_topo)
 var boundsArr = [bounds.slice(0, 2), bounds.slice(2, 4)]
 
 var projBounds = [proj4("EPSG:32633", "WGS84", boundsArr[0]).reverse(),
-				  proj4("EPSG:32633", "WGS84", boundsArr[1]).reverse()]
+                  proj4("EPSG:32633", "WGS84", boundsArr[1]).reverse()]
 console.log(projBounds)
 # %% [javascript]
 // Remove old map if there was one
@@ -679,7 +679,7 @@ function AccidentMap(data, {
       //.attr("fill", i => col[i])
       //.attr("stroke", i => col[i])
       .attr("top-left", i => projection(P[i])) // custom attr, we need for the tooltip
-  	  .attr("info", i => JSON.stringify(I[i])) // save all info in a json string to be parsed in the tooltip
+      .attr("info", i => JSON.stringify(I[i])) // save all info in a json string to be parsed in the tooltip
 
   // tooltip setting when hovering over accidentDots
   // TODO: Show accident info on hover
