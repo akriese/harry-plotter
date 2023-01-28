@@ -31,6 +31,21 @@ export const L = leaflet;
 var LorAreas = topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states)
 console.log(LorAreas)
 
+var LorWGS = { type: "FeatureCollection"}
+LorWGS.features = LorAreas.features.map(feature => ({
+  type: "Feature",
+  properties: feature.properties,
+  geometry: {
+    type: "Polygon",
+    coordinates: [feature.geometry.coordinates[0].map(coords => {
+      const [x, y] = proj4("EPSG:32633", "WGS84", coords)
+      return [y, x];
+    })]
+  }
+}))
+
+console.log(LorWGS)
+
 var projection = d3.geoIdentity()
   .reflectY(true)
   .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
@@ -59,6 +74,10 @@ let LorAreasLayer = L.geoJson(LorAreas, { //instantiates a new geoJson layer usi
 //.addTo(map); //Adds the layer to the map.
 # %% [javascript]
 map.fitBounds(projBounds)
+# %% [javascript]
+for (f of LorWGS.features) {
+  var polygon = L.polygon(f.geometry.coordinates[0]).addTo(map);
+}
 # %% [javascript]
 L.svg({clickable:true}).addTo(map)
 var [dots, P] = AccidentMap(data, {
