@@ -717,31 +717,18 @@ function AccidentMap(data, {
       .on("mouseover", function(d) {
         tooltip.transition().duration(200).style("opacity", .9);
         const accident = d3.select(this);
-        // TODO: take into account current zoom and zoom position
 
         var pos = accident.attr("top-left").split(",")
         console.log(pos)
         const [x, y] = [parseFloat(pos[0]) + document.getElementById("content").offsetLeft,
-                  parseFloat(pos[1]) + document.getElementById("content").offsetTop]
-
-        //const v = parseInt(accident.attr("visitors"));
-        //const visitorText = "Besucher:innen: " + (isNaN(v) ? "Keine Zahlen" : v.toLocaleString("de-DE"));
+                        parseFloat(pos[1]) + document.getElementById("content").offsetTop]
 
         const info = JSON.parse(accident.attr("info"))
-        const persons = "<b>Beteiligte:</b> " + info.Beteiligte.join(", ")
-        const dateTime = "<b>Monat:</b> " + info.UMONAT + "; <b>Wochentag:</b> " + info.UWOCHENTAG + "; <b>Stunde:</b> " + info.USTUNDE;
-        const gs = ["Tödlich", "Schwer", "Leicht"]
-        const graveness = "<b>Schweregrad:</b> " + gs[info.UKATEGORIE - 1]
-        const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
-                              "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
-                              "Unfall im Längsverkehr", "sonstiger Unfall"]
+
         tooltip.html(d)
           .style("left", x + "px")
           .style("top", y + "px")
-          .html("<b>"+accidentTypes[info.UTYP1 - 1]+"</b><br>"
-               + dateTime + "<br>"
-               + persons + "<br>"
-               + graveness + "<br>");
+          .html(makeTooltipContent(info));
       })
       .on("mouseout", function(d) {
         tooltip.transition().duration(500).style("opacity", 0);
