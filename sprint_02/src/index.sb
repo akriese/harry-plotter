@@ -224,7 +224,7 @@ body {
 }
 
 #mother {
-  height: 1000px;
+  height: 850px;
   width: 1000px
 }
 
