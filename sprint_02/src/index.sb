@@ -65,7 +65,8 @@ removeAllChildren("mother")
 
 var map = L.map("mother").setView([51.505, -0.09], 5).fitBounds(projBounds);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19
+  minZoom: 11,
+  maxZoom: 19,
 }).addTo(map);
 
 let LorAreasLayer = L.geoJson(LorAreas, { //instantiates a new geoJson layer using built in geoJson handling
