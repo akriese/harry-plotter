@@ -16,14 +16,13 @@ export const Lm = leafletMarkercluster;
   <div id=mother> </div>
 </body>
 # %% [css]
-#map {
-  height: 500px;
-  width: 500px;
+#mother {
+  height: 1000px;
+  width: 1000px
 }
 
-#mother {
-  height: 500px;
-  width: 500px
+.leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
+  background-color: #fff0;
 }
 
 .leaflet-popup-content h2{
