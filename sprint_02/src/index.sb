@@ -2,9 +2,13 @@
 import * as tj from "https://cdn.skypack.dev/pin/topojson@v3.0.2-ovpHjX420lx9YlKkg1QF/mode=imports/optimized/topojson.js"
 import * as d3_ from "https://cdn.skypack.dev/d3@7.6.0"
 import proj from 'https://cdn.skypack.dev/proj4'
+import leaflet from 'https://cdn.skypack.dev/leaflet'
+import leafletMarkercluster from 'https://cdn.skypack.dev/leaflet.markercluster';
 export const topojson = tj;
 export const d3 = d3_;
 export const proj4 = proj;
+export const L = leaflet;
+export const Lm = leafletMarkercluster;
 # %% [javascript]
 async function fetchJson(url) {
   return fetch(url).then(response => response.json())
@@ -22,7 +26,8 @@ berlin_lor_topo
 # %% [javascript]
 /// We define the two different coordinate systems for proj4
 proj4.defs([["EPSG:32632","+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs +type=crs"],
-           ["EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"]]);
+           ["EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"],
+           ["WGS84","+proj=longlat +datum=WGS84 +no_defs +type=crs"]]);
 function from32to33(coords) {
   return proj4("EPSG:32632", "EPSG:32633", coords)
 }
@@ -129,7 +134,7 @@ function filterData(data, {
         return false
       }
 
-      if (days.length != 0 && !(accident.UWOCHENTAG in days)) {
+      if (days.length != 0 && days.indexOf(accident.UWOCHENTAG) == -1) {
         return false
       }
 
@@ -172,24 +177,67 @@ measureFiltering({ graveness: 2, involved: ["IstRad"], days: [1,2,5,6] })
 measureFiltering({ graveness: 2, days: [1,2,5,6] })
 getInvolvedNumbers(measureFiltering({ graveness: 1, involved: ["IstRad"], days: [1,2,5,6] }))
 getDaysAndHours(data, mode="day_arrays")
-# %% [javascript]
+
 // trying out filters to precompute data for bar chart
 getInvolvedNumbers(measureFiltering({involved: ["IstRad"]}))
 countGraveness(data)
 # %% [javascript]
+
+// Berlin topographies
+var LorAreas = topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states)
+
+// creating an LOR topo object with WGS84 as coordinate system
+var LorWGS = { type: "FeatureCollection"}
+LorWGS.features = LorAreas.features.map(feature => ({
+  type: "Feature",
+  properties: feature.properties,
+  geometry: {
+    type: "Polygon",
+    coordinates: [feature.geometry.coordinates[0].map(coords => {
+      const [x, y] = proj4("EPSG:32633", "WGS84", coords)
+      return [y, x];
+    })]
+  }
+}))
+
+// TODO: probably not needed anymore since we are now using leaflets polygon function
 // statemesh should work as it looks like in the bubble map example
-statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b) => a !== b)
-# %%--- [html]
+//statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b) => a !== b)
+
+var projection = d3.geoIdentity()
+  .reflectY(true)
+  .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
+# %% [html]
+<!-- Main div for the map svg -->
+<div id="content"></div>
+
+<body>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+  <div id=mother></div>
+</body>
+# %%--- [css]
 # properties:
 #   top_hidden: true
 # ---%%
-<!-- Main div for the map svg -->
-<div id="content"></div>
-# %% [css]
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
   color: #333;
+}
+
+#mother {
+  height: 850px;
+  width: 1000px
+}
+
+.leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
+  background-color: #fff0;
+}
+
+.leaflet-popup-content h2 {
+  font-size: 20px;
+  text-decoration: underline;
 }
 
 div.tooltip {
@@ -205,14 +253,6 @@ div.tooltip {
   pointer-events: none;
 }
 
-.axis text,
-.slider text {
-  font: 13px sans-serif;
-}
-.slider text {
-  font-weight: bold;
-}
-
 /* Style of category legend text and circles */
 .legend text {
   font-size: 0.8em;
@@ -224,10 +264,9 @@ div.tooltip {
   stroke: black;
   stroke-opacity: 0.5;
 }
-# %% [javascript]
-
 # %%--- [javascript]
 # properties:
+#   top_hidden: true
 #   collapsed: true
 # ---%%
 colorLegend = (selection, props) => {
@@ -279,351 +318,114 @@ colorLegend = (selection, props) => {
       .attr('dy', '0.32em')
       .attr('x', textOffset);
 }
-# %%--- [javascript]
-# properties:
-#   collapsed: true
-# ---%%
-// Copyright 2022 Observable, Inc.
-// Released under the ISC license.
-// https://observablehq.com/@d3/bubble-map
-function AccidentMap(data, {
-  //position = d => d, // given d in data, returns the [longitude, latitude]
-  //value = () => undefined, // given d in data, returns the quantitative value
-  //cat = () => undefined,
-  //title, // given a datum d, returns the hover text
-  scale = d3.scaleSqrt, //d3.scaleLog, // type of radius scale
-  domain, // [0, max] values; input of radius scale; must start at zero
-  //maxRadius = 30, // maximum radius of accidentDots
-  width = 640, // outer width, in pixels
-  height, // outer height, in pixels
-  projection, // a D3 projection; null for pre-projected geometry
-  borders, // a GeoJSON object for stroking borders
-  outline = projection && projection.rotate ? {type: "Sphere"} : null, // a GeoJSON object for the background
-  topo,
-  backgroundFill = "#e0e0e0", // fill color for background
-  backgroundStroke = "white", // stroke color for borders
-  backgroundStrokeWidth, // stroke width for borders
-  backgroundStrokeOpacity, // stroke width for borders
-  backgroundStrokeLinecap = "round", // stroke line cap for borders
-  backgroundStrokeLinejoin = "round", // stroke line join for borders
-  //fill = d => d,// = "brown", // fill color for accidentDots
-  fillOpacity = 0.5, // fill opacity for accidentDots
-  //stroke = "white", // stroke color for accidentDots
-  //strokeWidth = 0.5, // stroke width for accidentDots
-  //strokeOpacity, // stroke opacity for accidentDots
-  //legendX = width - maxRadius - 10,
-  //legendY = height - 10,
-} = {}) {
-  // Compute values.
-  //const I = d3.map(data, (_, i) => i);
-  //const V = d3.map(data, d => data[i]); //.map(d => d == null ? NaN : +d);
-  //const P = d3.map(data, d => [d.XGCSWGS84, d.YGCSWGS84]); // given d in data, returns the [longitude, latitude]
-  const P = d3.map(data, d => d.coords); // given d in data, returns the [longitude, latitude]
-  //const T = title == null ? null : d3.map(data, title);
-  const I = d3.map(data, d => d)
-  //const C = d3.map(data, d => d[1])
-  // TODO: colorscheme for LOR coloring
-  //var color = d3.scaleOrdinal(data.map(d => d[1]), d3.schemeCategory10).unknown("red");
-  //const col = d3.map(data, (d) => color(d[1]));
+# %% [javascript]
+function makeTooltipContent(accident) {
+  const info = accident
+  const persons = "<b>Beteiligte:</b> " + info.Beteiligte.join(", ")
+  const dateTime = "<b>Monat:</b> " + info.UMONAT + "; <b>Wochentag:</b> " + info.UWOCHENTAG + "; <b>Stunde:</b> " + info.USTUNDE;
+  const gs = ["Tödlich", "Schwer", "Leicht"]
+  const graveness = "<b>Schweregrad:</b> " + gs[info.UKATEGORIE - 1]
+  const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
+                        "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
+                        "Unfall im Längsverkehr", "Sonstiger Unfall"]
 
-  //let [minYear, maxYear] = [2011, 2014];
-  //var dataTime = d3.range(minYear, maxYear+1);
-  //var currentYear = minYear;
-
-  // function returning the visitor number of a datapoint for the given year
-  //function yearMapper(zahlen, year) {
-  //  return zahlen.find((ls) => year == ls[0])[1]
-  //}
-
-  // radius function handling NaN's
-  /*
-
-  function makeRadius(zahlen) {
-    const value = yearMapper(zahlen, currentYear)
-    return isNaN(value) ? 0.5 : radius(value);
-  }*/
-
-  //const maxLorAccidents = d3.max(V.map(zahlen => Math.max(...zahlen.map(tup => isNaN(tup[1]) ? 0 : tup[1]))))
-  // Compute default domains.
-  //if (domain === undefined) domain = [1, maxLorAccidents];
-
-  // TODO: Use accident number Colorscale. Construct scales.
-  //const radius = scale(domain, [1, maxRadius]);
-
-  // Compute the default height. If an outline object is specified, scale the projection to fit
-  // the width, and then compute the corresponding height.
-  if (height === undefined) {
-    if (outline === undefined) {
-      height = 400;
-    } else {
-      const [[x0, y0], [x1, y1]] = d3.geoPath(projection.fitWidth(width, outline)).bounds(outline);
-      const dy = Math.ceil(y1 - y0), l = Math.min(Math.ceil(x1 - x0), dy);
-      projection.scale(projection.scale() * (l - 1) / l).precision(0.2);
-      height = dy;
-    }
-  }
-
-  // zoom out to see the full map
-  function reset() {
-    states.transition().style("fill", null);
-    svg.transition().duration(750).call(
-      zoom.transform,
-      d3.zoomIdentity,
-      d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
-    );
-  }
-
-  // click on a district to focus on it
-  function clickDistrict(event, d) {
-    if (d.focused !== undefined && d.focused === true) {
-      reset()
-      d.focused = false;
-      return
-    }
-    // else
-    d.focused = true;
-    const [[x0, y0], [x1, y1]] = path.bounds(d);
-    event.stopPropagation();
-    states.transition().style("fill", null);
-    d3.select(this).transition().style("fill", "#cecece");
-    svg.transition().duration(750).call(
-      zoom.transform,
-      d3.zoomIdentity
-        .translate(width / 2, height / 2)
-        .scale(Math.min(8, 0.9 / Math.max((x1 - x0) / width, (y1 - y0) / height)))
-        .translate(-(x0 + x1) / 2, -(y0 + y1) / 2),
-      d3.pointer(event, svg.node())
-    );
-  }
-
-  // zoom execution function, save new zoom and rescale map and accidentDots
-  function zoomed(event) {
-    const {transform} = event;
-    g.attr("transform", transform);
-    g.attr("stroke-width", 1 / transform.k);
-    g.attr("currentZoom", transform.k)
-    accidentDots
-      .attr("r", i => 4 / transform.k)
-      .attr("stroke-width", 2 / transform.k);
-      // TODO: Change opacity if zoomed out a lot
-    // TODO: remove colors of LORs when zoomed in
-  }
-
-  const zoom = d3.zoom()
-      .scaleExtent([1, 100])
-      .on("zoom", zoomed);
-
-  // Construct a path generator.
-  const path = d3.geoPath(projection);
-
-  // create a vector graphic object, reset on click
-  const svg = d3.select("#content").append("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .attr("viewBox", [0, 0, width, height])
-      .attr("style", "width: 100%; height: auto; height: intrinsic;");
-
-  if (outline != null) svg.append("path")
-      .attr("fill", "white")
-      .attr("stroke", "currentColor")
-      .attr("d", path(outline));
-
-  // dummy rectangle, preventing that a click on the legend is propagated to the global svg too
-  // https://stackoverflow.com/questions/70262042/d3-svg-click-event-and-circle-click-event-overlapping
-  const bg = svg.append("rect")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("fill", "white")
-    .on("click", reset);
-
-  // a global graph object, that we add the legend, states, borders, accidentDots to
-  const g = svg.append("g")
-      .attr("currentZoom", 1);
-
-  // LOR objects that are clickable to zoom into a state
-  const states = g.append("g")
-      .attr("fill", backgroundFill)
-      .attr("cursor", "pointer")
-      .selectAll("path")
-      .data(topojson.feature(topo, topo.objects.states).features)
-      .join("path")
-      .on("click", clickDistrict)
-      .attr("d", path)
-      .on("mouseover", function(d) {
-          d3.select(this).selectAll("title").transition().duration(200).style("opacity", .8);
-      })
-      .on("mouseout", function(d) {
-        d3.select(this).selectAll("title").transition().duration(200).style("opacity", 0.05);
-      })
-      .attr("cursor", "pointer");
-
-  states.append("title")
-      .classed("tooltip", true)
-      .text(d => d.properties.id);
-
-  states.append("text")
-      .text(d => d.properties.id);
-
-  // district borders
-  if (borders != null) g.append("path")
-      .attr("pointer-events", "none")
-      .attr("fill", "none")
-      .attr("stroke", backgroundStroke)
-      .attr("stroke-linecap", backgroundStrokeLinecap)
-      .attr("stroke-linejoin", backgroundStrokeLinejoin)
-      .attr("stroke-width", backgroundStrokeWidth)
-      .attr("stroke-opacity", backgroundStrokeOpacity)
-      .attr("d", path(borders));
-
-  // the bubble size legend showing bubble sizes and their corresponding visitor numbers
-  /*
-  const legend = svg.append("g")
-      .attr("fill", "#777")
-      .attr("transform", `translate(${legendX},${legendY})`)
-      .attr("text-anchor", "middle")
-      .style("font", "10px sans-serif")
-      .selectAll("g")
-      .data([50000, 400000, 1000000])
-      //.data(radius.ticks(4).slice(1))
-      .join("g");
-
-
-  legend.append("circle")
-      .attr("fill", "none")
-      .attr("stroke", "#ccc")
-      .attr("cy", d => -radius(d))
-      .attr("r", radius);
-
-  legend.append("text")
-      .attr("y", d => -2 * radius(d))
-      .attr("dy", "1.3em")
-      //.text(radius.tickFormat(4, "s"));
-      .text(d => (d == 50000) ? "50k" : d == 400000 ? "0.4M" : "1M")
-
-  // TODO: Make this the color legend
-  const legendWidth = 190
-  const categoryLegendG = svg.append('g')
-    .attr('transform', `translate(${width-legendWidth},20)`);
-
-
-  categoryLegendG.call(colorLegend, {
-    colorScale: color,
-    circleRadius: 8,
-    spacing: 20,
-    textOffset: 12,
-    backgroundRectWidth: legendWidth
-  });
-
-
-  categoryLegendG.selectAll(".legend")
-      .on("click", function(_event, d) {
-        const thisLegend = d3.select(this);
-        const isHidden = thisLegend.style("opacity") == 0.1;
-        const cat = thisLegend.attr("category");
-        thisLegend
-          .transition()
-          .duration(200)
-          .style("opacity", isHidden ? 0.8 : 0.1);
-        accidentDots.filter(i => C[i] === cat)
-          .style("visibility", i => isHidden ? "visible" : "hidden");
-      })
-      .on("contextmenu", function (event, i) {
-        event.preventDefault();
-        // react on right-clicking
-        const thisLegend = d3.select(this);
-        const cat = thisLegend.attr("category");
-        // set only accidentDots of selected category to visible
-        accidentDots.filter(i => C[i] === cat)
-          .style("visibility", "visible");
-        // hide all other accidentDots
-        accidentDots.filter(i => C[i] !== cat)
-          .style("visibility", "hidden");
-        // "hide" all other legend entries
-        categoryLegendG.selectAll(".legend")
-          .style("opacity", d_ => d_ === cat ? 0.8 : 0.1)
-      });
-  */
-
-  // a tooltip that is shown near the bubble that we hover over, displaying information about the data point
-  // TODO show accident info
-  var tooltip = d3.select("#content").append("div")
-      .attr("class", "tooltip")
-      .style("opacity", 0);
-
-  // create the accidentDots object, with stroke, colors, position, radius, and further attributes
-  var accidentDots = g.append("g")
-      .attr("fill-opacity", fillOpacity)
-      //.attr("stroke", stroke)
-      .attr("stroke-width", 2)
-      //.attr("stroke-opacity", strokeOpacity)
-      .attr("cursor", "pointer")
-      .selectAll("circle")
-      .data(d3.range(data.length)
-        .filter(i => P[i]))
-      .join("circle")
-      .attr("transform", projection == null
-        ? i => `translate(${P[i]})`
-        : i => `translate(${projection(P[i])})`)
-      .attr("r", 4)
-      //.attr("fill", i => col[i])
-      //.attr("stroke", i => col[i])
-      .attr("top-left", i => projection(P[i])) // custom attr, we need for the tooltip
-  	  .attr("info", i => JSON.stringify(I[i])) // save all info in a json string to be parsed in the tooltip
-
-  // tooltip setting when hovering over accidentDots
-  // TODO: Show accident info on hover
-  //test
-  accidentDots
-      .on("mouseover", function(d) {
-        tooltip.transition().duration(200).style("opacity", .9);
-        const accident = d3.select(this);
-        // TODO: take into account current zoom and zoom position
-
-        var pos = accident.attr("top-left").split(",")
-        console.log(pos)
-        const [x, y] = [parseFloat(pos[0]) + document.getElementById("content").offsetLeft,
-                  parseFloat(pos[1]) + document.getElementById("content").offsetTop]
-
-        //const v = parseInt(accident.attr("visitors"));
-        //const visitorText = "Besucher:innen: " + (isNaN(v) ? "Keine Zahlen" : v.toLocaleString("de-DE"));
-
-        const info = JSON.parse(accident.attr("info"))
-        const persons = "<b>Beteiligte:</b> " + info.Beteiligte.join(", ")
-        const dateTime = "<b>Monat:</b> " + info.UMONAT + "; <b>Wochentag:</b> " + info.UWOCHENTAG + "; <b>Stunde:</b> " + info.USTUNDE;
-        const gs = ["Tödlich", "Schwer", "Leicht"]
-        const graveness = "<b>Schweregrad:</b> " + gs[info.UKATEGORIE - 1]
-        const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
-                              "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
-                              "Unfall im Längsverkehr", "sonstiger Unfall"]
-        tooltip.html(d)
-          .style("left", x + "px")
-          .style("top", y + "px")
-          .html("<b>"+accidentTypes[info.UTYP1 - 1]+"</b><br>"
+    return "<b>" + accidentTypes[info.UTYP1 - 1] + "</b><br>"
                + dateTime + "<br>"
                + persons + "<br>"
-               + graveness + "<br>");
-      })
-      .on("mouseout", function(d) {
-        tooltip.transition().duration(500).style("opacity", 0);
-      });
-
-
-  // callback of change in selected data, changes visibility
-  function updateVisibleDots() {
-    const currentZoom = g.attr("currentZoom");
-    accidentDots
-      //.attr("visitors", i => yearMapper(V[i], currentYear)) // has to be set before the transition
-      .transition()
-      .duration(500);
-      // TODO: change visibility if necessary
-      //.attr("r", i => makeRadius(V[i]) / currentZoom) // scale radius by the current zoom
-  }
-
-  svg.call(zoom);
-  //return Object.assign(svg.node(), {scales: {radius}});
+               + graveness + "<br>";
 }
 # %% [javascript]
+function LeafletAccidentMap(data, {
+  topo,
+  topoCoordSystem = "EPSG:32633",
+  divName = "mother",
+  minZoom = 11,
+  maxZoom = 19,
+  states,
+  stateTitle,
+  tooltipContent,
+  dotCoords,
+}) {
+  // get topo bounds and convert them to WGS84, but with LatLong format (x and y switched)
+  var bounds = topojson.bbox(topo)
+  var boundsArr = [bounds.slice(0, 2), bounds.slice(2, 4)]
+  var projBounds = [proj4(topoCoordSystem, "WGS84", boundsArr[0]).reverse(),
+                    proj4(topoCoordSystem, "WGS84", boundsArr[1]).reverse()]
 
+  const mod = { initBounds: projBounds }
+
+  // draw map
+  mod.map = L.map(divName).fitBounds(projBounds);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    minZoom: minZoom,
+    maxZoom: maxZoom,
+  }).addTo(mod.map);
+
+  // LOR polygons
+  mod.states = states.features.map(f =>
+    L.polygon(f.geometry.coordinates[0])
+      .bindTooltip(stateTitle(f))
+      .addTo(mod.map)
+  );
+
+  mod.markersCluster = undefined
+  mod.update = function(data) {
+    // TODO: update polygon colors
+
+    // remove marker cluster layer if existent
+    if (this.markersCluster !== undefined) {
+      this.map.removeLayer(this.markersCluster)
+      delete this.markersCluster
+    }
+
+    // set accidentMarkers
+    this.markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
+
+    data.forEach(d => {
+      const dot = L
+        .marker(dotCoords(d).reverse())
+        .bindTooltip(tooltipContent(d))
+      this.markersCluster.addLayer(dot)
+    })
+
+    this.map.addLayer(this.markersCluster);
+
+    return this
+  }
+
+  mod.update(data)
+
+  return mod;
+
+  // Create dots with d3
+  /*
+  L.svg({clickable:true}).addTo(map)
+  var [dots, P] = AccidentMap(data, {
+    borders: statemesh,
+    getCoordinates: d => ([d.XGCSWGS84, d.YGCSWGS84]),
+    projection: d3.geoMercator(),
+    topo: berlin_lor_topo,
+    width: 1500,
+    height: 1000,
+    map: map
+    //overlay: d3.select(map.getPanes().overlayPane).select('svg').attr("pointer-events", "auto")
+  })
+  */
+}
+# %% [javascript]
+var module = LeafletAccidentMap(data, {
+  topo: berlin_lor_topo,
+  states: LorWGS,
+  dotCoords: d => ([d.XGCSWGS84, d.YGCSWGS84]),
+  tooltipContent: acc => makeTooltipContent(acc),
+  stateTitle: f => f.properties.BZR_NAME,
+})
+
+// try out update, only show weekend accidents
+//module.update(filterData(data, { days: [1,7] }))
+# %% [javascript]
+// Uncomment and execute to be able to reload the map
+//module.map.remove()
 # %% [javascript]
 function removeAllChildren(name) {
   const div = document.getElementById(name);
@@ -633,26 +435,6 @@ function removeAllChildren(name) {
     child = div.lastElementChild;
   }
 }
-
-// remove old map on reload
-removeAllChildren("content");
-
-// use this projection (found on https://stackoverflow.com/questions/73779158/how-can-i-translate-position-of-d3-symbol-on-wsg84-coropleth-map)
-var projection = d3.geoIdentity()
-  .reflectY(true)
-  .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
-
-var chart = AccidentMap(data, {
-  borders: statemesh,
-  projection: projection,
-  topo: berlin_lor_topo,
-  width: 1500,
-  height: 1000
-})
-
-console.log(chart);
-# %% [markdown]
-
 # %% [markdown]
 ### Sorted Bar chart category
 # %% [html]
