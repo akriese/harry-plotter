@@ -50,8 +50,6 @@ for (i in data) {
 }
 
 # %% [javascript]
-data[1]
-# %% [javascript]
 /// Collection of functions that grab certain parts of the given data
 
 // general function to count occurences of a category in one data property
@@ -108,7 +106,7 @@ function getDaysAndHours(data, mode="single") {
 
 // get numbers of how many accidents had e.g. cars involved
 function getInvolvedNumbers(data) {
-  var involved = ["IstRad", "IstPkw", "IstFuss", "IstKrad", "IstGkfz", "IstSonstige"]
+  var involved = ["IstRad", "IstPKW", "IstFuss", "IstKrad", "IstGkfz", "IstSonstige"]
   var results = {}
   for (x of involved) {
     results[x] = 0
@@ -179,7 +177,12 @@ measureFiltering({ graveness: 2, involved: ["IstRad"], days: [1,2,5,6] })
 measureFiltering({ graveness: 2, days: [1,2,5,6] })
 getInvolvedNumbers(measureFiltering({ graveness: 1, involved: ["IstRad"], days: [1,2,5,6] }))
 getDaysAndHours(data, mode="day_arrays")
+
+// trying out filters to precompute data for bar chart
+getInvolvedNumbers(measureFiltering({involved: ["IstRad"]}))
+countGraveness(data)
 # %% [javascript]
+
 // Berlin topographies
 var LorAreas = topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states)
 
@@ -264,6 +267,7 @@ div.tooltip {
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
+#   collapsed: true
 # ---%%
 colorLegend = (selection, props) => {
   const {
@@ -430,4 +434,424 @@ function removeAllChildren(name) {
     div.removeChild(child);
     child = div.lastElementChild;
   }
+}
+# %% [markdown]
+### Sorted Bar chart category
+# %% [html]
+<div id="test"></div>
+
+# %% [javascript]
+removeAllChildren("test");
+chart = BarChart(bar_data, {
+  x: d => d.category, // x axis -> category
+  y: d => d.count, // counts
+  xDomain: d3.groupSort(bar_data, ([d]) => -d.count, d => d.category), // sort by descending frequency
+  yLabel: "↑ Anzahl",
+  width: 400,
+  height: 200, // think about deceptive design
+  //title: "Gesamtanzahl der Unfälle per Beteiligte",
+})
+# %% [javascript]
+// Copyright 2021 Observable, Inc.
+// Released under the ISC license.
+// https://observablehq.com/@d3/bar-chart
+function BarChart(data, {
+  x = (d, i) => i, // given d in data, returns the (ordinal) x-value
+  y = d => d, // given d in data, returns the (quantitative) y-value
+  title, // given d in data, returns the title text
+  marginTop = 20, // the top margin, in pixels
+  marginRight = 0, // the right margin, in pixels
+  marginBottom = 30, // the bottom margin, in pixels
+  marginLeft = 40, // the left margin, in pixels
+  width = 640, // the outer width of the chart, in pixels
+  height = 400, // the outer height of the chart, in pixels
+  xDomain, // an array of (ordinal) x-values
+  xRange = [marginLeft, width - marginRight], // [left, right]
+  yType = d3.scaleLinear, // y-scale type
+  yDomain, // [ymin, ymax]
+  yRange = [height - marginBottom, marginTop], // [bottom, top]
+  xPadding = 0.1, // amount of x-range to reserve to separate bars
+  yFormat, // a format specifier string for the y-axis
+  yLabel, // a label for the y-axis
+ // color = "currentColor" // bar fill color
+} = {}) {
+  // Compute values.
+  const X = d3.map(data, x);
+  const Y = d3.map(data, y);
+
+  // Compute default domains, and unique the x-domain.
+  if (xDomain === undefined) xDomain = X;
+  if (yDomain === undefined) yDomain = [0, d3.max(Y)];
+  xDomain = new d3.InternSet(xDomain);
+
+  // Omit any data not present in the x-domain.
+  const I = d3.range(X.length).filter(i => xDomain.has(X[i]));
+
+  // Construct scales, axes, and formats.
+  const xScale = d3.scaleBand(xDomain, xRange).padding(xPadding);
+  const yScale = d3.scaleBand(yDomain, yRange);
+  const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
+  const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
+  // setted color can be changed by using another schemeCategory
+  var color = d3.scaleOrdinal(data.map(d => d.category), d3.schemeCategory10).unknown("red");
+  const col = d3.map(data, (d) => color(d.category));
+
+  // Compute titles.
+  //if (title === undefined) {
+  //  const formatValue = yScale.tickFormat(100, yFormat);
+  //  title = i => `${X[i]}\n${formatValue(Y[i])}`;
+  //} else {
+ //   const O = d3.map(data, d => d);
+  //  const T = title;
+  //  title = i => T(O[i], i, data);
+  //}
+
+  const svg = d3.select("#test").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, width, height])
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+
+  svg.append("g")
+      .attr("transform", `translate(${marginLeft},0)`)
+      .call(yAxis)
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick line").clone()
+          .attr("x2", width - marginLeft - marginRight)
+          .attr("stroke-opacity", 0.1))
+      .call(g => g.append("text")
+          .attr("fill-opacity", 0.7)
+          .attr("font-weight", "normal")
+          .attr("x", -marginLeft)
+          .attr("y", 10)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "start")
+          .text(yLabel));
+
+  const bar = svg.append("g")    
+    .selectAll("rect")
+    .data(I)
+    .join("rect")
+      .attr("x", i => xScale(X[i]))
+      .attr("y", i => yScale(Y[i]))
+      .attr("height", i => yScale(0) - yScale(Y[i]))
+      .attr("width", xScale.bandwidth())
+	  .attr("fill", i => col[i]);
+  
+  if (title) bar.append("title")
+      .text(title);
+
+  svg.append("g")
+      .attr("transform", `translate(0,${height - marginBottom})`)
+      .call(xAxis);
+
+   svg.append("g")
+      .attr("text-anchor", "end")
+      .attr("font-family", "sans-serif")
+      .attr("font-size", 10)
+    .selectAll("text")
+    .data(I)
+    .join("text")
+      .attr("text-anchor", i => X[i] < 0 ? "end" : "start")
+      .attr("x", i => xScale(X[i]) + Math.sign(X[i] - 0) * 4)
+      .attr("y", i => yScale(Y[i]) + yScale.bandwidth() / 2)
+      .attr("dy", "0.35em")
+      .text(i => format(X[i]));
+
+  return svg.node();
+}
+# %% [javascript]
+// helper functions to model data as needed
+function get_data_object_bar_chart(data, number_fct) {
+  categorys_counts = number_fct(data);
+  entries = Object.entries(categorys_counts)
+  let data_entry = entries.map(([key, val] = entry) => {
+  		return {category: key, count: val};
+	});
+  return data_entry
+}
+
+// returns category without "Ist"
+function get_substring(data_dict){
+  data_dict.category = data_dict.category.substring(3);
+}
+
+// returns category with its meaning
+function get_meaning(data_dict){
+  cat_graveness_dict = {1: "Tote", 2: "Schwerverletzte", 3: "Leichtverletzte"};
+  data_dict.category = cat_graveness_dict[data_dict.category];
+}
+# %% [javascript]
+bar_data = get_data_object_bar_chart(data, getInvolvedNumbers);
+bar_data.map(get_substring)
+bar_data
+# %% [markdown]
+## sorted horizontal bar chart graveness
+# %% [html]
+<div id="test_horizontal"></div>
+# %% [javascript]
+removeAllChildren("test_horizontal");
+chart = BarChartH(bar_data_horizontal, {
+  x: d => d.count, // x axis -> counts
+  y: d => d.category, // y-axis -> counts
+  yDomain: d3.groupSort(bar_data_horizontal, ([d]) => d.count, d => d.category), // sort by descending frequency
+  xLabel: "Anzahl →",
+  width: 400,
+  height: 200, // think about deceptive design
+  marginLeft: 80,
+  //title: "Gesamtanzahl der Unfälle per Beteiligte",
+})
+# %% [javascript]
+cat_graveness_dict = {1: "Unfall mit Getöteten", 2: "Unfall mit Schwerverletzten", 3: "Unfall mit Leichtverletzten"};
+bar_data_horizontal = get_data_object_bar_chart(data, countGraveness);
+bar_data_horizontal.map(get_meaning)
+bar_data_horizontal
+# %% [javascript]
+// Copyright 2021 Observable, Inc.
+// Released under the ISC license.
+// https://observablehq.com/@d3/horizontal-bar-chart
+function BarChartH(data, {
+  x = d => d, // given d in data, returns the (quantitative) x-value
+  y = (d, i) => i, // given d in data, returns the (ordinal) y-value
+  title, // given d in data, returns the title text
+  marginTop = 30, // the top margin, in pixels
+  marginRight = 0, // the right margin, in pixels
+  marginBottom = 10, // the bottom margin, in pixels
+  marginLeft = 50, // the left margin, in pixels
+  width = 640, // the outer width of the chart, in pixels
+  height, // outer height, in pixels
+  xType = d3.scaleLinear, // type of x-scale
+  xDomain, // [xmin, xmax]
+  xRange = [marginLeft, width - marginRight], // [left, right]
+  xFormat, // a format specifier string for the x-axis
+  xLabel, // a label for the x-axis
+  yPadding = 0.1, // amount of y-range to reserve to separate bars
+  yDomain, // an array of (ordinal) y-values
+  yRange, // [top, bottom]
+  color = "currentColor", // bar fill color
+  titleColor = "white", // title fill color when atop bar
+  titleAltColor = "currentColor", // title fill color when atop background
+} = {}) {
+  // Compute values.
+  const X = d3.map(data, x);
+  const Y = d3.map(data, y);
+
+  // Compute default domains, and unique the y-domain.
+  if (xDomain === undefined) xDomain = [0, d3.max(X)];
+  if (yDomain === undefined) yDomain = Y;
+  yDomain = new d3.InternSet(yDomain);
+
+  // Omit any data not present in the y-domain.
+  const I = d3.range(X.length).filter(i => yDomain.has(Y[i]));
+
+  // Compute the default height.
+  if (height === undefined) height = Math.ceil((yDomain.size + yPadding) * 25) + marginTop + marginBottom;
+  if (yRange === undefined) yRange = [marginTop, height - marginBottom];
+
+  // Construct scales and axes.
+  const xScale = xType(xDomain, xRange);
+  const yScale = d3.scaleBand(yDomain, yRange).padding(yPadding);
+  const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
+  const yAxis = d3.axisLeft(yScale).tickSizeOuter(0);
+  var color = d3.scaleOrdinal(data.map(d => d.category), ["red", "orange", "green"]).unknown("grey");
+  const col = d3.map(data, (d) => color(d.category));
+
+  // Compute titles.
+  if (title === undefined) {
+    const formatValue = xScale.tickFormat(100, xFormat);
+    title = i => `${formatValue(X[i])}`;
+  } else {
+    const O = d3.map(data, d => d);
+    const T = title;
+    title = i => T(O[i], i, data);
+  }
+
+  const svg = d3.select("#test_horizontal").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", [0, 0, width, height])
+      .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+
+  svg.append("g")
+      .attr("transform", `translate(0,${marginTop})`)
+      .call(xAxis)
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick line").clone()
+          .attr("y2", height - marginTop - marginBottom)
+          .attr("stroke-opacity", 0.1))
+      .call(g => g.append("text")
+          .attr("x", width - marginRight)
+          .attr("y", -22)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "end")
+          .text(xLabel));
+
+  svg.append("g") 
+    .selectAll("rect")
+    .data(I)
+    .join("rect")
+      .attr("x", xScale(0))
+      .attr("y", i => yScale(Y[i]))
+      .attr("width", i => xScale(X[i]) - xScale(0))
+      .attr("height", yScale.bandwidth())
+      .attr("fill", i => col[i]);
+
+  svg.append("g")
+      .attr("fill", titleColor)
+      .attr("text-anchor", "end")
+      .attr("font-family", "sans-serif")
+      .attr("font-size", 10)
+    .selectAll("text")
+    .data(I)
+    .join("text")
+      .attr("x", i => xScale(X[i]))
+      .attr("y", i => yScale(Y[i]) + yScale.bandwidth() / 2)
+      .attr("dy", "0.35em")
+      .attr("dx", -4)
+      .text(title)
+      .call(text => text.filter(i => xScale(X[i]) - xScale(0) < 20) // short bars
+          .attr("dx", +4)
+          .attr("fill", titleAltColor)
+          .attr("text-anchor", "start"));
+
+  svg.append("g")
+      .attr("transform", `translate(${marginLeft},0)`)
+      .call(yAxis);
+
+  return svg.node();
+}
+# %% [markdown]
+## Violin plot for amount of crash per days and hour
+
+* https://d3-graph-gallery.com/graph/violin_jitter.html
+
+\
+
+# %% [javascript]
+function hist_all_over(data, histogram) {
+  sorted_data = data.slice().sort((a, b) => d3.ascending(a.UWOCHENTAG, b.UWOCHENTAG));
+  data_grouped = d3.group(sorted_data,  d => d.UWOCHENTAG);
+  bins = Array.from(data_grouped).map(d => d[1].map(d => d.USTUNDE)).map(histogram);
+  return bins
+};
+
+categories = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
+function swap_days_to_starting_at_monday(data){
+  data.map(function(d){
+  	d.UWOCHENTAG = categories[d.UWOCHENTAG - 1];
+  });
+  return data;
+}
+# %% [html]
+<div id="test_violin"></div>
+# %% [javascript]
+removeAllChildren("test_violin");
+RaincloudPlot(data)
+# %% [javascript]
+function RaincloudPlot(data) {
+// Build and Show the Y scale
+
+// set the dimensions and margins of the graph
+var margin = {top: 20, right: 30, bottom: 10, left: 110},
+    width = 1000 - margin.left - margin.right,
+    height = 750; // - margin.top - margin.bottom;
+
+var x = d3.scaleLinear()
+  .domain([0, 24])          // Note that here the Y scale is set manually // days
+  .range([0, width])
+  
+// Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
+var y = d3.scaleBand()
+  .range([0, height])
+  .domain([1, 2, 3, 4, 5, 6, 7]) //days
+  .padding(0)     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
+
+categories = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+// Create the Y axis for names
+var yName = d3.scaleBand()
+  .domain(categories)
+  .range([0, height])
+  .paddingInner(0)
+  
+// Features of the histogram
+var histogram = d3.histogram()
+      .domain(x.domain())
+      .thresholds(x.ticks(24))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+      .value(d => d)
+  
+// Compute the binning for each group of the dataset and shift Sunday to be day 7
+var sumstat = hist_all_over(data, histogram);
+sumstat.push(sumstat[0])
+sumstat.shift()
+
+// What is the biggest number of value in a bin? We need it cause this value will have a width of 100% of the bandwidth.
+var maxNum = 0
+for ( i in sumstat ){
+  allBins = sumstat[i]
+  lengths = allBins.map(function(a){return a.length;})
+  longuest = d3.max(lengths)
+  if (longuest > maxNum) { maxNum = longuest }
+}
+
+// adapt data structure inner array to dict
+help_array = [1, 2, 3, 4, 5, 6, 7];
+for ( i in sumstat ){
+  var dict =  {};
+  dict[help_array[i]] = sumstat[i];
+  sumstat[i] = dict;
+}
+
+// The maximum width of a violin must be x.bandwidth = the width dedicated to a group
+var yNum = d3.scaleLinear()
+  .range([0, y.bandwidth()])
+  .domain([-maxNum, maxNum])
+
+// append the svg object to the body of the page
+const svg = d3.select("#test_violin")
+  .append("svg")
+    .attr("width", width)// + margin.left + margin.right)
+    .attr("height", height)// + margin.top + margin.bottom)
+  	.attr("viewBox", [-80, 0, width + 200, height + 30])
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+  
+svg.append("g")
+   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// add x-axis
+svg.append("g")	
+  .attr("transform", "translate(0," + height + ")") 
+  .call(d3.axisBottom(x))
+
+// add x-label 
+svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("x", width + 80)
+      .attr("y", height + 5)
+  	  .style("fill", "grey")
+      .text("Uhrzeit →");
+
+// add Days to yaxis 
+svg.append("g")
+  .call(d3.axisLeft(yName).tickSize(0))
+  .select(".domain").remove()
+
+// Add the shape to this svg!
+svg.append("g")
+.selectAll("myViolin")
+.data(sumstat)
+.enter()        // So now we are working group per group
+.append("g")
+  .append("path") // append elemnt
+    .attr("transform", function(d){return("translate(0, " + (y(parseInt(Object.keys(d)[0])))+")")} ) // - verschiebung y axe
+    .datum(function(d){return(Object.values(d)[0])})     // So now we are working bin per bin
+    .style("stroke", "none")
+    .style("fill","grey")
+    .attr("d", d3.area()
+        .x(function(d){return(x(d.x0)) })
+        .y0(function(d){return yNum(-d.length)}) // - => upper violin
+        .y1(yNum(0)) // cuts half of the violin
+        .curve(d3.curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
+    )
+
+  return svg.node();
 }
