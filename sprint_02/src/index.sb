@@ -367,11 +367,9 @@ function LeafletAccidentMap(data, {
   mod.markersCluster = undefined
   mod.update = function(data) {
     // TODO: update polygon colors
-    console.log(this)
 
     // remove marker cluster layer if existent
     if (this.markersCluster !== undefined) {
-      console.log("deleting old")
       this.map.removeLayer(this.markersCluster)
       delete this.markersCluster
     }
@@ -386,11 +384,9 @@ function LeafletAccidentMap(data, {
       this.markersCluster.addLayer(dot)
     })
 
-    console.log(this.markersCluster)
-
     this.map.addLayer(this.markersCluster);
-    console.log("hello there")
-    console.log(this)
+
+    return this
   }
 
   mod.update(data)
@@ -421,8 +417,8 @@ var module = LeafletAccidentMap(data, {
   stateTitle: f => f.properties.BZR_NAME,
 })
 
-// try out update
-module.update(filterData(data, { days: [1] }))
+// try out update, only show weekend accidents
+//module.update(filterData(data, { days: [1,7] }))
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
 //module.map.remove()
