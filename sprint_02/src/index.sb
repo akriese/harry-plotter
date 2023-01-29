@@ -136,7 +136,7 @@ function filterData(data, {
         return false
       }
 
-      if (days.length != 0 && !(accident.UWOCHENTAG in days)) {
+      if (days.length != 0 && days.indexOf(accident.UWOCHENTAG) == -1) {
         return false
       }
 
