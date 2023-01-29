@@ -45,16 +45,6 @@ for (i in data) {
 }
 
 # %% [javascript]
-data[1]
-function swap_days_to_starting_at_monday(d){
-  d.UWOCHENTAG = d.UWOCHENTAG - 1;
-  if (d.WOCHENTAG == 0){
-    d.WOCHENTAG = 7;
-  }
-}
-data.map(swap_days_to_starting_at_monday)
-data[1]
-# %% [javascript]
 /// Collection of functions that grab certain parts of the given data
 
 // general function to count occurences of a category in one data property
@@ -961,17 +951,20 @@ function hist_all_over(data, histogram) {
   data_grouped = d3.group(sorted_data,  d => d.UWOCHENTAG);
   bins = Array.from(data_grouped).map(d => d[1].map(d => d.USTUNDE)).map(histogram);
   return bins
-}; 
+};
 
-# %% [javascript]
-violin_data = data;
-violin_data.map(swap_days_to_starting_at_monday);
-violin_data[0]
+categories = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
+function swap_days_to_starting_at_monday(data){
+  data.map(function(d){
+  	d.UWOCHENTAG = categories[d.UWOCHENTAG - 1];
+  });
+  return data;
+}
 # %% [html]
 <div id="test_violin"></div>
 # %% [javascript]
 removeAllChildren("test_violin");
-RaincloudPlot(violin_data)
+RaincloudPlot(data)
 # %% [javascript]
 function RaincloudPlot(data) {
 // Build and Show the Y scale
@@ -991,7 +984,7 @@ var y = d3.scaleBand()
   .domain([1, 2, 3, 4, 5, 6, 7]) //days
   .padding(0)     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
 
-categories = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
+categories = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 // Create the Y axis for names
 var yName = d3.scaleBand()
   .domain(categories)
@@ -1004,8 +997,10 @@ var histogram = d3.histogram()
       .thresholds(x.ticks(24))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
       .value(d => d)
   
-// Compute the binning for each group of the dataset
+// Compute the binning for each group of the dataset and shift Sunday to be day 7
 var sumstat = hist_all_over(data, histogram);
+sumstat.push(sumstat[0])
+sumstat.shift()
 
 // What is the biggest number of value in a bin? We need it cause this value will have a width of 100% of the bandwidth.
 var maxNum = 0
@@ -1015,9 +1010,9 @@ for ( i in sumstat ){
   longuest = d3.max(lengths)
   if (longuest > maxNum) { maxNum = longuest }
 }
-  
+
+// adapt data structure inner array to dict
 help_array = [1, 2, 3, 4, 5, 6, 7];
-  
 for ( i in sumstat ){
   var dict =  {};
   dict[help_array[i]] = sumstat[i];
@@ -1029,14 +1024,6 @@ var yNum = d3.scaleLinear()
   .range([0, y.bandwidth()])
   .domain([-maxNum, maxNum])
 
-// Color scale for dots
-/*var myColor = d3.scaleSequential()
-  .interpolator(d3.interpolateInferno)
-  .domain([3,9])
-
-// set how many points per hour jitterWidth
-var jitterWidth = 80 */
-
 // append the svg object to the body of the page
 const svg = d3.select("#test_violin")
   .append("svg")
@@ -1047,30 +1034,33 @@ const svg = d3.select("#test_violin")
   
 svg.append("g")
    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-   
-// add y-axis
-//svg.append("g")
-//  .call(d3.axisLeft(y))
 
 // add x-axis
 svg.append("g")	
   .attr("transform", "translate(0," + height + ")") 
   .call(d3.axisBottom(x))
 
+// add x-label 
+svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("x", width + 80)
+      .attr("y", height + 5)
+  	  .style("fill", "grey")
+      .text("Uhrzeit →");
+
+// add Days to yaxis 
 svg.append("g")
   .call(d3.axisLeft(yName).tickSize(0))
   .select(".domain").remove()
 
 // Add the shape to this svg!
-//for ( i in sumstat ){
-  //console.log(sumstat[i])
 svg.append("g")
 .selectAll("myViolin")
 .data(sumstat)
 .enter()        // So now we are working group per group
 .append("g")
-  .append("path")
-    .attr("transform", function(d){return("translate(0, " + (y(parseInt(Object.keys(d)[0])))+")") } ) // - verschiebung y axe
+  .append("path") // append elemnt
+    .attr("transform", function(d){return("translate(0, " + (y(parseInt(Object.keys(d)[0])))+")")} ) // - verschiebung y axe
     .datum(function(d){return(Object.values(d)[0])})     // So now we are working bin per bin
     .style("stroke", "none")
     .style("fill","grey")
@@ -1080,20 +1070,6 @@ svg.append("g")
         .y1(yNum(0)) // cuts half of the violin
         .curve(d3.curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
     )
-    //.attr("y", function(d) {return y(parseInt(Object.keys(d)[0])); })
-//}
-  
-// Add individual points with jitter
-//svg.append("g")
- /* .selectAll("indPoints")
-  .data(data)
-  .enter()
-  .append("circle")
-    .attr("cx", function(d){return(x(d.UWOCHENTAG) + x.bandwidth()/2 - Math.random()*jitterWidth )}) //d.day
-    .attr("cy", function(d){return(y(d.USTUNDE))}) //d.time
-    .attr("r", 2)
-    .style("fill", function(d){ return(myColor(d.USTUNDE))}) //d.time
-    .attr("stroke", "white") */
 
   return svg.node();
 }
