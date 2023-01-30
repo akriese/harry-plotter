@@ -79,6 +79,22 @@ function countAccidentTypes(data) {
   return countCategoryOccurences(data, "UTYP1", [1, 2, 3, 4, 5, 6, 7])
 }
 
+// we have to cut off the last two digits of each number, as we want the "Bezirksregionen"
+// from https://www.statistik-berlin-brandenburg.de/raumbezuege#:~:text=Neue%20LOR%2DSystematik%20seit%202021
+function countPerLOR(data) {
+  var counts = {}
+  data.forEach(d => {
+    const lor = Math.floor(d.LOR_ab_2021 / 100)
+    if (lor in counts) {
+      counts[lor] += 1
+    } else {
+      counts[lor] = 1
+    }
+  })
+
+  return counts
+}
+
 // extract accident time data
 // mode: one of {"single", "array", "day_arrays"} defines how the data is returned
 function getDaysAndHours(data, mode="single") {
@@ -182,7 +198,6 @@ getDaysAndHours(data, mode="day_arrays")
 getInvolvedNumbers(measureFiltering({involved: ["IstRad"]}))
 countGraveness(data)
 # %% [javascript]
-
 // Berlin topographies
 var LorAreas = topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states)
 
@@ -207,6 +222,9 @@ LorWGS.features = LorAreas.features.map(feature => ({
 var projection = d3.geoIdentity()
   .reflectY(true)
   .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
+# %% [javascript]
+// For trying out different filters
+//module.update(filterData(data, { graveness: 2 }))
 # %% [html]
 <!-- Main div for the map svg -->
 <div id="content"></div>
@@ -229,6 +247,14 @@ body {
 #mother {
   height: 850px;
   width: 1000px
+}
+
+/*
+  This is needed, as chrome is drawing a rectangle around the focused polygon
+  See: https://gis.stackexchange.com/questions/447502/prevent-leaflet-map-from-showing-rectangle-around-layer-on-click
+*/
+:focus {
+    outline: -webkit-focus-ring-color auto 0px;
 }
 
 .leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
@@ -319,32 +345,56 @@ colorLegend = (selection, props) => {
       .attr('x', textOffset);
 }
 # %% [javascript]
+const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
+                    "August", "September", "Oktober", "November", "Dezember"]
+const dayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
+const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
+                      "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
+                      "Unfall im Längsverkehr", "Sonstiger Unfall"]
+
 function makeTooltipContent(accident) {
   const info = accident
   const persons = "<b>Beteiligte:</b> " + info.Beteiligte.join(", ")
-  const dateTime = "<b>Monat:</b> " + info.UMONAT + "; <b>Wochentag:</b> " + info.UWOCHENTAG + "; <b>Stunde:</b> " + info.USTUNDE;
+  const dateTime = "<b>Monat/Tag/Uhrzeit:</b> " + monthNames[info.UMONAT - 1] +
+                   "; " + dayNames[info.UWOCHENTAG - 1] +
+                   "; " + info.USTUNDE + " Uhr";
   const gs = ["Tödlich", "Schwer", "Leicht"]
   const graveness = "<b>Schweregrad:</b> " + gs[info.UKATEGORIE - 1]
-  const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
-                        "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
-                        "Unfall im Längsverkehr", "Sonstiger Unfall"]
 
-    return "<b>" + accidentTypes[info.UTYP1 - 1] + "</b><br>"
+  return "<b>" + accidentTypes[info.UTYP1 - 1] + "</b><br>"
                + dateTime + "<br>"
                + persons + "<br>"
                + graveness + "<br>";
 }
 # %% [javascript]
+function StateColors(counts) {
+  counts.dummy = 0
+  const c = Object.entries(counts).map(([_, count]) => count)
+  const [min, max] = [Math.min(...c), Math.max(...c)]
+  const colorScale = d3.scaleSequential(d3.interpolateReds)
+
+  const scaler = function(stateId) {
+    return stateId in counts ? colorScale(counts[stateId] / max) : colorScale(counts.dummy / max)
+  }
+
+  return [scaler, [min, max]]
+}
+
 function LeafletAccidentMap(data, {
   topo,
   topoCoordSystem = "EPSG:32633",
   divName = "mother",
   minZoom = 11,
   maxZoom = 19,
-  states,
-  stateTitle,
-  tooltipContent,
-  dotCoords,
+  states, // FeatureCollection of topojson data
+  stateTitle, // function to get the title from a state feature
+  stateCount, // function to count the occurences per state in the data
+  stateId, // function to get the ID of a given state
+  tooltipContent, // function to create the content of a tooltip for the given datapoint
+  dotCoords, // function to get the WGS84 (x, y) coordinates from a data point
+  stateStrokeInactive = 0.0, // state border stroke thickness, while neither focused nor hovered over
+  stateStrokeClicked = 3.0, // state border stroke thickness, while focused
+  stateStrokeHover = 1.0, // state border stroke thickness, while hovered over
 }) {
   // get topo bounds and convert them to WGS84, but with LatLong format (x and y switched)
   var bounds = topojson.bbox(topo)
@@ -352,25 +402,73 @@ function LeafletAccidentMap(data, {
   var projBounds = [proj4(topoCoordSystem, "WGS84", boundsArr[0]).reverse(),
                     proj4(topoCoordSystem, "WGS84", boundsArr[1]).reverse()]
 
-  const mod = { initBounds: projBounds }
+  const mod = { initBounds: projBounds, markersCluster: undefined }
 
   // draw map
-  mod.map = L.map(divName).fitBounds(projBounds);
+  mod.map = L.map(divName, { doubleClickZoom: false }).fitBounds(projBounds);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: minZoom,
     maxZoom: maxZoom,
   }).addTo(mod.map);
 
-  // LOR polygons
-  mod.states = states.features.map(f =>
-    L.polygon(f.geometry.coordinates[0])
-      .bindTooltip(stateTitle(f))
-      .addTo(mod.map)
-  );
+  // zoom out to see whole city
+  mod.resetView = function() {
+    this.map.fitBounds(this.initBounds)
+    this.unfocusState(this.currentlyFocusedState)
+    this.currentlyFocusedState = undefined
+  }
 
-  mod.markersCluster = undefined
+  // reset border stroke when unfocussing a state
+  mod.unfocusState = function(s) {
+    if (s === undefined) return
+    const res = this.states.find(p => stateTitle(p) === s)
+    if (res !== undefined) res.setStyle({ weight: stateStrokeInactive })
+  }
+
+  mod.map.on("click", _event => mod.resetView())
+
+  // create the LOR polygons and give them click behavior
+  mod.states = states.features.map(f => {
+    const polygon = L.polygon(f.geometry.coordinates[0],
+            { stroke: true, color: "black", weight: stateStrokeInactive, fillOpacity: 0.8 })
+
+    // change stroke when focussing state
+    polygon.focus = function(e) {
+      mod.map.fitBounds(this.getBounds())
+      mod.unfocusState(mod.currentlyFocusedState)
+      mod.currentlyFocusedState = stateTitle(f)
+      this.setStyle({ weight: stateStrokeClicked })
+      L.DomEvent.stopPropagation(e); // dont propagate click to map, otherwise mod.resetView() is called
+    }
+
+    polygon.isFocused = function() {
+      return mod.currentlyFocusedState === stateTitle(f)
+    }
+
+    // ATTENTION: dblclick might also fire click twice, so dont do anything with different side effects in click!
+    polygon
+      .on("click", event => polygon.isFocused() ? mod.resetView() : polygon.focus(event))
+      //.on("dblclick", _event => mod.resetView())
+      // these functions implement the highlighting of states that are currently hovered over
+      .on("mouseover", event => polygon.isFocused() ? {} : polygon.setStyle({ weight: stateStrokeHover }))
+      .on("mouseout", event => polygon.isFocused() ? {} : polygon.setStyle({ weight: stateStrokeInactive }))
+      .addTo(mod.map)
+
+    polygon.properties = f.properties
+    return polygon
+  });
+
   mod.update = function(data) {
-    // TODO: update polygon colors
+    // update polygon colors
+    const counts = stateCount(data)
+    const [colorScale, range] = StateColors(counts)
+    this.states.forEach(p => {
+      const id = stateId(p)
+      p.setStyle({fillColor: colorScale(id)})
+      p.bindTooltip(`${stateTitle(p)} (${counts[id]} Unfälle)`) // TODO: maybe handle case count == 1?
+    })
+
+    // TODO: when we get a color legend, update that too
 
     // remove marker cluster layer if existent
     if (this.markersCluster !== undefined) {
@@ -389,29 +487,16 @@ function LeafletAccidentMap(data, {
     })
 
     this.map.addLayer(this.markersCluster);
-
     return this
   }
 
   mod.update(data)
 
   return mod;
-
-  // Create dots with d3
-  /*
-  L.svg({clickable:true}).addTo(map)
-  var [dots, P] = AccidentMap(data, {
-    borders: statemesh,
-    getCoordinates: d => ([d.XGCSWGS84, d.YGCSWGS84]),
-    projection: d3.geoMercator(),
-    topo: berlin_lor_topo,
-    width: 1500,
-    height: 1000,
-    map: map
-    //overlay: d3.select(map.getPanes().overlayPane).select('svg').attr("pointer-events", "auto")
-  })
-  */
 }
+# %% [javascript]
+// Uncomment and execute to be able to reload the map
+//module.map.remove()
 # %% [javascript]
 var module = LeafletAccidentMap(data, {
   topo: berlin_lor_topo,
@@ -419,13 +504,12 @@ var module = LeafletAccidentMap(data, {
   dotCoords: d => ([d.XGCSWGS84, d.YGCSWGS84]),
   tooltipContent: acc => makeTooltipContent(acc),
   stateTitle: f => f.properties.BZR_NAME,
+  stateCount: countPerLOR,
+  stateId: p => parseInt(p.properties.BZR_ID),
 })
 
 // try out update, only show weekend accidents
 //module.update(filterData(data, { days: [1,7] }))
-# %% [javascript]
-// Uncomment and execute to be able to reload the map
-//module.map.remove()
 # %% [javascript]
 function removeAllChildren(name) {
   const div = document.getElementById(name);
