@@ -389,6 +389,9 @@ function LeafletAccidentMap(data, {
   stateId, // function to get the ID of a given state
   tooltipContent, // function to create the content of a tooltip for the given datapoint
   dotCoords, // function to get the WGS84 (x, y) coordinates from a data point
+  stateStrokeInactive = 0.0, // state border stroke thickness, while neither focused nor hovered over
+  stateStrokeClicked = 3.0, // state border stroke thickness, while focused
+  stateStrokeHover = 1.0, // state border stroke thickness, while hovered over
 }) {
   // get topo bounds and convert them to WGS84, but with LatLong format (x and y switched)
   var bounds = topojson.bbox(topo)
@@ -423,21 +426,29 @@ function LeafletAccidentMap(data, {
 
   // create the LOR polygons and give them click behavior
   mod.states = states.features.map(f => {
-    const polygon = L.polygon(f.geometry.coordinates[0], { stroke: true, weight: 0.3, fillOpacity: 0.8 })
-      .bindTooltip(stateTitle(f))
+    const polygon = L.polygon(f.geometry.coordinates[0],
+            { stroke: true, color: "black", weight: stateStrokeInactive, fillOpacity: 0.8 })
 
+    // change stroke when focussing state
     polygon.focus = function(e) {
-      mod.map.fitBounds(polygon.getBounds())
+      mod.map.fitBounds(this.getBounds())
       mod.unfocusState(mod.currentlyFocusedState)
       mod.currentlyFocusedState = stateTitle(f)
+      this.setStyle({ weight: stateStrokeClicked })
       L.DomEvent.stopPropagation(e); // dont propagate click to map, otherwise mod.resetView() is called
+    }
+
+    polygon.isFocused = function() {
+      return mod.currentlyFocusedState === stateTitle(f)
     }
 
     // ATTENTION: dblclick might also fire click twice, so dont do anything with different side effects in click!
     polygon
-      .on("click", event => mod.currentlyFocusedState === stateTitle(f) ?
-        mod.resetView() : polygon.focus(event))
+      .on("click", event => polygon.isFocused() ? mod.resetView() : polygon.focus(event))
       //.on("dblclick", _event => mod.resetView())
+      // these functions implement the highlighting of states that are currently hovered over
+      .on("mouseover", event => polygon.isFocused() ? {} : polygon.setStyle({ weight: stateStrokeHover }))
+      .on("mouseout", event => polygon.isFocused() ? {} : polygon.setStyle({ weight: stateStrokeInactive }))
       .addTo(mod.map)
 
     polygon.properties = f.properties
