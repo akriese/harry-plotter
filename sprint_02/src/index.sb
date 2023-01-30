@@ -405,9 +405,18 @@ function LeafletAccidentMap(data, {
     maxZoom: maxZoom,
   }).addTo(mod.map);
 
+  // zoom out to see whole city
   mod.resetView = function() {
-    mod.map.fitBounds(mod.initBounds)
-    mod.currentlyFocusedState = undefined
+    this.map.fitBounds(this.initBounds)
+    this.unfocusState(this.currentlyFocusedState)
+    this.currentlyFocusedState = undefined
+  }
+
+  // reset border stroke when unfocussing a state
+  mod.unfocusState = function(s) {
+    if (s === undefined) return
+    const res = this.states.find(p => stateTitle(p) === s)
+    if (res !== undefined) res.setStyle({ weight: stateStrokeInactive })
   }
 
   mod.map.on("click", _event => mod.resetView())
@@ -419,6 +428,7 @@ function LeafletAccidentMap(data, {
 
     polygon.focus = function(e) {
       mod.map.fitBounds(polygon.getBounds())
+      mod.unfocusState(mod.currentlyFocusedState)
       mod.currentlyFocusedState = stateTitle(f)
       L.DomEvent.stopPropagation(e); // dont propagate click to map, otherwise mod.resetView() is called
     }
