@@ -358,23 +358,39 @@ function LeafletAccidentMap(data, {
   var projBounds = [proj4(topoCoordSystem, "WGS84", boundsArr[0]).reverse(),
                     proj4(topoCoordSystem, "WGS84", boundsArr[1]).reverse()]
 
-  const mod = { initBounds: projBounds }
+  const mod = { initBounds: projBounds, markersCluster: undefined }
 
   // draw map
-  mod.map = L.map(divName).fitBounds(projBounds);
+  mod.map = L.map(divName, { doubleClickZoom: false }).fitBounds(projBounds);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: minZoom,
     maxZoom: maxZoom,
   }).addTo(mod.map);
 
-  // LOR polygons
-  mod.states = states.features.map(f =>
-    L.polygon(f.geometry.coordinates[0])
-      .bindTooltip(stateTitle(f))
-      .addTo(mod.map)
-  );
+  mod.resetView = function() {
+    mod.map.fitBounds(mod.initBounds)
+    mod.currentlyFocusedState = undefined
+  }
 
-  mod.markersCluster = undefined
+  // create the LOR polygons and give them click behavior
+  mod.states = states.features.map(f => {
+    const polygon = L.polygon(f.geometry.coordinates[0])
+      .bindTooltip(stateTitle(f))
+
+    polygon.focus = function() {
+      mod.map.fitBounds(polygon.getBounds())
+      mod.currentlyFocusedState = stateTitle(f)
+    }
+
+    // ATTENTION: dblclick might also fire click twice, so dont do anything with different side effects in click!
+    polygon
+      .on("click", event => mod.currentlyFocusedState === stateTitle(f) ?
+        mod.resetView() : polygon.focus())
+      .on("dblclick", event => mod.resetView())
+      .addTo(mod.map)
+    return polygon
+  });
+
   mod.update = function(data) {
     // TODO: update polygon colors
 
@@ -402,21 +418,6 @@ function LeafletAccidentMap(data, {
   mod.update(data)
 
   return mod;
-
-  // Create dots with d3
-  /*
-  L.svg({clickable:true}).addTo(map)
-  var [dots, P] = AccidentMap(data, {
-    borders: statemesh,
-    getCoordinates: d => ([d.XGCSWGS84, d.YGCSWGS84]),
-    projection: d3.geoMercator(),
-    topo: berlin_lor_topo,
-    width: 1500,
-    height: 1000,
-    map: map
-    //overlay: d3.select(map.getPanes().overlayPane).select('svg').attr("pointer-events", "auto")
-  })
-  */
 }
 # %% [javascript]
 var module = LeafletAccidentMap(data, {
