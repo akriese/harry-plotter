@@ -222,6 +222,9 @@ LorWGS.features = LorAreas.features.map(feature => ({
 var projection = d3.geoIdentity()
   .reflectY(true)
   .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
+# %% [javascript]
+// For trying out different filters
+//module.update(filterData(data, { graveness: 2 }))
 # %% [html]
 <!-- Main div for the map svg -->
 <div id="content"></div>
@@ -345,6 +348,9 @@ colorLegend = (selection, props) => {
 const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
                     "August", "September", "Oktober", "November", "Dezember"]
 const dayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
+const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
+                      "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
+                      "Unfall im Längsverkehr", "Sonstiger Unfall"]
 
 function makeTooltipContent(accident) {
   const info = accident
@@ -354,11 +360,8 @@ function makeTooltipContent(accident) {
                    "; " + info.USTUNDE + " Uhr";
   const gs = ["Tödlich", "Schwer", "Leicht"]
   const graveness = "<b>Schweregrad:</b> " + gs[info.UKATEGORIE - 1]
-  const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
-                        "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
-                        "Unfall im Längsverkehr", "Sonstiger Unfall"]
 
-    return "<b>" + accidentTypes[info.UTYP1 - 1] + "</b><br>"
+  return "<b>" + accidentTypes[info.UTYP1 - 1] + "</b><br>"
                + dateTime + "<br>"
                + persons + "<br>"
                + graveness + "<br>";
@@ -492,6 +495,9 @@ function LeafletAccidentMap(data, {
   return mod;
 }
 # %% [javascript]
+// Uncomment and execute to be able to reload the map
+//module.map.remove()
+# %% [javascript]
 var module = LeafletAccidentMap(data, {
   topo: berlin_lor_topo,
   states: LorWGS,
@@ -504,9 +510,6 @@ var module = LeafletAccidentMap(data, {
 
 // try out update, only show weekend accidents
 //module.update(filterData(data, { days: [1,7] }))
-# %% [javascript]
-// Uncomment and execute to be able to reload the map
-//module.map.remove()
 # %% [javascript]
 function removeAllChildren(name) {
   const div = document.getElementById(name);
