@@ -319,10 +319,16 @@ colorLegend = (selection, props) => {
       .attr('x', textOffset);
 }
 # %% [javascript]
+const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
+                    "August", "September", "Oktober", "November", "Dezember"]
+const dayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
+
 function makeTooltipContent(accident) {
   const info = accident
   const persons = "<b>Beteiligte:</b> " + info.Beteiligte.join(", ")
-  const dateTime = "<b>Monat:</b> " + info.UMONAT + "; <b>Wochentag:</b> " + info.UWOCHENTAG + "; <b>Stunde:</b> " + info.USTUNDE;
+  const dateTime = "<b>Monat/Tag/Uhrzeit:</b> " + monthNames[info.UMONAT - 1] +
+                   "; " + dayNames[info.UWOCHENTAG - 1] +
+                   "; " + info.USTUNDE + " Uhr";
   const gs = ["Tödlich", "Schwer", "Leicht"]
   const graveness = "<b>Schweregrad:</b> " + gs[info.UKATEGORIE - 1]
   const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
