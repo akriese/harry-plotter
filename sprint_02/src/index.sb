@@ -416,18 +416,15 @@ function LeafletAccidentMap(data, {
     maxZoom: maxZoom,
   }).addTo(mod.map);
 
+  // A dummy state we need for when no state is focussed, needs to implement unfocus to prevent error
+  mod.dummyState = { unfocus: function() {} }
+  mod.currentlyFocusedState = mod.dummyState
+
   // zoom out to see whole city
   mod.resetView = function() {
     this.map.fitBounds(this.initBounds)
-    this.unfocusState(this.currentlyFocusedState)
-    this.currentlyFocusedState = undefined
-  }
-
-  // reset border stroke when unfocussing a state
-  mod.unfocusState = function(s) {
-    if (s === undefined) return
-    const res = this.states.find(p => stateTitle(p) === s)
-    if (res !== undefined) res.setStyle({ weight: stateStrokeInactive })
+    this.currentlyFocusedState.unfocus()
+    this.currentlyFocusedState = this.dummyState
   }
 
   mod.map.on("click", _event => mod.resetView())
@@ -440,14 +437,19 @@ function LeafletAccidentMap(data, {
     // change stroke when focussing state
     polygon.focus = function(e) {
       mod.map.fitBounds(this.getBounds())
-      mod.unfocusState(mod.currentlyFocusedState)
-      mod.currentlyFocusedState = stateTitle(f)
+      mod.currentlyFocusedState.unfocus()
+      mod.currentlyFocusedState = this
       this.setStyle({ weight: stateStrokeClicked })
       L.DomEvent.stopPropagation(e); // dont propagate click to map, otherwise mod.resetView() is called
     }
 
+    // reset border stroke when unfocussing a state
+    polygon.unfocus = function() {
+      this.setStyle({ weight: stateStrokeInactive })
+    }
+
     polygon.isFocused = function() {
-      return mod.currentlyFocusedState === stateTitle(f)
+      return mod.currentlyFocusedState === this
     }
 
     // ATTENTION: dblclick might also fire click twice, so dont do anything with different side effects in click!
