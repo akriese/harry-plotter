@@ -372,21 +372,24 @@ function LeafletAccidentMap(data, {
     mod.currentlyFocusedState = undefined
   }
 
+  mod.map.on("click", _event => mod.resetView())
+
   // create the LOR polygons and give them click behavior
   mod.states = states.features.map(f => {
     const polygon = L.polygon(f.geometry.coordinates[0])
       .bindTooltip(stateTitle(f))
 
-    polygon.focus = function() {
+    polygon.focus = function(e) {
       mod.map.fitBounds(polygon.getBounds())
       mod.currentlyFocusedState = stateTitle(f)
+      L.DomEvent.stopPropagation(e); // dont propagate click to map, otherwise mod.resetView() is called
     }
 
     // ATTENTION: dblclick might also fire click twice, so dont do anything with different side effects in click!
     polygon
       .on("click", event => mod.currentlyFocusedState === stateTitle(f) ?
-        mod.resetView() : polygon.focus())
-      .on("dblclick", event => mod.resetView())
+        mod.resetView() : polygon.focus(event))
+      //.on("dblclick", _event => mod.resetView())
       .addTo(mod.map)
     return polygon
   });
