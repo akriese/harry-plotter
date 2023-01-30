@@ -246,6 +246,14 @@ body {
   width: 1000px
 }
 
+/*
+  This is needed, as chrome is drawing a rectangle around the focused polygon
+  See: https://gis.stackexchange.com/questions/447502/prevent-leaflet-map-from-showing-rectangle-around-layer-on-click
+*/
+:focus {
+    outline: -webkit-focus-ring-color auto 0px;
+}
+
 .leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
   background-color: #fff0;
 }
