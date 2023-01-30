@@ -79,6 +79,22 @@ function countAccidentTypes(data) {
   return countCategoryOccurences(data, "UTYP1", [1, 2, 3, 4, 5, 6, 7])
 }
 
+// we have to cut off the last two digits of each number, as we want the "Bezirksregionen"
+// from https://www.statistik-berlin-brandenburg.de/raumbezuege#:~:text=Neue%20LOR%2DSystematik%20seit%202021
+function countPerLOR(data) {
+  var counts = {}
+  data.forEach(d => {
+    const lor = Math.floor(d.LOR_ab_2021 / 100)
+    if (lor in counts) {
+      counts[lor] += 1
+    } else {
+      counts[lor] = 1
+    }
+  })
+
+  return counts
+}
+
 // extract accident time data
 // mode: one of {"single", "array", "day_arrays"} defines how the data is returned
 function getDaysAndHours(data, mode="single") {
@@ -182,7 +198,6 @@ getDaysAndHours(data, mode="day_arrays")
 getInvolvedNumbers(measureFiltering({involved: ["IstRad"]}))
 countGraveness(data)
 # %% [javascript]
-
 // Berlin topographies
 var LorAreas = topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states)
 
@@ -341,16 +356,31 @@ function makeTooltipContent(accident) {
                + graveness + "<br>";
 }
 # %% [javascript]
+function StateColors(data, stateCount) {
+  const counts = stateCount(data)
+  counts.dummy = 1
+  const c = Object.entries(counts).map(([_, count]) => count)
+  const colorScale = d3.scaleSequential(c, d3.interpolateReds)
+
+  const scaler = function(stateId) {
+    return stateId in counts ? colorScale(counts[stateId]) : colorScale(counts.dummy)
+  }
+
+  return [scaler, colorScale.domain()]
+}
+
 function LeafletAccidentMap(data, {
   topo,
   topoCoordSystem = "EPSG:32633",
   divName = "mother",
   minZoom = 11,
   maxZoom = 19,
-  states,
-  stateTitle,
-  tooltipContent,
-  dotCoords,
+  states, // FeatureCollection of topojson data
+  stateTitle, // function to get the title from a state feature
+  stateCount, // function to count the occurences per state in the data
+  stateId, // function to get the ID of a given state
+  tooltipContent, // function to create the content of a tooltip for the given datapoint
+  dotCoords, // function to get the WGS84 (x, y) coordinates from a data point
 }) {
   // get topo bounds and convert them to WGS84, but with LatLong format (x and y switched)
   var bounds = topojson.bbox(topo)
@@ -376,7 +406,7 @@ function LeafletAccidentMap(data, {
 
   // create the LOR polygons and give them click behavior
   mod.states = states.features.map(f => {
-    const polygon = L.polygon(f.geometry.coordinates[0])
+    const polygon = L.polygon(f.geometry.coordinates[0], { stroke: true, weight: 0.3, fillOpacity: 0.8 })
       .bindTooltip(stateTitle(f))
 
     polygon.focus = function(e) {
@@ -391,11 +421,17 @@ function LeafletAccidentMap(data, {
         mod.resetView() : polygon.focus(event))
       //.on("dblclick", _event => mod.resetView())
       .addTo(mod.map)
+
+    polygon.properties = f.properties
     return polygon
   });
 
   mod.update = function(data) {
-    // TODO: update polygon colors
+    // update polygon colors
+    const [colorScale, range] = StateColors(data, stateCount)
+    mod.states.forEach(p => p.setStyle({fillColor: colorScale(stateId(p))}))
+
+    // TODO: when we get a color legend, update that too
 
     // remove marker cluster layer if existent
     if (this.markersCluster !== undefined) {
@@ -414,7 +450,6 @@ function LeafletAccidentMap(data, {
     })
 
     this.map.addLayer(this.markersCluster);
-
     return this
   }
 
@@ -429,6 +464,8 @@ var module = LeafletAccidentMap(data, {
   dotCoords: d => ([d.XGCSWGS84, d.YGCSWGS84]),
   tooltipContent: acc => makeTooltipContent(acc),
   stateTitle: f => f.properties.BZR_NAME,
+  stateCount: countPerLOR,
+  stateId: p => parseInt(p.properties.BZR_ID),
 })
 
 // try out update, only show weekend accidents
