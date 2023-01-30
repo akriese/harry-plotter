@@ -364,17 +364,17 @@ function makeTooltipContent(accident) {
                + graveness + "<br>";
 }
 # %% [javascript]
-function StateColors(data, stateCount) {
-  const counts = stateCount(data)
-  counts.dummy = 1
+function StateColors(counts) {
+  counts.dummy = 0
   const c = Object.entries(counts).map(([_, count]) => count)
-  const colorScale = d3.scaleSequential(c, d3.interpolateReds)
+  const [min, max] = [Math.min(...c), Math.max(...c)]
+  const colorScale = d3.scaleSequential(d3.interpolateReds)
 
   const scaler = function(stateId) {
-    return stateId in counts ? colorScale(counts[stateId]) : colorScale(counts.dummy)
+    return stateId in counts ? colorScale(counts[stateId] / max) : colorScale(counts.dummy / max)
   }
 
-  return [scaler, colorScale.domain()]
+  return [scaler, [min, max]]
 }
 
 function LeafletAccidentMap(data, {
@@ -436,8 +436,13 @@ function LeafletAccidentMap(data, {
 
   mod.update = function(data) {
     // update polygon colors
-    const [colorScale, range] = StateColors(data, stateCount)
-    mod.states.forEach(p => p.setStyle({fillColor: colorScale(stateId(p))}))
+    const counts = stateCount(data)
+    const [colorScale, range] = StateColors(counts)
+    this.states.forEach(p => {
+      const id = stateId(p)
+      p.setStyle({fillColor: colorScale(id)})
+      p.bindTooltip(`${stateTitle(p)} (${counts[id]} Unfälle)`) // TODO: maybe handle case count == 1?
+    })
 
     // TODO: when we get a color legend, update that too
 
