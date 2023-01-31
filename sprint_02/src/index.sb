@@ -691,7 +691,9 @@ function BarChart(data, {
   xPadding = 0.1, // amount of x-range to reserve to separate bars
   yFormat, // a format specifier string for the y-axis
   yLabel, // a label for the y-axis
- // color = "currentColor" // bar fill color
+  color = "currentColor", // bar fill color
+  titleColor = "black", // title fill color when atop bar
+  titleAltColor = "currentColor", // title fill color when atop background
 } = {}) {
   // Compute values.
   const X = d3.map(data, x);
@@ -707,7 +709,7 @@ function BarChart(data, {
 
   // Construct scales, axes, and formats.
   const xScale = d3.scaleBand(xDomain, xRange).padding(xPadding);
-  const yScale = d3.scaleBand(yDomain, yRange);
+  const yScale = yType(yDomain, yRange);//d3.scaleBand(yDomain, yRange);
   const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
   const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
   // setted color can be changed by using another schemeCategory
@@ -715,14 +717,14 @@ function BarChart(data, {
   const col = d3.map(data, (d) => color(d.category));
 
   // Compute titles.
-  //if (title === undefined) {
-  //  const formatValue = yScale.tickFormat(100, yFormat);
-  //  title = i => `${X[i]}\n${formatValue(Y[i])}`;
-  //} else {
- //   const O = d3.map(data, d => d);
-  //  const T = title;
-  //  title = i => T(O[i], i, data);
-  //}
+ if (title === undefined) {
+    const formatValue = yScale.tickFormat(100, yFormat);
+    title = i => `${X[i]}\n${formatValue(Y[i])}`;
+  } else {
+    const O = d3.map(data, d => d);
+    const T = title;
+    title = i => T(O[i], i, data);
+  }
 
   const svg = d3.select("#test").append("svg")
     .attr("width", width)
@@ -732,21 +734,19 @@ function BarChart(data, {
 
   svg.append("g")
       .attr("transform", `translate(${marginLeft},0)`)
-      .call(yAxis)
+	  .call(yAxis)
       .call(g => g.select(".domain").remove())
       .call(g => g.selectAll(".tick line").clone()
           .attr("x2", width - marginLeft - marginRight)
           .attr("stroke-opacity", 0.1))
       .call(g => g.append("text")
-          .attr("fill-opacity", 0.7)
-          .attr("font-weight", "normal")
           .attr("x", -marginLeft)
           .attr("y", 10)
           .attr("fill", "currentColor")
           .attr("text-anchor", "start")
           .text(yLabel));
-
-  const bar = svg.append("g")    
+  
+  const bar = svg.append("g")
     .selectAll("rect")
     .data(I)
     .join("rect")
@@ -759,23 +759,28 @@ function BarChart(data, {
   if (title) bar.append("title")
       .text(title);
 
-  svg.append("g")
-      .attr("transform", `translate(0,${height - marginBottom})`)
-      .call(xAxis);
-
-   svg.append("g")
+svg.append("g")
+      .attr("fill", "currentColor")
       .attr("text-anchor", "end")
       .attr("font-family", "sans-serif")
       .attr("font-size", 10)
     .selectAll("text")
     .data(I)
     .join("text")
-      .attr("text-anchor", i => X[i] < 0 ? "end" : "start")
-      .attr("x", i => xScale(X[i]) + Math.sign(X[i] - 0) * 4)
-      .attr("y", i => yScale(Y[i]) + yScale.bandwidth() / 2)
+      .attr("y", i => yScale(Y[i]))
+      .attr("x", i => xScale(X[i]) + xScale.bandwidth() / 2 + 6)
       .attr("dy", "0.35em")
-      .text(i => format(X[i]));
-
+      .attr("dx", -4)
+      .text(title)
+      .call(text=> text.filter(i => yScale(Y[i]) - yScale(0) < 20) // short bars
+          .attr("dy", +4)
+          .attr("fill", titleAltColor)
+          .attr("text-anchor", "start"));
+  
+svg.append("g")
+      .attr("transform", `translate(0,${height - marginBottom})`)
+      .call(xAxis);
+  
   return svg.node();
 }
 # %% [javascript]
@@ -914,7 +919,7 @@ function BarChartH(data, {
       .attr("height", yScale.bandwidth())
       .attr("fill", i => col[i]);
 
-  svg.append("g")
+ svg.append("g")
       .attr("fill", titleColor)
       .attr("text-anchor", "end")
       .attr("font-family", "sans-serif")
