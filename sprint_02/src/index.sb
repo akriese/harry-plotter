@@ -499,6 +499,17 @@ function LeafletAccidentMap(data, {
     return this
   }
 
+  // change polygon color scale on zoom
+  mod.map.on('zoomend', () => {
+    var zoom = mod.map.getZoom();
+    const minOpacity = 0.01 // zoom == maxZoom => opacity = minOpacity
+    const maxOpacity = 0.8 // zoom == minZoom => opacity = maxOpacity
+    const multiplier = (maxZoom - zoom) / (maxZoom - minZoom) // number between 0 and 1; zoom normalized
+    // do a cubic descent of opacity to see the underlying map earlier
+    const newOpacity = (maxOpacity - minOpacity) * Math.pow(multiplier, 3) + minOpacity
+    mod.states.forEach((s) => s.setStyle({ fillOpacity: newOpacity }))
+  });
+
   mod.update(data)
 
   return mod;
