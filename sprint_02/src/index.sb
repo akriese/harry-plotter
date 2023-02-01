@@ -32,23 +32,26 @@ function from32to33(coords) {
   return proj4("EPSG:32632", "EPSG:32633", coords)
 }
 
-// ... and assign each data point a new parameter 'coords' holding x AND y value
-// these coordinates now match the coordinates that are used by the topojson file :)
-for (i in data) {
-  data[i].coords = from32to33([data[i].LINREFX, data[i].LINREFY])
-}
-# %% [javascript]
-// Precompute list of involved per accident
-for (i in data) {
+
+// Some added properties for each data point
+data.forEach(d => {
+  // Assign each data point a new parameter 'coords' holding x AND y value
+  // these coordinates now match the coordinates that are used by the topojson file :)
+  d.coords = from32to33([d.LINREFX, d.LINREFY]);
+  
+  // we have to cut off the last two digits of each number, as we want the "Bezirksregionen"
+  // from https://www.statistik-berlin-brandenburg.de/raumbezuege#:~:text=Neue%20LOR%2DSystematik%20seit%202021
+  d.lor = Math.floor(d.LOR_ab_2021 / 100);
+
+  // Precompute list of involved per accident
   var arr = []
-  for (const [key, value] of Object.entries(data[i])) {
+  for (const [key, value] of Object.entries(d)) {
     if (key.startsWith("Ist") && value === true) {
       arr.push(key.replace("Ist", ""))
     }
   }
-  data[i].Beteiligte = arr
-}
-
+  d.Beteiligte = arr
+})
 # %% [javascript]
 /// Collection of functions that grab certain parts of the given data
 
@@ -79,12 +82,11 @@ function countAccidentTypes(data) {
   return countCategoryOccurences(data, "UTYP1", [1, 2, 3, 4, 5, 6, 7])
 }
 
-// we have to cut off the last two digits of each number, as we want the "Bezirksregionen"
-// from https://www.statistik-berlin-brandenburg.de/raumbezuege#:~:text=Neue%20LOR%2DSystematik%20seit%202021
+// count the occurences of LOR in the given data, return the lor ids and their counts as an Object
 function countPerLOR(data) {
   var counts = {}
   data.forEach(d => {
-    const lor = Math.floor(d.LOR_ab_2021 / 100)
+    const lor = d.lor
     if (lor in counts) {
       counts[lor] += 1
     } else {
@@ -226,6 +228,56 @@ var projection = d3.geoIdentity()
 // For trying out different filters
 //module.update(filterData(data, { graveness: 2 }))
 # %% [html]
+<body>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+  <h1 style="text-align:center">TITEL</h1>
+  <div id=main>
+      <div id=map><h1>MAP</h1><svg id=legend></svg></div>
+      <div id=right>
+        <div id=infoText><h1>INFO</h1></div>
+        <div id=gravenessDiagramm><h1>GRAVENESS</h1></div>
+        <div id=involvedDiagramm><h1>Beteiligte</h1></div>
+      </div>
+  </div>
+  <h3>QUELLE</h3>
+</body>
+# %%--- [css]
+# properties:
+#   top_hidden: true
+# ---%%
+#main {
+  height: 850px;
+  width: 1600px;
+  display: flex;
+}
+
+#map {
+  background-color: brown;
+  width: 70%;
+}
+
+#right {
+  background-color: coral;
+  width: 30%
+}
+
+#infoText {
+  height: 20%; 
+  background-color: white;
+}
+
+#gravenessDiagramm {
+  background-color: red;
+  height: 40%;
+}
+
+#involvedDiagramm {
+  background-color: yellow;
+  height: 40%;
+}
+
+# %% [html]
 <!-- Main div for the map svg -->
 <div id="content"></div>
 
@@ -233,6 +285,7 @@ var projection = d3.geoIdentity()
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
   <div id=mother></div>
+  <svg id=legendSvg></svg>
 </body>
 # %%--- [css]
 # properties:
@@ -251,7 +304,19 @@ body {
 
 #mother {
   height: 850px;
-  width: 1000px
+  width: 1000px;
+}
+
+#legendSvg {
+  position: absolute;
+  height: 60px;
+  width: 300px;
+  top: 35px;
+  left: 700px;
+  /* Let mouse events go through to reach the map underneath */
+  pointer-events: none;
+  /* Make sure to be above the map pane (.leaflet-pane) */
+  z-index: 450;
 }
 
 /*
@@ -271,17 +336,23 @@ body {
   text-decoration: underline;
 }
 
-div.tooltip {
-  position: absolute;
-  text-align: center;
-  width: fit-content;
-  height: fit-content;
-  padding: 2px;
-  font: 12px sans-serif;
-  background: lightsteelblue;
-  border: 0px;
-  border-radius: 8px;
-  pointer-events: none;
+.marker-cluster-large div {
+  background-color: rgba(255, 0, 0, 0.8)
+}
+.marker-cluster-large  {
+  background-color: rgba(255, 0, 0, 0.2)
+}
+.marker-cluster-medium div {
+  background-color: rgba(255, 173, 0, 0.8)
+}
+.marker-cluster-medium  {
+  background-color: rgba(255, 173, 0, 0.2)
+}
+.marker-cluster-small div {
+  background-color: rgba(247, 255, 0, 0.8)
+}
+.marker-cluster-small  {
+  background-color: rgba(247, 255, 0, 0.2)
 }
 
 /* Style of category legend text and circles */
@@ -295,60 +366,41 @@ div.tooltip {
   stroke: black;
   stroke-opacity: 0.5;
 }
-# %%--- [javascript]
-# properties:
-#   top_hidden: true
-#   collapsed: true
-# ---%%
-colorLegend = (selection, props) => {
-  const {
-    colorScale,
-    circleRadius,
-    spacing,
-    textOffset,
-    backgroundRectWidth
-  } = props;
-
-  const backgroundRect = selection.selectAll('rect')
-    .data([null]);
-  const n = colorScale.domain().length;
-  backgroundRect.enter().append('rect')
-    .merge(backgroundRect)
-      .attr('x', -circleRadius * 2)
-      .attr('y', -circleRadius * 2)
-      .attr('rx', circleRadius * 2)
-      .attr('width', backgroundRectWidth)
-      .attr('height', spacing * n + circleRadius * 2)
-      .attr('fill', 'white')
-      .attr('opacity', 0.8);
-
-  const groups = selection.selectAll('.legend')
-    .data(colorScale.domain());
-  const groupsEnter = groups
-    .enter().append('g')
-      .attr('class', 'legend')
-      .attr('category', d => d)
-      .style("opacity", 0.8);
-  groupsEnter
-    .merge(groups)
-      .attr('transform', (d, i) =>
-        `translate(0, ${i * spacing})`
-      )
-      .attr("cursor", "pointer");
-  groups.exit().remove();
-
-  groupsEnter.append('circle')
-    .merge(groups.select('circle'))
-      .attr('r', circleRadius)
-      .attr('fill', colorScale);
-
-  groupsEnter.append('text')
-    .merge(groups.select('text'))
-      // cut off long category names
-      .text(d => d.length > 29 ? d.substr(0, 27) + '...' : d)
-      .attr('dy', '0.32em')
-      .attr('x', textOffset);
+# %% [javascript]
+var manager = {
+  initData: data,
+  currentFilters: {},
+  members: [], // list of objects that have a module and a an ignore property (explained in addMember())
+  
+  // updates all members with the new information 
+  trigger(info) {
+    // merge the filters and the new info to create a new filter object, the new info 
+    // WILL OVERWRITE whatever the old filters were at the respective property!
+    this.currentFilters = {...this.currentFilters, ...info}
+    console.log(`Number of currently filtered data points: ${filterData(this.initData, this.currentFilters).length}`)
+    console.log("trigger called. updating all plots...")
+    for (member of this.members) {
+      const filteredData = filterData(this.initData, {...this.currentFilters, ...member.ignore})
+      member.module.update(filteredData)
+    }
+    console.log("Update finished.")
+  },
+  
+  // add a module to be kept in the update loop to the members
+  // ignoreFilter is a filter entity that is overwritten when updating the given module.
+  // E.g. we dont want to lose all points outside of a state when selecting it
+  // on the map. So the manager is told to ignore that filter just for the map module
+  addMember(module, { 
+    ignoreFilter = {}
+  }) {
+    // give the module a member 'manager', so it can
+    // call module.manager.trigger(info)
+    module.manager = this
+    this.members.push({module: module, ignore: ignoreFilter});
+  }
 }
+# %% [javascript]
+manager.addMember(module, {ignoreFilter: {lor: undefined}})
 # %% [javascript]
 const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
                     "August", "September", "Oktober", "November", "Dezember"]
@@ -372,23 +424,86 @@ function makeTooltipContent(accident) {
                + graveness + "<br>";
 }
 # %% [javascript]
+// Inspired by https://observablehq.com/@tmcw/d3-scalesequential-continuous-color-legend-example
+function colorLegend(colorScale, {
+  map = undefined, 
+  selection = undefined, 
+  width = 300, 
+  height = 50,
+  margin = ({top: 40, right: 40, bottom: 30, left: 40}),
+  barHeight = 20
+}) {
+  axisScale = d3.scaleLinear()
+    .domain(colorScale.domain())
+    .range([margin.left, width - margin.right])
+  
+  axisBottom = g => g
+    .attr("class", `x-axis`)
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(axisScale)
+      .ticks(width / 50)
+      .tickSize(-barHeight))
+  //DOM.svg(width, height)
+
+  const svg = selection === undefined ? 
+    document.createElementNS('http://www.w3.org/2000/svg', 'svg') :
+    selection.append("svg").attr('transform', `translate(${300}, 20)`)
+  
+  const defs = svg.append("defs");
+  const linearGradient = defs.append("linearGradient")
+      .attr("id", "linear-gradient");
+  
+  linearGradient.selectAll("stop")
+    .data(colorScale.ticks().map((t, i, n) => ({ offset: `${100*i/n.length}%`, color: colorScale(t) })))
+    .enter().append("stop")
+    .attr("offset", d => d.offset)
+    .attr("stop-color", d => d.color);
+  
+  svg.append('g')
+    .attr("transform", `translate(0,${height - margin.bottom - barHeight})`)
+    .append("rect")
+    .attr('transform', `translate(${margin.left}, 0)`)
+	.attr("width", width - margin.right - margin.left)
+	.attr("height", barHeight)
+	.style("fill", "url(#linear-gradient)");
+  
+  svg.append('g')
+    .call(axisBottom);
+
+  if (map) map.getContainer().appendChild(selection.node())
+  
+  return svg.node();
+}
+# %% [javascript]
 function StateColors(counts) {
   counts.dummy = 0
   const c = Object.entries(counts).map(([_, count]) => count)
   const [min, max] = [Math.min(...c), Math.max(...c)]
-  const colorScale = d3.scaleSequential(d3.interpolateReds)
+  const colorScale = d3.scaleSequential(d3.interpolateReds).domain([min, max])
 
   const scaler = function(stateId) {
-    return stateId in counts ? colorScale(counts[stateId] / max) : colorScale(counts.dummy / max)
+    return stateId in counts ? colorScale(counts[stateId]) : colorScale(counts.dummy)
   }
 
-  return [scaler, [min, max]]
+  return [scaler, colorScale]
 }
+
+const markerMultiplier = 1.1 // change this to increase or decrease the marker size
+const iconSize = [38*markerMultiplier, 38*markerMultiplier]
+var blackMarkerIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/akriese/harry-plotter/anton/sprint_02/data/icons8-map-pin-100.png',
+
+    iconSize:     iconSize, // size of the icon
+    iconAnchor:   [iconSize[0] / 2, iconSize[1]], // point of the icon which will correspond to marker's location
+    popupAnchor:  [-15, -38] // point from which the popup should open relative to the iconAnchor
+});
+
 
 function LeafletAccidentMap(data, {
   topo,
   topoCoordSystem = "EPSG:32633",
   divName = "mother",
+  legendSvgName = "legendSvg",
   minZoom = 11,
   maxZoom = 19,
   states, // FeatureCollection of topojson data
@@ -416,21 +531,22 @@ function LeafletAccidentMap(data, {
     maxZoom: maxZoom,
   }).addTo(mod.map);
 
+  L.control.scale().addTo(mod.map);
+
+  // A dummy state we need for when no state is focussed, needs to implement unfocus to prevent error
+  mod.dummyState = { unfocus: function() {} }
+  mod.currentlyFocusedState = mod.dummyState
+
   // zoom out to see whole city
-  mod.resetView = function() {
+  mod.resetView = function(e) {
     this.map.fitBounds(this.initBounds)
-    this.unfocusState(this.currentlyFocusedState)
-    this.currentlyFocusedState = undefined
+    this.currentlyFocusedState.unfocus()
+    this.currentlyFocusedState = this.dummyState
+    if (mod.manager !== undefined) mod.manager.trigger({ lor: undefined })
+    L.DomEvent.stopPropagation(e); // dont propagate click to map, otherwise mod.resetView() is called
   }
 
-  // reset border stroke when unfocussing a state
-  mod.unfocusState = function(s) {
-    if (s === undefined) return
-    const res = this.states.find(p => stateTitle(p) === s)
-    if (res !== undefined) res.setStyle({ weight: stateStrokeInactive })
-  }
-
-  mod.map.on("click", _event => mod.resetView())
+  mod.map.on("click", event => mod.resetView(event))
 
   // create the LOR polygons and give them click behavior
   mod.states = states.features.map(f => {
@@ -440,23 +556,29 @@ function LeafletAccidentMap(data, {
     // change stroke when focussing state
     polygon.focus = function(e) {
       mod.map.fitBounds(this.getBounds())
-      mod.unfocusState(mod.currentlyFocusedState)
-      mod.currentlyFocusedState = stateTitle(f)
+      mod.currentlyFocusedState.unfocus()
+      mod.currentlyFocusedState = this
       this.setStyle({ weight: stateStrokeClicked })
+      if (mod.manager !== undefined) mod.manager.trigger({ lor: stateId(this) })
       L.DomEvent.stopPropagation(e); // dont propagate click to map, otherwise mod.resetView() is called
     }
 
+    // reset border stroke when unfocussing a state
+    polygon.unfocus = function() {
+      this.setStyle({ weight: stateStrokeInactive })
+    }
+
     polygon.isFocused = function() {
-      return mod.currentlyFocusedState === stateTitle(f)
+      return mod.currentlyFocusedState === this
     }
 
     // ATTENTION: dblclick might also fire click twice, so dont do anything with different side effects in click!
     polygon
-      .on("click", event => polygon.isFocused() ? mod.resetView() : polygon.focus(event))
-      //.on("dblclick", _event => mod.resetView())
+      .on("click", event => polygon.isFocused() ? mod.resetView(event) : polygon.focus(event))
+      //.on("dblclick", () => mod.resetView())
       // these functions implement the highlighting of states that are currently hovered over
-      .on("mouseover", event => polygon.isFocused() ? {} : polygon.setStyle({ weight: stateStrokeHover }))
-      .on("mouseout", event => polygon.isFocused() ? {} : polygon.setStyle({ weight: stateStrokeInactive }))
+      .on("mouseover", () => polygon.isFocused() ? {} : polygon.setStyle({ weight: stateStrokeHover }))
+      .on("mouseout", () => polygon.isFocused() ? {} : polygon.setStyle({ weight: stateStrokeInactive }))
       .addTo(mod.map)
 
     polygon.properties = f.properties
@@ -466,14 +588,21 @@ function LeafletAccidentMap(data, {
   mod.update = function(data) {
     // update polygon colors
     const counts = stateCount(data)
-    const [colorScale, range] = StateColors(counts)
+    const [scaler, colorScale] = StateColors(counts)
+    mod.colorScale = colorScale
     this.states.forEach(p => {
       const id = stateId(p)
-      p.setStyle({fillColor: colorScale(id)})
+      p.setStyle({fillColor: scaler(id)})
       p.bindTooltip(`${stateTitle(p)} (${counts[id]} Unfälle)`) // TODO: maybe handle case count == 1?
     })
 
-    // TODO: when we get a color legend, update that too
+    // update color legend (by replacing it completely)
+    const selection = d3.select(`#${legendSvgName}`)
+    // remove old legend if it is available
+    const oldLegend = selection.node().lastElementChild
+    if (oldLegend !== null) oldLegend.remove()
+    // draw new legend
+    colorLegend(mod.colorScale, { selection: selection, map: mod.map })
 
     // remove marker cluster layer if existent
     if (this.markersCluster !== undefined) {
@@ -486,7 +615,7 @@ function LeafletAccidentMap(data, {
 
     data.forEach(d => {
       const dot = L
-        .marker(dotCoords(d).reverse())
+        .marker(dotCoords(d).reverse(), {icon: blackMarkerIcon})
         .bindTooltip(tooltipContent(d))
       this.markersCluster.addLayer(dot)
     })
@@ -494,6 +623,17 @@ function LeafletAccidentMap(data, {
     this.map.addLayer(this.markersCluster);
     return this
   }
+
+  // change polygon color scale on zoom
+  mod.map.on('zoomend', () => {
+    var zoom = mod.map.getZoom();
+    const minOpacity = 0.01 // zoom == maxZoom => opacity = minOpacity
+    const maxOpacity = 0.8 // zoom == minZoom => opacity = maxOpacity
+    const multiplier = (maxZoom - zoom) / (maxZoom - minZoom) // number between 0 and 1; zoom normalized
+    // do a cubic descent of opacity to see the underlying map earlier
+    const newOpacity = (maxOpacity - minOpacity) * Math.pow(multiplier, 3) + minOpacity
+    mod.states.forEach((s) => s.setStyle({ fillOpacity: newOpacity }))
+  });
 
   mod.update(data)
 
