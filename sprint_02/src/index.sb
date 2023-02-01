@@ -396,8 +396,6 @@ var manager = {
   }
 }
 # %% [javascript]
-manager.addMember(module, {ignoreFilter: {lor: undefined}})
-# %% [javascript]
 const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
                     "August", "September", "Oktober", "November", "Dezember"]
 const dayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
@@ -639,9 +637,11 @@ function LeafletAccidentMap(data, {
 // Uncomment and execute to be able to reload the map
 //module.map.remove()
 # %% [javascript]
-var module = LeafletAccidentMap(data, {
+var mapModule = LeafletAccidentMap(data, {
   topo: berlin_lor_topo,
   states: LorWGS,
+  divName: "map",
+  legendSvgName: "legend",
   dotCoords: d => ([d.XGCSWGS84, d.YGCSWGS84]),
   tooltipContent: acc => makeTooltipContent(acc),
   stateTitle: f => f.properties.BZR_NAME,
@@ -649,8 +649,7 @@ var module = LeafletAccidentMap(data, {
   stateId: p => parseInt(p.properties.BZR_ID),
 })
 
-// try out update, only show weekend accidents
-//module.update(filterData(data, { days: [1,7] }))
+manager.addMember(mapModule, {ignoreFilter: {lor: undefined}})
 # %% [javascript]
 function removeAllChildren(name) {
   const div = document.getElementById(name);
@@ -707,8 +706,9 @@ function BarChart(data, {
   color = "currentColor", // bar fill color
   titleColor = "black", // title fill color when atop bar
   titleAltColor = "currentColor", // title fill color when atop background
+  divName,
 } = {}) {
-
+  removeAllChildren(divName);
   data = get_data_object_bar_chart(data, getInvolvedNumbers);
   data.map(get_substring)  
   // Compute values.
@@ -736,7 +736,7 @@ function BarChart(data, {
   const mod = {yScale: yScale, yDomain: yDomain, heigth: height, yRange: yRange, col: col, xScale: xScale};
   
   // Compute titles.
- if (title === undefined) {
+  if (title === undefined) {
     const formatValue = yScale.tickFormat(100, yFormat);
     title = i => `${formatValue(Y[i])}`;
   } else {
@@ -745,7 +745,7 @@ function BarChart(data, {
     title = i => T(O[i], i, data);
   }
 
-  const svg = d3.select("#test").append("svg")
+  const svg = d3.select(`#${divName}`).append("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", [0, 0, width, height])
@@ -861,19 +861,19 @@ svg.append("g")
 }
 # %% [html]
 <div id="test"></div>
-
 # %% [javascript]
-removeAllChildren("test");
-module = BarChart(data, {
+//
+var moduleInvolvedChart = BarChart(data, {
   x: d => d.category, // x=> xScale(X[i])). axis -> category
   y: d => d.count, // counts
   yLabel: "↑ Anzahl",
   width: 400,
   height: 200, // think about deceptive design
+  divName: "involvedDiagramm",
   //title: "Anzahl der Unfälle per Beteiligte",
 })
-# %% [javascript]
-module.update(filterData(data, { graveness: 2 }))
+
+manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }})
 # %% [markdown]
 ## sorted horizontal bar chart graveness
 # %% [javascript]
@@ -899,6 +899,7 @@ function BarChartH(data, {
   color = "currentColor", // bar fill color
   titleColor = "black", // title fill color when atop bar
   titleAltColor = "currentColor", // title fill color when atop background
+  divName,
 } = {}) {
 
   // get correct data format
@@ -942,7 +943,7 @@ function BarChartH(data, {
     title = i => T(O[i], i, data);
   }
 
-  const svg = d3.select("#test_horizontal").append("svg")
+  const svg = d3.select(`#${divName}`).append("svg")
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", [0, 0, width, height])
@@ -1059,19 +1060,19 @@ function BarChartH(data, {
 # %% [html]
 <div id="test_horizontal"></div>
 # %% [javascript]
-removeAllChildren("test_horizontal");
-modu = BarChartH(data, {
+//removeAllChildren("test_horizontal");
+var moduleGravenessChart = BarChartH(data, {
   x: d => d.count, // x axis -> counts
   y: d => d.category, // y-axis -> counts
   xLabel: "Anzahl →",
   width: 400,
   height: 200, // think about deceptive design
   marginLeft: 80,
+  divName: "gravenessDiagramm",
   //title: "Gesamtanzahl der Unfälle per Beteiligte",
 })
-# %% [javascript]
 
-modu.update(filterData(data, { graveness: 3}))
+manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }})
 # %% [markdown]
 ## Violin plot for amount of crash per days and hour
 
