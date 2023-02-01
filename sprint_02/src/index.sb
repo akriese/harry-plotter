@@ -400,6 +400,8 @@ var manager = {
   }
 }
 # %% [javascript]
+manager.addMember(module, {ignoreFilter: {lor: undefined}})
+# %% [javascript]
 const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
                     "August", "September", "Oktober", "November", "Dezember"]
 const dayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
@@ -540,6 +542,7 @@ function LeafletAccidentMap(data, {
     this.map.fitBounds(this.initBounds)
     this.currentlyFocusedState.unfocus()
     this.currentlyFocusedState = this.dummyState
+    if (mod.manager !== undefined) mod.manager.trigger({ lor: undefined })
     L.DomEvent.stopPropagation(e); // dont propagate click to map, otherwise mod.resetView() is called
   }
 
@@ -556,6 +559,7 @@ function LeafletAccidentMap(data, {
       mod.currentlyFocusedState.unfocus()
       mod.currentlyFocusedState = this
       this.setStyle({ weight: stateStrokeClicked })
+      if (mod.manager !== undefined) mod.manager.trigger({ lor: stateId(this) })
       L.DomEvent.stopPropagation(e); // dont propagate click to map, otherwise mod.resetView() is called
     }
 
