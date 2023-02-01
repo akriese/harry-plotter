@@ -233,6 +233,7 @@ var projection = d3.geoIdentity()
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
   <div id=mother></div>
+  <svg id=legendSvg></svg>
 </body>
 # %%--- [css]
 # properties:
@@ -251,7 +252,19 @@ body {
 
 #mother {
   height: 850px;
-  width: 1000px
+  width: 1000px;
+}
+
+#legendSvg {
+  position: absolute;
+  height: 60px;
+  width: 300px;
+  top: 35px;
+  left: 700px;
+  /* Let mouse events go through to reach the map underneath */
+  pointer-events: none;
+  /* Make sure to be above the map pane (.leaflet-pane) */
+  z-index: 450;
 }
 
 /*
@@ -376,6 +389,56 @@ function makeTooltipContent(accident) {
                + dateTime + "<br>"
                + persons + "<br>"
                + graveness + "<br>";
+}
+# %% [javascript]
+function colorLegend(colorScale, {
+  map = undefined, 
+  selection = undefined, 
+  width = 300, 
+  height = 50,
+  margin = ({top: 40, right: 40, bottom: 30, left: 40}),
+  barHeight = 20
+}) {
+  axisScale = d3.scaleLinear()
+    .domain(colorScale.domain())
+    .range([margin.left, width - margin.right])
+  
+  axisBottom = g => g
+    .attr("class", `x-axis`)
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(axisScale)
+      .ticks(width / 50)
+      .tickSize(-barHeight))
+  //DOM.svg(width, height)
+
+  const svg = selection === undefined ? 
+    document.createElementNS('http://www.w3.org/2000/svg', 'svg') :
+    selection.append("svg").attr('transform', `translate(${300}, 20)`)
+  
+  const defs = svg.append("defs");
+  const linearGradient = defs.append("linearGradient")
+      .attr("id", "linear-gradient");
+  
+  linearGradient.selectAll("stop")
+    .data(colorScale.ticks().map((t, i, n) => ({ offset: `${100*i/n.length}%`, color: colorScale(t) })))
+    .enter().append("stop")
+    .attr("offset", d => d.offset)
+    .attr("stop-color", d => d.color);
+  
+  svg.append('g')
+    .attr("transform", `translate(0,${height - margin.bottom - barHeight})`)
+    .append("rect")
+    .attr('transform', `translate(${margin.left}, 0)`)
+	.attr("width", width - margin.right - margin.left)
+	.attr("height", barHeight)
+	.style("fill", "url(#linear-gradient)");
+  
+  svg.append('g')
+    .call(axisBottom);
+
+  if (map) map.getContainer().appendChild(selection.node())
+  
+  return svg.node();
 }
 # %% [javascript]
 function StateColors(counts) {
