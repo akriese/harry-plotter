@@ -464,10 +464,12 @@ var blackMarkerIcon = L.icon({
     popupAnchor:  [-15, -38] // point from which the popup should open relative to the iconAnchor
 });
 
+
 function LeafletAccidentMap(data, {
   topo,
   topoCoordSystem = "EPSG:32633",
   divName = "mother",
+  legendSvgName = "legendSvg",
   minZoom = 11,
   maxZoom = 19,
   states, // FeatureCollection of topojson data
@@ -557,7 +559,13 @@ function LeafletAccidentMap(data, {
       p.bindTooltip(`${stateTitle(p)} (${counts[id]} Unfälle)`) // TODO: maybe handle case count == 1?
     })
 
-    // TODO: when we get a color legend, update that too
+    // update color legend (by replacing it completely)
+    const selection = d3.select(`#${legendSvgName}`)
+    // remove old legend if it is available
+    const oldLegend = selection.node().lastElementChild
+    if (oldLegend !== null) oldLegend.remove()
+    // draw new legend
+    colorLegend(mod.colorScale, { selection: selection, map: mod.map })
 
     // remove marker cluster layer if existent
     if (this.markersCluster !== undefined) {
