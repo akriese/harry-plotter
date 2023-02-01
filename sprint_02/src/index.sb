@@ -187,6 +187,7 @@ statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b
 <div id="content"></div>
 # %% [css]
 
+
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
@@ -657,20 +658,26 @@ console.log(chart);
 # %% [markdown]
 ### Sorted Bar chart category
 # %% [javascript]
-module.update(filterData(data, { graveness: 1 }))
-# %% [html]
-<div id="test"></div>
+// helper functions to model data as needed
+function get_data_object_bar_chart(data, number_fct) {
+  categorys_counts = number_fct(data);
+  entries = Object.entries(categorys_counts)
+  let data_entry = entries.map(([key, val] = entry) => {
+  		return {category: key, count: val};
+	});
+  return data_entry
+}
 
-# %% [javascript]
-removeAllChildren("test");
-module = BarChart(data, {
-  x: d => d.category, // x=> xScale(X[i])). axis -> category
-  y: d => d.count, // counts
-  yLabel: "↑ Anzahl",
-  width: 400,
-  height: 200, // think about deceptive design
-  //title: "Anzahl der Unfälle per Beteiligte",
-})
+// returns category without "Ist"
+function get_substring(data_dict){
+  data_dict.category = data_dict.category.substring(3);
+}
+
+// returns category with its meaning
+function get_meaning(data_dict){
+  cat_graveness_dict = {1: "Tote", 2: "Schwerverletzte", 3: "Leichtverletzte"};
+  data_dict.category = cat_graveness_dict[data_dict.category];
+}
 # %% [javascript]
 // Copyright 2021 Observable, Inc.
 // Released under the ISC license.
@@ -679,7 +686,7 @@ function BarChart(data, {
   x = (d, i) => i, // given d in data, returns the (ordinal) x-value
   y = d => d, // given d in data, returns the (quantitative) y-value
   title, // given d in data, returns the title text
-  marginTop = 20, // the top margin, in pixels
+  marginTop = 60, // the top margin, in pixels
   marginRight = 0, // the right margin, in pixels
   marginBottom = 30, // the bottom margin, in pixels
   marginLeft = 40, // the left margin, in pixels
@@ -726,7 +733,7 @@ function BarChart(data, {
   // Compute titles.
  if (title === undefined) {
     const formatValue = yScale.tickFormat(100, yFormat);
-    title = i => `${X[i]}\n${formatValue(Y[i])}`;
+    title = i => `${formatValue(Y[i])}`;
   } else {
     const O = d3.map(data, d => d);
     const T = title;
@@ -739,6 +746,15 @@ function BarChart(data, {
     .attr("viewBox", [0, 0, width, height])
     .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
+  //title
+  svg.append("text")
+  	  .attr("x", (width / 2 + 30))             
+      .attr("y", 30 )
+      .attr("text-anchor", "middle")
+      .attr("font-family", "sans-serif")
+      .style("font-size", "13px") 
+      .text("Anzahl der Unfälle pro Beteiligte");
+
  const yAxe = svg.append("g")
       .attr("transform", `translate(${marginLeft},0)`)
 	  .call(yAxis)
@@ -748,7 +764,7 @@ function BarChart(data, {
           .attr("stroke-opacity", 0.1))
       .call(g => g.append("text")
           .attr("x", -marginLeft)
-          .attr("y", 10)
+          .attr("y", 50)
           .attr("fill", "currentColor")
           .attr("text-anchor", "start")
           .text(yLabel));
@@ -766,7 +782,7 @@ function BarChart(data, {
   if (title) bar.append("title")
       .text(title);
 
-svg.append("g")
+const bartext = svg.append("g")
       .attr("fill", "currentColor")
       .attr("text-anchor", "end")
       .attr("font-family", "sans-serif")
@@ -774,8 +790,8 @@ svg.append("g")
     .selectAll("text")
     .data(I)
     .join("text")
-      .attr("y", i => yScale(Y[i]))
-      .attr("x", i => xScale(X[i]) + xScale.bandwidth() / 2 + 6)
+      .attr("y", i => yScale(Y[i]) - 7)
+      .attr("x", i => xScale(X[i]) + xScale.bandwidth() / 3)
       .attr("dy", "0.35em")
       .attr("dx", -4)
       .text(title)
@@ -806,63 +822,55 @@ svg.append("g")
           .attr("stroke-opacity", 0.1))
       .call(g => g.append("text")
           .attr("x", -marginLeft)
-          .attr("y", 10)
+          .attr("y", 50)
           .attr("fill", "currentColor")
           .attr("text-anchor", "start")
           .text(yLabel));
+
+    // update bar height
 	bar.transition().duration(500).attr("y", i => yScale(Y[i])).attr("height", i => yScale(0) - yScale(Y[i]))
+
+    // update text height
+    bartext.transition().duration(500).attr("y", i => yScale(Y[i]) - 7)
+
+    const formatValue = yScale.tickFormat(100, yFormat);
+    title = i => `${formatValue(Y[i])}`;
+    
+    bartext.data(I)
+    .join("text")
+      .attr("y", i => yScale(Y[i]) - 7)
+      .attr("x", i => xScale(X[i]) + xScale.bandwidth() / 3)
+      .attr("dy", "0.35em")
+      .attr("dx", -4)
+      .text(title)
+      .call(text=> text.filter(i => yScale(Y[i]) - yScale(0) < 20) // short bars
+          .attr("dy", +4)
+          .attr("fill", titleAltColor)
+          .attr("text-anchor", "start"));
+    
     
     return this
   }
   
   return mod;
 }
-# %% [javascript]
-// helper functions to model data as needed
-function get_data_object_bar_chart(data, number_fct) {
-  categorys_counts = number_fct(data);
-  entries = Object.entries(categorys_counts)
-  let data_entry = entries.map(([key, val] = entry) => {
-  		return {category: key, count: val};
-	});
-  return data_entry
-}
-
-// returns category without "Ist"
-function get_substring(data_dict){
-  data_dict.category = data_dict.category.substring(3);
-}
-
-// returns category with its meaning
-function get_meaning(data_dict){
-  cat_graveness_dict = {1: "Tote", 2: "Schwerverletzte", 3: "Leichtverletzte"};
-  data_dict.category = cat_graveness_dict[data_dict.category];
-}
-# %% [javascript]
-bar_data = get_data_object_bar_chart(data, getInvolvedNumbers);
-bar_data.map(get_substring)
-bar_data
-# %% [markdown]
-## sorted horizontal bar chart graveness
 # %% [html]
-<div id="test_horizontal"></div>
+<div id="test"></div>
+
 # %% [javascript]
-removeAllChildren("test_horizontal");
-chart = BarChartH(bar_data_horizontal, {
-  x: d => d.count, // x axis -> counts
-  y: d => d.category, // y-axis -> counts
-  yDomain: d3.groupSort(bar_data_horizontal, ([d]) => d.count, d => d.category), // sort by descending frequency
-  xLabel: "Anzahl →",
+removeAllChildren("test");
+module = BarChart(data, {
+  x: d => d.category, // x=> xScale(X[i])). axis -> category
+  y: d => d.count, // counts
+  yLabel: "↑ Anzahl",
   width: 400,
   height: 200, // think about deceptive design
-  marginLeft: 80,
-  //title: "Gesamtanzahl der Unfälle per Beteiligte",
+  //title: "Anzahl der Unfälle per Beteiligte",
 })
 # %% [javascript]
-cat_graveness_dict = {1: "Unfall mit Getöteten", 2: "Unfall mit Schwerverletzten", 3: "Unfall mit Leichtverletzten"};
-bar_data_horizontal = get_data_object_bar_chart(data, countGraveness);
-bar_data_horizontal.map(get_meaning)
-bar_data_horizontal
+module.update(filterData(data, { graveness: 2 }))
+# %% [markdown]
+## sorted horizontal bar chart graveness
 # %% [javascript]
 // Copyright 2021 Observable, Inc.
 // Released under the ISC license.
@@ -871,24 +879,30 @@ function BarChartH(data, {
   x = d => d, // given d in data, returns the (quantitative) x-value
   y = (d, i) => i, // given d in data, returns the (ordinal) y-value
   title, // given d in data, returns the title text
-  marginTop = 30, // the top margin, in pixels
-  marginRight = 0, // the right margin, in pixels
+  marginTop = 80, // the top margin, in pixels
+  marginRight = 30, // the right margin, in pixels
   marginBottom = 10, // the bottom margin, in pixels
   marginLeft = 50, // the left margin, in pixels
   width = 640, // the outer width of the chart, in pixels
   height, // outer height, in pixels
-  xType = d3.scaleLinear, // type of x-scale
   xDomain, // [xmin, xmax]
   xRange = [marginLeft, width - marginRight], // [left, right]
   xFormat, // a format specifier string for the x-axis
   xLabel, // a label for the x-axis
   yPadding = 0.1, // amount of y-range to reserve to separate bars
-  yDomain, // an array of (ordinal) y-values
   yRange, // [top, bottom]
   color = "currentColor", // bar fill color
-  titleColor = "white", // title fill color when atop bar
+  titleColor = "black", // title fill color when atop bar
   titleAltColor = "currentColor", // title fill color when atop background
 } = {}) {
+
+  // get correct data format
+  const cat_graveness_dict = {1: "Unfall mit Getöteten", 2: "Unfall mit Schwerverletzten", 3: "Unfall mit Leichtverletzten"};
+  data = get_data_object_bar_chart(data, countGraveness);
+  data.map(get_meaning)
+
+  var yDomain = d3.groupSort(data, ([d]) => d.count, d => d.category); // sort by descending frequency
+  
   // Compute values.
   const X = d3.map(data, x);
   const Y = d3.map(data, y);
@@ -906,7 +920,7 @@ function BarChartH(data, {
   if (yRange === undefined) yRange = [marginTop, height - marginBottom];
 
   // Construct scales and axes.
-  const xScale = xType(xDomain, xRange);
+  const xScale = d3.scaleLinear(xDomain, xRange);
   const yScale = d3.scaleBand(yDomain, yRange).padding(yPadding);
   const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
   const yAxis = d3.axisLeft(yScale).tickSizeOuter(0);
@@ -929,7 +943,16 @@ function BarChartH(data, {
       .attr("viewBox", [0, 0, width, height])
       .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
-  svg.append("g")
+  //title
+  svg.append("text")
+  	  .attr("x", (width / 2 + 30))             
+      .attr("y", 30 )
+      .attr("text-anchor", "middle")
+      .attr("font-family", "sans-serif")
+      .style("font-size", "13px") 
+      .text("Anzahl der Unfälle pro Schweregrad");
+
+  const xAxe = svg.append("g")
       .attr("transform", `translate(0,${marginTop})`)
       .call(xAxis)
       .call(g => g.select(".domain").remove())
@@ -943,7 +966,7 @@ function BarChartH(data, {
           .attr("text-anchor", "end")
           .text(xLabel));
 
-  svg.append("g") 
+  const bar = svg.append("g") 
     .selectAll("rect")
     .data(I)
     .join("rect")
@@ -953,7 +976,8 @@ function BarChartH(data, {
       .attr("height", yScale.bandwidth())
       .attr("fill", i => col[i]);
 
- svg.append("g")
+  
+ const bar_title = svg.append("g")
       .attr("fill", titleColor)
       .attr("text-anchor", "end")
       .attr("font-family", "sans-serif")
@@ -964,9 +988,9 @@ function BarChartH(data, {
       .attr("x", i => xScale(X[i]))
       .attr("y", i => yScale(Y[i]) + yScale.bandwidth() / 2)
       .attr("dy", "0.35em")
-      .attr("dx", -4)
+      .attr("dx", +30)
       .text(title)
-      .call(text => text.filter(i => xScale(X[i]) - xScale(0) < 20) // short bars
+      .call(text => text.filter(i => xScale(X[i]) - xScale(0) < 0) // short bars
           .attr("dx", +4)
           .attr("fill", titleAltColor)
           .attr("text-anchor", "start"));
@@ -974,9 +998,75 @@ function BarChartH(data, {
   svg.append("g")
       .attr("transform", `translate(${marginLeft},0)`)
       .call(yAxis);
+  mod = {};
+  mod.update = function(data) {
+    
+   data = get_data_object_bar_chart(data, countGraveness);
+   data.map(get_meaning)
+    
+    // update bar heigth
+  	const X = d3.map(data, x);
+    xDomain = [0, d3.max(X)]	
+    const xScale =  d3.scaleLinear(xDomain, xRange);
 
-  return svg.node();
+  	const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
+    
+    xAxe.call(xAxis)
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick line").clone()
+          .attr("y2", height - marginTop - marginBottom)
+          .attr("stroke-opacity", 0.1))
+      .call(g => g.append("text")
+          .attr("x", width - marginRight)
+          .attr("y", -22)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "end")
+          .text(xLabel));
+    
+	bar.transition().duration(500)
+      .attr("x", xScale(0))
+      .attr("width", i => xScale(X[i]) - xScale(0));
+
+  	bar_title.transition().duration(500)
+      .attr("x", i => xScale(X[i]))
+    
+  const formatValue = xScale.tickFormat(100, xFormat);
+  title = i => `${formatValue(X[i])}`;
+    
+  bar_title
+    .data(I)
+    .join("text")
+      .attr("x", i => xScale(X[i]))
+      .attr("y", i => yScale(Y[i]) + yScale.bandwidth() / 2)
+      .attr("dy", "0.35em")
+      .attr("dx", +30)
+      .text(title)
+      .call(text => text.filter(i => xScale(X[i]) - xScale(0) < 0) // short bars
+          .attr("dx", +4)
+          .attr("fill", titleAltColor)
+          .attr("text-anchor", "start"));
+    
+    return this
+  }
+
+  return mod;
 }
+# %% [html]
+<div id="test_horizontal"></div>
+# %% [javascript]
+removeAllChildren("test_horizontal");
+modu = BarChartH(data, {
+  x: d => d.count, // x axis -> counts
+  y: d => d.category, // y-axis -> counts
+  xLabel: "Anzahl →",
+  width: 400,
+  height: 200, // think about deceptive design
+  marginLeft: 80,
+  //title: "Gesamtanzahl der Unfälle per Beteiligte",
+})
+# %% [javascript]
+
+modu.update(filterData(data, { graveness: 3}))
 # %% [markdown]
 ## Violin plot for amount of crash per days and hour
 
@@ -999,18 +1089,13 @@ function swap_days_to_starting_at_monday(data){
   });
   return data;
 }
-# %% [html]
-<div id="test_violin"></div>
-# %% [javascript]
-removeAllChildren("test_violin");
-RaincloudPlot(data)
 # %% [javascript]
 function RaincloudPlot(data) {
 // Build and Show the Y scale
 
 // set the dimensions and margins of the graph
-var margin = {top: 20, right: 30, bottom: 10, left: 110},
-    width = 1000 - margin.left - margin.right,
+var margin = {top: 20, right: 40, bottom: 10, left: 300},
+    width = 1100 - margin.left - margin.right,
     height = 750; // - margin.top - margin.bottom;
 
 var x = d3.scaleLinear()
@@ -1068,7 +1153,7 @@ const svg = d3.select("#test_violin")
   .append("svg")
     .attr("width", width)// + margin.left + margin.right)
     .attr("height", height)// + margin.top + margin.bottom)
-  	.attr("viewBox", [-80, 0, width + 200, height + 30])
+  	.attr("viewBox", [-120, 0, width + 200, height + 30])
     .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
   
 svg.append("g")
@@ -1076,20 +1161,22 @@ svg.append("g")
 
 // add x-axis
 svg.append("g")	
-  .attr("transform", "translate(0," + height + ")") 
-  .call(d3.axisBottom(x))
+  .attr("transform", "translate(0," + height + ")")
+  .call(d3.axisBottom(x)).selectAll("text").attr("font-size", 17).style("fill", "grey")
 
 // add x-label 
 svg.append("text")
       .attr("text-anchor", "end")
-      .attr("x", width + 80)
-      .attr("y", height + 5)
+      .attr("x", width/2 + 50)
+      .attr("y", height + 50)
+  	  .attr("font-size", 20)
   	  .style("fill", "grey")
       .text("Uhrzeit →");
 
 // add Days to yaxis 
 svg.append("g")
   .call(d3.axisLeft(yName).tickSize(0))
+  .selectAll("text").attr("font-size", 20).style("fill", "grey")
   .select(".domain").remove()
 
 // Add the shape to this svg!
@@ -1112,3 +1199,8 @@ svg.append("g")
 
   return svg.node();
 }
+# %% [html]
+<div id="test_violin"></div>
+# %% [javascript]
+removeAllChildren("test_violin");
+RaincloudPlot(data)
