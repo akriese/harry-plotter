@@ -82,12 +82,11 @@ function countAccidentTypes(data) {
   return countCategoryOccurences(data, "UTYP1", [1, 2, 3, 4, 5, 6, 7])
 }
 
-// we have to cut off the last two digits of each number, as we want the "Bezirksregionen"
-// from https://www.statistik-berlin-brandenburg.de/raumbezuege#:~:text=Neue%20LOR%2DSystematik%20seit%202021
+// count the occurences of LOR in the given data, return the lor ids and their counts as an Object
 function countPerLOR(data) {
   var counts = {}
   data.forEach(d => {
-    const lor = Math.floor(d.LOR_ab_2021 / 100)
+    const lor = d.lor
     if (lor in counts) {
       counts[lor] += 1
     } else {
