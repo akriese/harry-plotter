@@ -385,6 +385,16 @@ function StateColors(counts) {
   return [scaler, [min, max]]
 }
 
+const markerMultiplier = 1.1 // change this to increase or decrease the marker size
+const iconSize = [38*markerMultiplier, 38*markerMultiplier]
+var blackMarkerIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/akriese/harry-plotter/anton/sprint_02/data/icons8-map-pin-100.png',
+
+    iconSize:     iconSize, // size of the icon
+    iconAnchor:   [iconSize[0] / 2, iconSize[1]], // point of the icon which will correspond to marker's location
+    popupAnchor:  [-15, -38] // point from which the popup should open relative to the iconAnchor
+});
+
 function LeafletAccidentMap(data, {
   topo,
   topoCoordSystem = "EPSG:32633",
@@ -490,7 +500,7 @@ function LeafletAccidentMap(data, {
 
     data.forEach(d => {
       const dot = L
-        .marker(dotCoords(d).reverse())
+        .marker(dotCoords(d).reverse(), {icon: blackMarkerIcon})
         .bindTooltip(tooltipContent(d))
       this.markersCluster.addLayer(dot)
     })
