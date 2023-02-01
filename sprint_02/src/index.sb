@@ -503,13 +503,14 @@ function LeafletAccidentMap(data, {
   mod.currentlyFocusedState = mod.dummyState
 
   // zoom out to see whole city
-  mod.resetView = function() {
+  mod.resetView = function(e) {
     this.map.fitBounds(this.initBounds)
     this.currentlyFocusedState.unfocus()
     this.currentlyFocusedState = this.dummyState
+    L.DomEvent.stopPropagation(e); // dont propagate click to map, otherwise mod.resetView() is called
   }
 
-  mod.map.on("click", () => mod.resetView())
+  mod.map.on("click", event => mod.resetView(event))
 
   // create the LOR polygons and give them click behavior
   mod.states = states.features.map(f => {
@@ -536,7 +537,7 @@ function LeafletAccidentMap(data, {
 
     // ATTENTION: dblclick might also fire click twice, so dont do anything with different side effects in click!
     polygon
-      .on("click", event => polygon.isFocused() ? mod.resetView() : polygon.focus(event))
+      .on("click", event => polygon.isFocused() ? mod.resetView(event) : polygon.focus(event))
       //.on("dblclick", () => mod.resetView())
       // these functions implement the highlighting of states that are currently hovered over
       .on("mouseover", () => polygon.isFocused() ? {} : polygon.setStyle({ weight: stateStrokeHover }))
