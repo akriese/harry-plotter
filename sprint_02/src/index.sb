@@ -271,17 +271,23 @@ body {
   text-decoration: underline;
 }
 
-div.tooltip {
-  position: absolute;
-  text-align: center;
-  width: fit-content;
-  height: fit-content;
-  padding: 2px;
-  font: 12px sans-serif;
-  background: lightsteelblue;
-  border: 0px;
-  border-radius: 8px;
-  pointer-events: none;
+.marker-cluster-large div {
+  background-color: rgba(255, 0, 0, 0.8)
+}
+.marker-cluster-large  {
+  background-color: rgba(255, 0, 0, 0.2)
+}
+.marker-cluster-medium div {
+  background-color: rgba(255, 173, 0, 0.8)
+}
+.marker-cluster-medium  {
+  background-color: rgba(255, 173, 0, 0.2)
+}
+.marker-cluster-small div {
+  background-color: rgba(247, 255, 0, 0.8)
+}
+.marker-cluster-small  {
+  background-color: rgba(247, 255, 0, 0.2)
 }
 
 /* Style of category legend text and circles */
