@@ -228,6 +228,56 @@ var projection = d3.geoIdentity()
 // For trying out different filters
 //module.update(filterData(data, { graveness: 2 }))
 # %% [html]
+<body>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+  <h1 style="text-align:center">TITEL</h1>
+  <div id=main>
+      <div id=map><h1>MAP</h1><svg id=legend></svg></div>
+      <div id=right>
+        <div id=infoText><h1>INFO</h1></div>
+        <div id=gravenessDiagramm><h1>GRAVENESS</h1></div>
+        <div id=involvedDiagramm><h1>Beteiligte</h1></div>
+      </div>
+  </div>
+  <h3>QUELLE</h3>
+</body>
+# %%--- [css]
+# properties:
+#   top_hidden: true
+# ---%%
+#main {
+  height: 850px;
+  width: 1600px;
+  display: flex;
+}
+
+#map {
+  background-color: brown;
+  width: 70%;
+}
+
+#right {
+  background-color: coral;
+  width: 30%
+}
+
+#infoText {
+  height: 20%; 
+  background-color: white;
+}
+
+#gravenessDiagramm {
+  background-color: red;
+  height: 40%;
+}
+
+#involvedDiagramm {
+  background-color: yellow;
+  height: 40%;
+}
+
+# %% [html]
 <!-- Main div for the map svg -->
 <div id="content"></div>
 
