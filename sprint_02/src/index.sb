@@ -422,6 +422,7 @@ function makeTooltipContent(accident) {
                + graveness + "<br>";
 }
 # %% [javascript]
+// Inspired by https://observablehq.com/@tmcw/d3-scalesequential-continuous-color-legend-example
 function colorLegend(colorScale, {
   map = undefined, 
   selection = undefined, 
