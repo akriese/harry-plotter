@@ -32,23 +32,26 @@ function from32to33(coords) {
   return proj4("EPSG:32632", "EPSG:32633", coords)
 }
 
-// ... and assign each data point a new parameter 'coords' holding x AND y value
-// these coordinates now match the coordinates that are used by the topojson file :)
-for (i in data) {
-  data[i].coords = from32to33([data[i].LINREFX, data[i].LINREFY])
-}
-# %% [javascript]
-// Precompute list of involved per accident
-for (i in data) {
+
+// Some added properties for each data point
+data.forEach(d => {
+  // Assign each data point a new parameter 'coords' holding x AND y value
+  // these coordinates now match the coordinates that are used by the topojson file :)
+  d.coords = from32to33([d.LINREFX, d.LINREFY]);
+  
+  // we have to cut off the last two digits of each number, as we want the "Bezirksregionen"
+  // from https://www.statistik-berlin-brandenburg.de/raumbezuege#:~:text=Neue%20LOR%2DSystematik%20seit%202021
+  d.lor = Math.floor(d.LOR_ab_2021 / 100);
+
+  // Precompute list of involved per accident
   var arr = []
-  for (const [key, value] of Object.entries(data[i])) {
+  for (const [key, value] of Object.entries(d)) {
     if (key.startsWith("Ist") && value === true) {
       arr.push(key.replace("Ist", ""))
     }
   }
-  data[i].Beteiligte = arr
-}
-
+  d.Beteiligte = arr
+})
 # %% [javascript]
 /// Collection of functions that grab certain parts of the given data
 
