@@ -233,7 +233,8 @@ var projection = d3.geoIdentity()
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
   <h1 style="text-align:center">TITEL</h1>
   <div id=main>
-      <div id=map><h1>MAP</h1><svg id=legend></svg></div>
+      <div id=map><h1>MAP</h1></div>
+      <svg id=legend></svg>
       <div id=right>
         <div id=infoText><h1>INFO</h1></div>
         <div id=gravenessDiagramm><h1>GRAVENESS</h1></div>
@@ -253,27 +254,24 @@ var projection = d3.geoIdentity()
 }
 
 #map {
-  background-color: brown;
-  width: 70%;
+  background-color: white;
+  width: 1000px;
 }
 
 #right {
-  background-color: coral;
+    background-color: lightgray;
   width: 30%
 }
 
 #infoText {
   height: 20%; 
-  background-color: white;
 }
 
 #gravenessDiagramm {
-  background-color: red;
   height: 40%;
 }
 
 #involvedDiagramm {
-  background-color: yellow;
   height: 40%;
 }
 
@@ -294,8 +292,6 @@ var projection = d3.geoIdentity()
 <!-- Main div for the map svg -->
 <div id="content"></div>
 # %% [css]
-
-
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
