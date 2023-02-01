@@ -366,6 +366,7 @@ body {
 var manager = {
   initData: data,
   currentFilters: {},
+  combinedIgnores: {},
   members: [], // list of objects that have a module and a an ignore property (explained in addMember())
   
   // updates all members with the new information 
@@ -373,10 +374,12 @@ var manager = {
     // merge the filters and the new info to create a new filter object, the new info 
     // WILL OVERWRITE whatever the old filters were at the respective property!
     this.currentFilters = {...this.currentFilters, ...info}
+    // we use this to prefilter the data to do less work later when filtering for every member separately
+    const currentDataToFilterFurther = filterData(this.initData, {...this.currentFilters, ...this.combinedIgnores})
     console.log(`Number of currently filtered data points: ${filterData(this.initData, this.currentFilters).length}`)
     console.log("trigger called. updating all plots...")
     for (member of this.members) {
-      const filteredData = filterData(this.initData, {...this.currentFilters, ...member.ignore})
+      const filteredData = filterData(currentDataToFilterFurther, {...this.currentFilters, ...member.ignore})
       member.module.update(filteredData)
     }
     console.log("Update finished.")
@@ -393,6 +396,7 @@ var manager = {
     // call module.manager.trigger(info)
     module.manager = this
     this.members.push({module: module, ignore: ignoreFilter});
+    this.combinedIgnores = {...this.combinedIngores, ...ignoreFilter}
   }
 }
 # %% [javascript]
