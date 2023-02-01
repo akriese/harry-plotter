@@ -186,6 +186,7 @@ statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b
 <!-- Main div for the map svg -->
 <div id="content"></div>
 # %% [css]
+
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
@@ -655,19 +656,20 @@ console.log(chart);
 
 # %% [markdown]
 ### Sorted Bar chart category
+# %% [javascript]
+module.update(filterData(data, { graveness: 1 }))
 # %% [html]
 <div id="test"></div>
 
 # %% [javascript]
 removeAllChildren("test");
-chart = BarChart(bar_data, {
-  x: d => d.category, // x axis -> category
+module = BarChart(data, {
+  x: d => d.category, // x=> xScale(X[i])). axis -> category
   y: d => d.count, // counts
-  xDomain: d3.groupSort(bar_data, ([d]) => -d.count, d => d.category), // sort by descending frequency
   yLabel: "↑ Anzahl",
   width: 400,
   height: 200, // think about deceptive design
-  //title: "Gesamtanzahl der Unfälle per Beteiligte",
+  //title: "Anzahl der Unfälle per Beteiligte",
 })
 # %% [javascript]
 // Copyright 2021 Observable, Inc.
@@ -683,7 +685,6 @@ function BarChart(data, {
   marginLeft = 40, // the left margin, in pixels
   width = 640, // the outer width of the chart, in pixels
   height = 400, // the outer height of the chart, in pixels
-  xDomain, // an array of (ordinal) x-values
   xRange = [marginLeft, width - marginRight], // [left, right]
   yType = d3.scaleLinear, // y-scale type
   yDomain, // [ymin, ymax]
@@ -695,9 +696,13 @@ function BarChart(data, {
   titleColor = "black", // title fill color when atop bar
   titleAltColor = "currentColor", // title fill color when atop background
 } = {}) {
+
+  data = get_data_object_bar_chart(data, getInvolvedNumbers);
+  data.map(get_substring)  
   // Compute values.
   const X = d3.map(data, x);
   const Y = d3.map(data, y);
+  var xDomain = d3.groupSort(data, ([d]) => -d.count, d => d.category); // sort by descending frequency;
 
   // Compute default domains, and unique the x-domain.
   if (xDomain === undefined) xDomain = X;
@@ -709,13 +714,15 @@ function BarChart(data, {
 
   // Construct scales, axes, and formats.
   const xScale = d3.scaleBand(xDomain, xRange).padding(xPadding);
-  const yScale = yType(yDomain, yRange);//d3.scaleBand(yDomain, yRange);
+  const yScale = d3.scaleLinear(yDomain, yRange);//d3.scaleBand(yDomain, yRange);
   const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
   const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
   // setted color can be changed by using another schemeCategory
   var color = d3.scaleOrdinal(data.map(d => d.category), d3.schemeCategory10).unknown("red");
   const col = d3.map(data, (d) => color(d.category));
 
+  const mod = {yScale: yScale, yDomain: yDomain, heigth: height, yRange: yRange, col: col, xScale: xScale};
+  
   // Compute titles.
  if (title === undefined) {
     const formatValue = yScale.tickFormat(100, yFormat);
@@ -732,7 +739,7 @@ function BarChart(data, {
     .attr("viewBox", [0, 0, width, height])
     .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
-  svg.append("g")
+ const yAxe = svg.append("g")
       .attr("transform", `translate(${marginLeft},0)`)
 	  .call(yAxis)
       .call(g => g.select(".domain").remove())
@@ -781,7 +788,34 @@ svg.append("g")
       .attr("transform", `translate(0,${height - marginBottom})`)
       .call(xAxis);
   
-  return svg.node();
+  mod.update = function(data) {
+    
+    data = get_data_object_bar_chart(data, getInvolvedNumbers);
+	data.map(get_substring) // map -> principle of least astonishment
+    
+    // update bar heigth
+  	const Y = d3.map(data, y);
+    yDomain = [0, d3.max(Y)]	
+    const yScale = d3.scaleLinear(yDomain, yRange);
+
+  	const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
+    yAxe.call(yAxis)
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick line").clone()
+          .attr("x2", width - marginLeft - marginRight)
+          .attr("stroke-opacity", 0.1))
+      .call(g => g.append("text")
+          .attr("x", -marginLeft)
+          .attr("y", 10)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "start")
+          .text(yLabel));
+	bar.transition().duration(500).attr("y", i => yScale(Y[i])).attr("height", i => yScale(0) - yScale(Y[i]))
+    
+    return this
+  }
+  
+  return mod;
 }
 # %% [javascript]
 // helper functions to model data as needed
