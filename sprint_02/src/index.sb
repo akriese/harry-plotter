@@ -366,6 +366,38 @@ body {
   stroke: black;
   stroke-opacity: 0.5;
 }
+# %% [javascript]
+var manager = {
+  initData: data,
+  currentFilters: {},
+  members: [], // list of objects that have a module and a an ignore property (explained in addMember())
+  
+  // updates all members with the new information 
+  trigger(info) {
+    // merge the filters and the new info to create a new filter object, the new info 
+    // WILL OVERWRITE whatever the old filters were at the respective property!
+    this.currentFilters = {...this.currentFilters, ...info}
+    console.log(`Number of currently filtered data points: ${filterData(this.initData, this.currentFilters).length}`)
+    console.log("trigger called. updating all plots...")
+    for (member of this.members) {
+      const filteredData = filterData(this.initData, {...this.currentFilters, ...member.ignore})
+      member.module.update(filteredData)
+    }
+    console.log("Update finished.")
+  },
+  
+  // add a module to be kept in the update loop to the members
+  // ignoreFilter is a filter entity that is overwritten when updating the given module.
+  // E.g. we dont want to lose all points outside of a state when selecting it
+  // on the map. So the manager is told to ignore that filter just for the map module
+  addMember(module, { 
+    ignoreFilter = {}
+  }) {
+    // give the module a member 'manager', so it can
+    // call module.manager.trigger(info)
+    module.manager = this
+    this.members.push({module: module, ignore: ignoreFilter});
+  }
 }
 # %% [javascript]
 const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
