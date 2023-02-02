@@ -566,18 +566,14 @@ function removeAllChildren(name) {
 #   run_on_load: true
 # ---%%
 // helper functions to model data as needed
-function get_data_object_bar_chart(data, number_fct) {
-  categorys_counts = number_fct(data);
-  entries = Object.entries(categorys_counts)
-  let data_entry = entries.map(([key, val] = entry) => {
-    return {category: key, count: val};
-  });
-  return data_entry
+function get_data_object_bar_chart(data, numberFct) {
+  let categoryCounts = numberFct(data);
+  return Object.entries(categoryCounts).map(([key, val]) => ({category: key, count: val}));
 }
 
 // returns category without "Ist"
-function get_substring(data_dict){
-  data_dict.category = data_dict.category.substring(3);
+function get_substring(cat){
+  cat.category = cat.category.substring(3);
 }
 
 // returns category with its meaning
