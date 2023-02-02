@@ -1,4 +1,9 @@
-# %% [esm]
+# %%--- [esm]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 import * as tj from "https://cdn.skypack.dev/pin/topojson@v3.0.2-ovpHjX420lx9YlKkg1QF/mode=imports/optimized/topojson.js"
 import * as d3_ from "https://cdn.skypack.dev/d3@7.6.0"
 import proj from 'https://cdn.skypack.dev/proj4'
@@ -9,12 +14,12 @@ export const d3 = d3_;
 export const proj4 = proj;
 export const L = leaflet;
 export const Lm = leafletMarkercluster;
-# %% [css]
-/* We need this to make all cells wider */
-:root {
-  --cell-base-width: 1600px;
-}
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 async function fetchJson(url) {
   return fetch(url).then(response => response.json())
 }
@@ -28,7 +33,12 @@ var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plot
 var berlin_lor_topo = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/lor_bezirksregionen_2021.topojson")
 berlin_lor_topo
 
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 /// We define the two different coordinate systems for proj4
 proj4.defs([["EPSG:32632","+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs +type=crs"],
            ["EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"],
@@ -57,7 +67,11 @@ data.forEach(d => {
   }
   d.Beteiligte = arr
 })
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 /// Collection of functions that grab certain parts of the given data
 
 // general function to count occurences of a category in one data property
@@ -143,7 +157,12 @@ function getInvolvedNumbers(data) {
 
   return results
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 /// Apply a filter on the overall data and return the chosen set
 function filterData(data, {
   lor = undefined, // int describing the focused lor; undefined means the whole city is focused
@@ -184,7 +203,12 @@ function filterData(data, {
     }
   );
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // trying out the filter function
 function measureFiltering(filter) {
   console.time()
@@ -204,7 +228,12 @@ getDaysAndHours(data, mode="day_arrays")
 // trying out filters to precompute data for bar chart
 getInvolvedNumbers(measureFiltering({involved: ["IstRad"]}))
 countGraveness(data)
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // Berlin topographies
 var LorAreas = topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states)
 
@@ -229,7 +258,11 @@ LorWGS.features = LorAreas.features.map(feature => ({
 var projection = d3.geoIdentity()
   .reflectY(true)
   .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
-# %% [html]
+# %%--- [html]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 <body>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
@@ -245,150 +278,12 @@ var projection = d3.geoIdentity()
   </div>
   <h3>QUELLE</h3>
 </body>
-# %%--- [css]
+# %%--- [javascript]
 # properties:
 #   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
 # ---%%
-#main {
-  height: 850px;
-  width: 1600px;
-  display: flex;
-}
-
-#map {
-  background-color: white;
-  width: 1100px;
-}
-
-#right {
-    background-color: lightgray;
-  width: 30%
-}
-
-#infoText {
-  height: 20%;
-}
-
-#gravenessDiagramm {
-  height: 40%;
-}
-
-#involvedDiagramm {
-  height: 40%;
-}
-
-# %%--- [css]
-# properties:
-#   top_hidden: true
-# ---%%
-body {
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
-  font-size: 14px;
-  color: #333;
-}
-
-#mother {
-  height: 850px;
-  width: 1000px;
-}
-
-#legendSvg {
-  position: absolute;
-  height: 60px;
-  width: 300px;
-  top: 35px;
-  left: 700px;
-  /* Let mouse events go through to reach the map underneath */
-  pointer-events: none;
-  /* Make sure to be above the map pane (.leaflet-pane) */
-  z-index: 450;
-}
-
-/*
-  This is needed, as chrome is drawing a rectangle around the focused polygon
-  See: https://gis.stackexchange.com/questions/447502/prevent-leaflet-map-from-showing-rectangle-around-layer-on-click
-*/
-:focus {
-    outline: -webkit-focus-ring-color auto 0px;
-}
-
-.leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
-  background-color: #fff0;
-}
-
-.leaflet-popup-content h2 {
-  font-size: 20px;
-  text-decoration: underline;
-}
-
-.marker-cluster-large div {
-  background-color: rgba(255, 0, 0, 0.8)
-}
-.marker-cluster-large  {
-  background-color: rgba(255, 0, 0, 0.2)
-}
-.marker-cluster-medium div {
-  background-color: rgba(255, 173, 0, 0.8)
-}
-.marker-cluster-medium  {
-  background-color: rgba(255, 173, 0, 0.2)
-}
-.marker-cluster-small div {
-  background-color: rgba(247, 255, 0, 0.8)
-}
-.marker-cluster-small  {
-  background-color: rgba(247, 255, 0, 0.2)
-}
-
-/* Style of category legend text and circles */
-.legend text {
-  font-size: 0.8em;
-  fill: black;
-  font-family: sans-serif;
-}
-
-.legend circle {
-  stroke: black;
-  stroke-opacity: 0.5;
-}
-# %% [javascript]
-var manager = {
-  initData: data,
-  currentFilters: {},
-  combinedIgnores: {},
-  members: [], // list of objects that have a module and a an ignore property (explained in addMember())
-
-  // updates all members with the new information
-  trigger(info) {
-    // merge the filters and the new info to create a new filter object, the new info
-    // WILL OVERWRITE whatever the old filters were at the respective property!
-    this.currentFilters = {...this.currentFilters, ...info}
-    // we use this to prefilter the data to do less work later when filtering for every member separately
-    const currentDataToFilterFurther = filterData(this.initData, {...this.currentFilters, ...this.combinedIgnores})
-    console.log(`Number of currently filtered data points: ${filterData(this.initData, this.currentFilters).length}`)
-    console.log("trigger called. updating all plots...")
-    for (member of this.members) {
-      const filteredData = filterData(currentDataToFilterFurther, {...this.currentFilters, ...member.ignore})
-      member.module.update(filteredData)
-    }
-    console.log("Update finished.")
-  },
-
-  // add a module to be kept in the update loop to the members
-  // ignoreFilter is a filter entity that is overwritten when updating the given module.
-  // E.g. we dont want to lose all points outside of a state when selecting it
-  // on the map. So the manager is told to ignore that filter just for the map module
-  addMember(module, {
-    ignoreFilter = {}
-  }) {
-    // give the module a member 'manager', so it can
-    // call module.manager.trigger(info)
-    module.manager = this
-    this.members.push({module: module, ignore: ignoreFilter});
-    this.combinedIgnores = {...this.combinedIngores, ...ignoreFilter}
-  }
-}
-# %% [javascript]
 const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
                     "August", "September", "Oktober", "November", "Dezember"]
 const dayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
@@ -410,7 +305,12 @@ function makeTooltipContent(accident) {
                + persons + "<br>"
                + graveness + "<br>";
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // Inspired by https://observablehq.com/@tmcw/d3-scalesequential-continuous-color-legend-example
 function colorLegend(colorScale, {
   map = undefined,
@@ -461,7 +361,12 @@ function colorLegend(colorScale, {
 
   return svg.node();
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 function StateColors(counts) {
   counts.dummy = 0
   const c = Object.entries(counts).map(([_, count]) => count)
@@ -484,7 +389,6 @@ var blackMarkerIcon = L.icon({
     iconAnchor:   [iconSize[0] / 2, iconSize[1]], // point of the icon which will correspond to marker's location
     popupAnchor:  [-15, -38] // point from which the popup should open relative to the iconAnchor
 });
-
 
 function LeafletAccidentMap(data, {
   topo,
@@ -626,10 +530,12 @@ function LeafletAccidentMap(data, {
 
   return mod;
 }
-# %% [javascript]
-// Uncomment and execute to be able to reload the map
-//mapModule.map.remove()
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 var mapModule = LeafletAccidentMap(data, {
   topo: berlin_lor_topo,
   states: LorWGS,
@@ -641,9 +547,12 @@ var mapModule = LeafletAccidentMap(data, {
   stateCount: countPerLOR,
   stateId: p => parseInt(p.properties.BZR_ID),
 })
-
-manager.addMember(mapModule, {ignoreFilter: {lor: undefined}})
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 function removeAllChildren(name) {
   const div = document.getElementById(name);
   let child = div.lastElementChild;
@@ -654,7 +563,12 @@ function removeAllChildren(name) {
 }
 # %% [markdown]
 ### Sorted Bar chart category
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // helper functions to model data as needed
 function get_data_object_bar_chart(data, number_fct) {
   categorys_counts = number_fct(data);
@@ -675,7 +589,12 @@ function get_meaning(data_dict){
   cat_graveness_dict = {1: "Tote", 2: "Schwerverletzte", 3: "Leichtverletzte"};
   data_dict.category = cat_graveness_dict[data_dict.category];
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // Copyright 2021 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/bar-chart
@@ -853,7 +772,12 @@ function BarChart(data, {
 }
 # %% [html]
 <div id="test"></div>
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 //
 var moduleInvolvedChart = BarChart(data, {
   x: d => d.category, // x=> xScale(X[i])). axis -> category
@@ -864,11 +788,14 @@ var moduleInvolvedChart = BarChart(data, {
   divName: "involvedDiagramm",
   //title: "Anzahl der Unfälle per Beteiligte",
 })
-
-manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }})
 # %% [markdown]
 ## sorted horizontal bar chart graveness
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // Copyright 2021 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/horizontal-bar-chart
@@ -1049,10 +976,12 @@ function BarChartH(data, {
 
   return mod;
 }
-# %% [html]
-<div id="test_horizontal"></div>
-# %% [javascript]
-//removeAllChildren("test_horizontal");
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 var moduleGravenessChart = BarChartH(data, {
   x: d => d.count, // x axis -> counts
   y: d => d.category, // y-axis -> counts
@@ -1063,8 +992,6 @@ var moduleGravenessChart = BarChartH(data, {
   divName: "gravenessDiagramm",
   //title: "Gesamtanzahl der Unfälle per Beteiligte",
 })
-
-manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }})
 # %% [markdown]
 ## Violin plot for amount of crash per days and hour
 
@@ -1072,7 +999,12 @@ manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }
 
 \
 
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 function hist_all_over(data, histogram) {
   sorted_data = data.slice().sort((a, b) => d3.ascending(a.UWOCHENTAG, b.UWOCHENTAG));
   data_grouped = d3.group(sorted_data,  d => d.UWOCHENTAG);
@@ -1087,7 +1019,12 @@ function swap_days_to_starting_at_monday(data){
   });
   return data;
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 function RaincloudPlot(data) {
   // Build and Show the Y scale
 
@@ -1202,3 +1139,156 @@ function RaincloudPlot(data) {
 # %% [javascript]
 removeAllChildren("test_violin");
 RaincloudPlot(data)
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
+var manager = {
+  initData: data,
+  currentFilters: {},
+  combinedIgnores: {},
+  members: [], // list of objects that have a module and a an ignore property (explained in addMember())
+
+  // updates all members with the new information
+  trigger(info) {
+    // merge the filters and the new info to create a new filter object, the new info
+    // WILL OVERWRITE whatever the old filters were at the respective property!
+    this.currentFilters = {...this.currentFilters, ...info}
+    // we use this to prefilter the data to do less work later when filtering for every member separately
+    const currentDataToFilterFurther = filterData(this.initData, {...this.currentFilters, ...this.combinedIgnores})
+    console.log(`Number of currently filtered data points: ${filterData(this.initData, this.currentFilters).length}`)
+    console.log(`Size of the prefiltered data: ${currentDataToFilterFurther.length}`)
+    console.log("trigger called. updating all plots...")
+    for (member of this.members) {
+      const filteredData = filterData(currentDataToFilterFurther, {...this.currentFilters, ...member.ignore})
+      member.module.update(filteredData)
+    }
+    console.log("Update finished.")
+  },
+
+  // add a module to be kept in the update loop to the members
+  // ignoreFilter is a filter entity that is overwritten when updating the given module.
+  // E.g. we dont want to lose all points outside of a state when selecting it
+  // on the map. So the manager is told to ignore that filter just for the map module
+  addMember(module, {
+    ignoreFilter = {}
+  }) {
+    // give the module a member 'manager', so it can
+    // call module.manager.trigger(info)
+    module.manager = this
+    this.members.push({module: module, ignore: ignoreFilter});
+    this.combinedIgnores = {...this.combinedIgnores, ...ignoreFilter}
+  }
+}
+
+manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }})
+manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }})
+manager.addMember(mapModule, {ignoreFilter: {lor: undefined}})
+# %% [javascript]
+// Uncomment and execute to be able to reload the map
+//mapModule.map.remove()
+# %%--- [css]
+# properties:
+#   top_hidden: true
+# ---%%
+/* We need this to make all cells wider */
+:root {
+  --cell-base-width: 1600px;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+#main {
+  height: 850px;
+  width: 1600px;
+  display: flex;
+}
+
+#map {
+  background-color: white;
+  width: 1100px;
+}
+
+#legend {
+  position: absolute;
+  height: 60px;
+  width: 300px;
+  top: 35px;
+  left: 800px;
+  /* Let mouse events go through to reach the map underneath */
+  pointer-events: none;
+  /* Make sure to be above the map pane (.leaflet-pane) */
+  z-index: 450;
+}
+
+#right {
+    background-color: lightgray;
+  width: 30%
+}
+
+#infoText {
+  height: 20%;
+}
+
+#gravenessDiagramm {
+  height: 40%;
+}
+
+#involvedDiagramm {
+  height: 40%;
+}
+
+/*
+  This is needed, as chrome is drawing a rectangle around the focused polygon
+  See: https://gis.stackexchange.com/questions/447502/prevent-leaflet-map-from-showing-rectangle-around-layer-on-click
+*/
+:focus {
+    outline: -webkit-focus-ring-color auto 0px;
+}
+
+.leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
+  background-color: #fff0;
+}
+
+.leaflet-popup-content h2 {
+  font-size: 20px;
+  text-decoration: underline;
+}
+
+/* Change colors of cluster bubbles */
+.marker-cluster-large div {
+  background-color: rgba(255, 0, 0, 0.8)
+}
+.marker-cluster-large  {
+  background-color: rgba(255, 0, 0, 0.2)
+}
+.marker-cluster-medium div {
+  background-color: rgba(255, 173, 0, 0.8)
+}
+.marker-cluster-medium  {
+  background-color: rgba(255, 173, 0, 0.2)
+}
+.marker-cluster-small div {
+  background-color: rgba(247, 255, 0, 0.8)
+}
+.marker-cluster-small  {
+  background-color: rgba(247, 255, 0, 0.2)
+}
+
+/* Style of category legend text and circles */
+.legend text {
+  font-size: 0.8em;
+  fill: black;
+  font-family: sans-serif;
+}
+
+.legend circle {
+  stroke: black;
+  stroke-opacity: 0.5;
+}
