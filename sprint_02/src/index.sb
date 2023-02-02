@@ -607,19 +607,18 @@ function BarChart(data, {
   xPadding = 0.1, // amount of x-range to reserve to separate bars
   yFormat, // a format specifier string for the y-axis
   yLabel, // a label for the y-axis
-  color = "currentColor", // bar fill color
   titleColor = "black", // title fill color when atop bar
   titleAltColor = "currentColor", // title fill color when atop background
   divName,
 } = {}) {
   removeAllChildren(divName);
 
-  data = get_data_object_bar_chart(data, getInvolvedNumbers);
-  data.map(get_substring)
+  let barData = get_data_object_bar_chart(data, getInvolvedNumbers);
+  barData.map(get_substring)
   // Compute values.
-  const X = d3.map(data, x);
-  const Y = d3.map(data, y);
-  var xDomain = d3.groupSort(data, ([d]) => -d.count, d => d.category); // sort by descending frequency;
+  let X = d3.map(barData, x);
+  let Y = d3.map(barData, y);
+  let xDomain = d3.groupSort(barData, ([d]) => -d.count, d => d.category); // sort by descending frequency;
 
   // Compute default domains, and unique the x-domain.
   if (xDomain === undefined) xDomain = X;
@@ -627,29 +626,29 @@ function BarChart(data, {
   xDomain = new d3.InternSet(xDomain);
 
   // Omit any data not present in the x-domain.
-  const I = d3.range(X.length).filter(i => xDomain.has(X[i]));
+  let I = d3.range(X.length).filter(i => xDomain.has(X[i]));
 
   // Construct scales, axes, and formats.
-  const xScale = d3.scaleBand(xDomain, xRange).padding(xPadding);
-  const yScale = d3.scaleLinear(yDomain, yRange);//d3.scaleBand(yDomain, yRange);
-  const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
-  const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
+  let xScale = d3.scaleBand(xDomain, xRange).padding(xPadding);
+  let yScale = d3.scaleLinear(yDomain, yRange);//d3.scaleBand(yDomain, yRange);
+  let xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
+  let yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
 
   // setted color can be changed by using another schemeCategory
-  var color = d3.scaleOrdinal(data.map(d => d.category), d3.schemeCategory10).unknown("red");
-  const col = d3.map(data, (d) => color(d.category));
+  let color = d3.scaleOrdinal(barData.map(d => d.category), d3.schemeCategory10).unknown("red");
+  let col = d3.map(barData, (d) => color(d.category));
 
   // Compute titles.
   if (title === undefined) {
-    const formatValue = yScale.tickFormat(100, yFormat);
+    let formatValue = yScale.tickFormat(100, yFormat);
     title = i => `${formatValue(Y[i])}`;
   } else {
-    const O = d3.map(data, d => d);
-    const T = title;
-    title = i => T(O[i], i, data);
+    let O = d3.map(barData, d => d);
+    let T = title;
+    title = i => T(O[i], i, barData);
   }
 
-  const svg = d3.select(`#${divName}`).append("svg")
+  let svg = d3.select(`#${divName}`).append("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", [0, 0, width, height])
@@ -664,7 +663,7 @@ function BarChart(data, {
     .style("font-size", "13px")
     .text("Anzahl der Unfälle pro Beteiligte");
 
-  const yAxe = svg.append("g")
+  let yAxe = svg.append("g")
     .attr("transform", `translate(${marginLeft},0)`)
     .call(yAxis)
     .call(g => g.select(".domain").remove())
@@ -678,7 +677,7 @@ function BarChart(data, {
       .attr("text-anchor", "start")
       .text(yLabel));
 
-  const bar = svg.append("g")
+  let bar = svg.append("g")
     .selectAll("rect")
     .data(I)
     .join("rect")
@@ -691,7 +690,7 @@ function BarChart(data, {
   if (title) bar.append("title")
       .text(title);
 
-  const bartext = svg.append("g")
+  let bartext = svg.append("g")
     .attr("fill", "currentColor")
     .attr("text-anchor", "end")
     .attr("font-family", "sans-serif")
@@ -715,15 +714,15 @@ function BarChart(data, {
 
   const mod = {}
   mod.update = function(data) {
-    data = get_data_object_bar_chart(data, getInvolvedNumbers);
-    data.map(get_substring) // map -> principle of least astonishment
+    let barData = get_data_object_bar_chart(data, getInvolvedNumbers);
+    barData.forEach(get_substring) // map -> principle of least astonishment
 
     // update bar heigth
-    const Y = d3.map(data, y);
+    let Y = d3.map(barData, y);
     yDomain = [0, d3.max(Y)]
-    const yScale = d3.scaleLinear(yDomain, yRange);
+    let yScale = d3.scaleLinear(yDomain, yRange);
 
-    const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
+    let yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
     yAxe.call(yAxis)
       .call(g => g.select(".domain").remove())
       .call(g => g.selectAll(".tick line").clone()
@@ -742,7 +741,7 @@ function BarChart(data, {
     // update text height
     bartext.transition().duration(500).attr("y", i => yScale(Y[i]) - 7)
 
-    const formatValue = yScale.tickFormat(100, yFormat);
+    let formatValue = yScale.tickFormat(100, yFormat);
     title = i => `${formatValue(Y[i])}`;
 
     bartext.data(I)
