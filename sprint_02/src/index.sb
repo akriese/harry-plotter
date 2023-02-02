@@ -1159,7 +1159,7 @@ var manager = {
     console.log("trigger called. updating all plots...")
     for (member of this.members) {
       const filteredData = filterData(currentDataToFilterFurther, {...this.currentFilters, ...member.ignore})
-      member.module.update(filteredData)
+      if (!member.noUpdate) member.module.update(filteredData)
     }
     console.log("Update finished.")
   },
@@ -1169,22 +1169,23 @@ var manager = {
   // E.g. we dont want to lose all points outside of a state when selecting it
   // on the map. So the manager is told to ignore that filter just for the map module
   addMember(module, {
-    ignoreFilter = {}
+    ignoreFilter = {},
+    noUpdate = false
   }) {
     // give the module a member 'manager', so it can
     // call module.manager.trigger(info)
     module.manager = this
-    this.members.push({module: module, ignore: ignoreFilter});
+    this.members.push({module: module, ignore: ignoreFilter, noUpdate: noUpdate});
     this.combinedIgnores = {...this.combinedIgnores, ...ignoreFilter}
   }
 }
 
-manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }})
-manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }})
+manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }, noUpdate: true}) // seems a little leaky
+manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }, noUpdate: true}) // seems leaky
 manager.addMember(mapModule, {ignoreFilter: {lor: undefined}})
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
-//mapModule.map.remove()
+mapModule.map.remove()
 # %%--- [css]
 # properties:
 #   top_hidden: true
