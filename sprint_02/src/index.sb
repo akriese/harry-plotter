@@ -820,6 +820,7 @@ function BarChartH(data, {
   titleAltColor = "currentColor", // title fill color when atop background
   divName,
 } = {}) {
+  removeAllChildren(divName)
 
   // get correct data format
   const cat_graveness_dict = {1: "Unfall mit Getöteten", 2: "Unfall mit Schwerverletzten", 3: "Unfall mit Leichtverletzten"};
