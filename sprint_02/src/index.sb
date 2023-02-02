@@ -719,21 +719,20 @@ function BarChart(data, {
 
     // update bar heigth
     let Y = d3.map(barData, y);
-    yDomain = [0, d3.max(Y)]
+    let yDomain = [0, d3.max(Y)]
     let yScale = d3.scaleLinear(yDomain, yRange);
 
     let yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
-    yAxe.call(yAxis)
-      .call(g => g.select(".domain").remove())
-      .call(g => g.selectAll(".tick line").clone()
-        .attr("x2", width - marginLeft - marginRight)
-        .attr("stroke-opacity", 0.1))
-      .call(g => g.append("text")
-        .attr("x", -marginLeft)
-        .attr("y", 50)
-        .attr("fill", "currentColor")
-        .attr("text-anchor", "start")
-        .text(yLabel));
+    yAxe.selectAll("*").remove()
+    yAxe.attr("transform", `translate(${marginLeft},0)`)
+      .call(yAxis)
+        .call(g => g.select(".domain").remove())
+        .call(g => g.append("text")
+          .attr("x", -marginLeft)
+          .attr("y", 50)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "start")
+          .text(yLabel));
 
     // update bar height
     bar.transition().duration(500).attr("y", i => yScale(Y[i])).attr("height", i => yScale(0) - yScale(Y[i]))
@@ -751,7 +750,7 @@ function BarChart(data, {
         .attr("dy", "0.35em")
         .attr("dx", -4)
         .text(title)
-        .call(text=> text.filter(i => yScale(Y[i]) - yScale(0) < 20) // short bars
+        .call(text => text.filter(i => yScale(Y[i]) - yScale(0) < 20) // short bars
           .attr("dy", +4)
           .attr("fill", titleAltColor)
           .attr("text-anchor", "start"));
@@ -928,6 +927,7 @@ function BarChartH(data, {
 
     const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
 
+    xAxe.selectAll("*").remove()
     xAxe.call(xAxis)
       .call(g => g.select(".domain").remove())
       .call(g => g.selectAll(".tick line").clone()
@@ -1176,8 +1176,8 @@ var manager = {
   }
 }
 
-manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }, noUpdate: true}) // seems a little leaky
-manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }, noUpdate: true}) // seems leaky
+manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }, noUpdate: false}) // seems a little leaky
+manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }, noUpdate: false}) // seems leaky
 manager.addMember(mapModule, {ignoreFilter: {lor: undefined}})
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
