@@ -9,6 +9,11 @@ export const d3 = d3_;
 export const proj4 = proj;
 export const L = leaflet;
 export const Lm = leafletMarkercluster;
+# %% [css]
+/* We need this to make all cells wider */
+:root {
+  --cell-base-width: 1600px;
+}
 # %% [javascript]
 async function fetchJson(url) {
   return fetch(url).then(response => response.json())
