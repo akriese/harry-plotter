@@ -47,6 +47,14 @@ function from32to33(coords) {
   return proj4("EPSG:32632", "EPSG:32633", coords)
 }
 
+var monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
+                    "August", "September", "Oktober", "November", "Dezember"]
+var dayNames = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+var accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
+                      "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
+                      "Unfall im Längsverkehr", "Sonstiger Unfall"]
+var gravenessMeanings = ["Tödlich", "Schwer", "Leicht"]
+var involved = ["IstRad", "IstPKW", "IstFuss", "IstKrad", "IstGkfz", "IstSonstige"]
 
 // Some added properties for each data point
 data.forEach(d => {
@@ -66,6 +74,10 @@ data.forEach(d => {
     }
   }
   d.Beteiligte = arr
+
+  // shift the days to start at monday=0, sunday=6
+  // sunday is UWOCHENTAG 1
+  d.day = d.UWOCHENTAG == 1 ? 6 : (d.UWOCHENTAG - 2)
 })
 # %%--- [javascript]
 # properties:
@@ -119,7 +131,7 @@ function countPerLOR(data) {
 // extract accident time data
 // mode: one of {"single", "array", "day_arrays"} defines how the data is returned
 function getDaysAndHours(data, mode="single") {
-  var filtered = data.map(accident => ({ day: accident.UWOCHENTAG, hour: accident.STUNDE }));
+  var filtered = data.map(accident => ({ day: accident.day, hour: accident.STUNDE }));
   if (mode === "single") return filtered;
   if (mode === "array" ) {
     return {
@@ -129,10 +141,7 @@ function getDaysAndHours(data, mode="single") {
   }
 
   // else: day_arrays
-  var result = {}
-  for (day of [1,2,3,4,5,6,7]) {
-    result[day] = []
-  }
+  var result = Array.from(Array(7), () => [])
 
   for (p of filtered) {
     result[p.day].push(p.hour)
@@ -143,7 +152,6 @@ function getDaysAndHours(data, mode="single") {
 
 // get numbers of how many accidents had e.g. cars involved
 function getInvolvedNumbers(data) {
-  var involved = ["IstRad", "IstPKW", "IstFuss", "IstKrad", "IstGkfz", "IstSonstige"]
   var results = {}
   for (x of involved) {
     results[x] = 0
@@ -273,27 +281,21 @@ var projection = d3.geoIdentity()
   </div>
   <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
 </body>
+# %% [markdown]
+## Map implementation
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
 #   bottom_hidden: true
 #   run_on_load: true
 # ---%%
-const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
-                    "August", "September", "Oktober", "November", "Dezember"]
-const dayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
-const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
-                      "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
-                      "Unfall im Längsverkehr", "Sonstiger Unfall"]
-
 function makeTooltipContent(accident) {
   const info = accident
   const persons = "<b>Beteiligte:</b> " + info.Beteiligte.join(", ")
   const dateTime = "<b>Monat/Tag/Uhrzeit:</b> " + monthNames[info.UMONAT - 1] +
-                   "; " + dayNames[info.UWOCHENTAG - 1] +
+                   "; " + dayNames[info.day] +
                    "; " + info.USTUNDE + " Uhr";
-  const gs = ["Tödlich", "Schwer", "Leicht"]
-  const graveness = "<b>Schweregrad:</b> " + gs[info.UKATEGORIE - 1]
+  const graveness = "<b>Schweregrad:</b> " + gravenessMeanings[info.UKATEGORIE - 1]
 
   return "<b>" + accidentTypes[info.UTYP1 - 1] + "</b><br>"
                + dateTime + "<br>"
@@ -558,7 +560,7 @@ function removeAllChildren(name) {
   }
 }
 # %% [markdown]
-### Sorted Bar chart category
+## Involved chart
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -578,8 +580,7 @@ function get_substring(cat){
 
 // returns category with its meaning
 function get_meaning(data_dict){
-  cat_graveness_dict = {1: "Tote", 2: "Schwerverletzte", 3: "Leichtverletzte"};
-  data_dict.category = cat_graveness_dict[data_dict.category];
+  data_dict.category = gravenessMeanings[data_dict.category - 1];
 }
 # %%--- [javascript]
 # properties:
@@ -760,8 +761,6 @@ function BarChart(data, {
 
   return mod;
 }
-# %% [html]
-<div id="test"></div>
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -779,7 +778,7 @@ var moduleInvolvedChart = BarChart(data, {
   //title: "Anzahl der Unfälle per Beteiligte",
 })
 # %% [markdown]
-## sorted horizontal bar chart graveness
+## Graveness chart
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -813,7 +812,6 @@ function BarChartH(data, {
   removeAllChildren(divName)
 
   // get correct data format
-  const cat_graveness_dict = {1: "Unfall mit Getöteten", 2: "Unfall mit Schwerverletzten", 3: "Unfall mit Leichtverletzten"};
   data = get_data_object_bar_chart(data, countGraveness);
   data.map(get_meaning)
 
@@ -998,19 +996,11 @@ var moduleGravenessChart = BarChartH(data, {
 #   run_on_load: true
 # ---%%
 function hist_all_over(data, histogram) {
-  sorted_data = data.slice().sort((a, b) => d3.ascending(a.UWOCHENTAG, b.UWOCHENTAG));
-  data_grouped = d3.group(sorted_data,  d => d.UWOCHENTAG);
+  sorted_data = data.slice().sort((a, b) => d3.ascending(a.day, b.day));
+  data_grouped = d3.group(sorted_data, d => d.day);
   bins = Array.from(data_grouped).map(d => d[1].map(d => d.USTUNDE)).map(histogram);
   return bins
 };
-
-categories = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
-function swap_days_to_starting_at_monday(data){
-  data.map(function(d){
-    d.UWOCHENTAG = categories[d.UWOCHENTAG - 1];
-  });
-  return data;
-}
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -1032,13 +1022,12 @@ function RaincloudPlot(data) {
   // Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
   var y = d3.scaleBand()
     .range([0, height])
-    .domain([1, 2, 3, 4, 5, 6, 7]) //days
+    .domain([...Array(7).keys()]) // days
     .padding(0)     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
 
-  categories = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
   // Create the Y axis for names
   var yName = d3.scaleBand()
-    .domain(categories)
+    .domain(dayNames)
     .range([0, height])
     .paddingInner(0)
 
@@ -1048,25 +1037,22 @@ function RaincloudPlot(data) {
     .thresholds(x.ticks(24))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
     .value(d => d)
 
-  // Compute the binning for each group of the dataset and shift Sunday to be day 7
+  // Compute the binning for each group of the dataset
   var sumstat = hist_all_over(data, histogram);
-  sumstat.push(sumstat[0])
-  sumstat.shift()
 
   // What is the biggest number of value in a bin? We need it cause this value will have a width of 100% of the bandwidth.
   var maxNum = 0
-  for ( i in sumstat ){
-    allBins = sumstat[i]
-    lengths = allBins.map(function(a){return a.length;})
-    longuest = d3.max(lengths)
-    if (longuest > maxNum) { maxNum = longuest }
+  for (i in sumstat){
+    let allBins = sumstat[i]
+    let lengths = allBins.map(a => a.length)
+    let longest = d3.max(lengths)
+    if (longest > maxNum) { maxNum = longest }
   }
 
   // adapt data structure inner array to dict
-  help_array = [1, 2, 3, 4, 5, 6, 7];
-  for ( i in sumstat ){
-    var dict =  {};
-    dict[help_array[i]] = sumstat[i];
+  for (i in sumstat){
+    let dict = {};
+    dict[i] = sumstat[i];
     sumstat[i] = dict;
   }
 
@@ -1113,13 +1099,13 @@ function RaincloudPlot(data) {
     .enter()        // So now we are working group per group
     .append("g")
     .append("path") // append elemnt
-      .attr("transform", function(d){return("translate(0, " + (y(parseInt(Object.keys(d)[0])))+")")} ) // - verschiebung y axe
-      .datum(function(d){return(Object.values(d)[0])})     // So now we are working bin per bin
+      .attr("transform", d => ("translate(0, " + (y(parseInt(Object.keys(d)[0])))+")") ) // - verschiebung y axe
+      .datum(d => Object.values(d)[0])     // So now we are working bin per bin
       .style("stroke", "none")
       .style("fill","grey")
       .attr("d", d3.area()
-        .x(function(d){return(x(d.x0)) })
-        .y0(function(d){return yNum(-d.length)}) // - => upper violin
+        .x(d => x(d.x0))
+        .y0(d => yNum(-d.length)) // - => upper violin
         .y1(yNum(0)) // cuts half of the violin
         .curve(d3.curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
       )
