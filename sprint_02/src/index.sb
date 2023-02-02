@@ -38,7 +38,7 @@ data.forEach(d => {
   // Assign each data point a new parameter 'coords' holding x AND y value
   // these coordinates now match the coordinates that are used by the topojson file :)
   d.coords = from32to33([d.LINREFX, d.LINREFY]);
-  
+
   // we have to cut off the last two digits of each number, as we want the "Bezirksregionen"
   // from https://www.statistik-berlin-brandenburg.de/raumbezuege#:~:text=Neue%20LOR%2DSystematik%20seit%202021
   d.lor = Math.floor(d.LOR_ab_2021 / 100);
@@ -224,9 +224,6 @@ LorWGS.features = LorAreas.features.map(feature => ({
 var projection = d3.geoIdentity()
   .reflectY(true)
   .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
-# %% [javascript]
-// For trying out different filters
-//module.update(filterData(data, { graveness: 2 }))
 # %% [html]
 <body>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
@@ -264,7 +261,7 @@ var projection = d3.geoIdentity()
 }
 
 #infoText {
-  height: 20%; 
+  height: 20%;
 }
 
 #gravenessDiagramm {
@@ -275,23 +272,10 @@ var projection = d3.geoIdentity()
   height: 40%;
 }
 
-# %% [html]
-<!-- Main div for the map svg -->
-<div id="content"></div>
-
-<body>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-  <div id=mother></div>
-  <svg id=legendSvg></svg>
-</body>
 # %%--- [css]
 # properties:
 #   top_hidden: true
 # ---%%
-<!-- Main div for the map svg -->
-<div id="content"></div>
-# %% [css]
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 14px;
@@ -368,10 +352,10 @@ var manager = {
   currentFilters: {},
   combinedIgnores: {},
   members: [], // list of objects that have a module and a an ignore property (explained in addMember())
-  
-  // updates all members with the new information 
+
+  // updates all members with the new information
   trigger(info) {
-    // merge the filters and the new info to create a new filter object, the new info 
+    // merge the filters and the new info to create a new filter object, the new info
     // WILL OVERWRITE whatever the old filters were at the respective property!
     this.currentFilters = {...this.currentFilters, ...info}
     // we use this to prefilter the data to do less work later when filtering for every member separately
@@ -384,12 +368,12 @@ var manager = {
     }
     console.log("Update finished.")
   },
-  
+
   // add a module to be kept in the update loop to the members
   // ignoreFilter is a filter entity that is overwritten when updating the given module.
   // E.g. we dont want to lose all points outside of a state when selecting it
   // on the map. So the manager is told to ignore that filter just for the map module
-  addMember(module, { 
+  addMember(module, {
     ignoreFilter = {}
   }) {
     // give the module a member 'manager', so it can
@@ -424,9 +408,9 @@ function makeTooltipContent(accident) {
 # %% [javascript]
 // Inspired by https://observablehq.com/@tmcw/d3-scalesequential-continuous-color-legend-example
 function colorLegend(colorScale, {
-  map = undefined, 
-  selection = undefined, 
-  width = 300, 
+  map = undefined,
+  selection = undefined,
+  width = 300,
   height = 50,
   margin = ({top: 40, right: 40, bottom: 30, left: 40}),
   barHeight = 20
@@ -434,7 +418,7 @@ function colorLegend(colorScale, {
   axisScale = d3.scaleLinear()
     .domain(colorScale.domain())
     .range([margin.left, width - margin.right])
-  
+
   axisBottom = g => g
     .attr("class", `x-axis`)
     .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -443,33 +427,33 @@ function colorLegend(colorScale, {
       .tickSize(-barHeight))
   //DOM.svg(width, height)
 
-  const svg = selection === undefined ? 
+  const svg = selection === undefined ?
     document.createElementNS('http://www.w3.org/2000/svg', 'svg') :
     selection.append("svg").attr('transform', `translate(${300}, 20)`)
-  
+
   const defs = svg.append("defs");
   const linearGradient = defs.append("linearGradient")
-      .attr("id", "linear-gradient");
-  
+    .attr("id", "linear-gradient");
+
   linearGradient.selectAll("stop")
     .data(colorScale.ticks().map((t, i, n) => ({ offset: `${100*i/n.length}%`, color: colorScale(t) })))
     .enter().append("stop")
     .attr("offset", d => d.offset)
     .attr("stop-color", d => d.color);
-  
+
   svg.append('g')
     .attr("transform", `translate(0,${height - margin.bottom - barHeight})`)
     .append("rect")
     .attr('transform', `translate(${margin.left}, 0)`)
-	.attr("width", width - margin.right - margin.left)
-	.attr("height", barHeight)
-	.style("fill", "url(#linear-gradient)");
-  
+    .attr("width", width - margin.right - margin.left)
+    .attr("height", barHeight)
+    .style("fill", "url(#linear-gradient)");
+
   svg.append('g')
     .call(axisBottom);
 
   if (map) map.getContainer().appendChild(selection.node())
-  
+
   return svg.node();
 }
 # %% [javascript]
@@ -639,7 +623,7 @@ function LeafletAccidentMap(data, {
 }
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
-//module.map.remove()
+//mapModule.map.remove()
 # %% [javascript]
 var mapModule = LeafletAccidentMap(data, {
   topo: berlin_lor_topo,
@@ -671,8 +655,8 @@ function get_data_object_bar_chart(data, number_fct) {
   categorys_counts = number_fct(data);
   entries = Object.entries(categorys_counts)
   let data_entry = entries.map(([key, val] = entry) => {
-  		return {category: key, count: val};
-	});
+    return {category: key, count: val};
+  });
   return data_entry
 }
 
@@ -713,8 +697,9 @@ function BarChart(data, {
   divName,
 } = {}) {
   removeAllChildren(divName);
+
   data = get_data_object_bar_chart(data, getInvolvedNumbers);
-  data.map(get_substring)  
+  data.map(get_substring)
   // Compute values.
   const X = d3.map(data, x);
   const Y = d3.map(data, y);
@@ -733,12 +718,11 @@ function BarChart(data, {
   const yScale = d3.scaleLinear(yDomain, yRange);//d3.scaleBand(yDomain, yRange);
   const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
   const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
+
   // setted color can be changed by using another schemeCategory
   var color = d3.scaleOrdinal(data.map(d => d.category), d3.schemeCategory10).unknown("red");
   const col = d3.map(data, (d) => color(d.category));
 
-  const mod = {yScale: yScale, yDomain: yDomain, heigth: height, yRange: yRange, col: col, xScale: xScale};
-  
   // Compute titles.
   if (title === undefined) {
     const formatValue = yScale.tickFormat(100, yFormat);
@@ -757,27 +741,27 @@ function BarChart(data, {
 
   //title
   svg.append("text")
-  	  .attr("x", (width / 2 + 30))             
-      .attr("y", 30 )
-      .attr("text-anchor", "middle")
-      .attr("font-family", "sans-serif")
-      .style("font-size", "13px") 
-      .text("Anzahl der Unfälle pro Beteiligte");
+    .attr("x", (width / 2 + 30))
+    .attr("y", 30 )
+    .attr("text-anchor", "middle")
+    .attr("font-family", "sans-serif")
+    .style("font-size", "13px")
+    .text("Anzahl der Unfälle pro Beteiligte");
 
- const yAxe = svg.append("g")
-      .attr("transform", `translate(${marginLeft},0)`)
-	  .call(yAxis)
-      .call(g => g.select(".domain").remove())
-      .call(g => g.selectAll(".tick line").clone()
-          .attr("x2", width - marginLeft - marginRight)
-          .attr("stroke-opacity", 0.1))
-      .call(g => g.append("text")
-          .attr("x", -marginLeft)
-          .attr("y", 50)
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "start")
-          .text(yLabel));
-  
+  const yAxe = svg.append("g")
+    .attr("transform", `translate(${marginLeft},0)`)
+    .call(yAxis)
+    .call(g => g.select(".domain").remove())
+    .call(g => g.selectAll(".tick line").clone()
+      .attr("x2", width - marginLeft - marginRight)
+      .attr("stroke-opacity", 0.1))
+    .call(g => g.append("text")
+      .attr("x", -marginLeft)
+      .attr("y", 50)
+      .attr("fill", "currentColor")
+      .attr("text-anchor", "start")
+      .text(yLabel));
+
   const bar = svg.append("g")
     .selectAll("rect")
     .data(I)
@@ -786,16 +770,16 @@ function BarChart(data, {
       .attr("y", i => yScale(Y[i]))
       .attr("height", i => yScale(0) - yScale(Y[i]))
       .attr("width", xScale.bandwidth())
-	  .attr("fill", i => col[i]);
-  
+      .attr("fill", i => col[i]);
+
   if (title) bar.append("title")
       .text(title);
 
-const bartext = svg.append("g")
-      .attr("fill", "currentColor")
-      .attr("text-anchor", "end")
-      .attr("font-family", "sans-serif")
-      .attr("font-size", 10)
+  const bartext = svg.append("g")
+    .attr("fill", "currentColor")
+    .attr("text-anchor", "end")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", 10)
     .selectAll("text")
     .data(I)
     .join("text")
@@ -805,62 +789,61 @@ const bartext = svg.append("g")
       .attr("dx", -4)
       .text(title)
       .call(text=> text.filter(i => yScale(Y[i]) - yScale(0) < 20) // short bars
-          .attr("dy", +4)
-          .attr("fill", titleAltColor)
-          .attr("text-anchor", "start"));
-  
-svg.append("g")
-      .attr("transform", `translate(0,${height - marginBottom})`)
-      .call(xAxis);
-  
+        .attr("dy", +4)
+        .attr("fill", titleAltColor)
+        .attr("text-anchor", "start"));
+
+  svg.append("g")
+    .attr("transform", `translate(0,${height - marginBottom})`)
+    .call(xAxis);
+
+  const mod = {}
   mod.update = function(data) {
-    
     data = get_data_object_bar_chart(data, getInvolvedNumbers);
-	data.map(get_substring) // map -> principle of least astonishment
-    
+    data.map(get_substring) // map -> principle of least astonishment
+
     // update bar heigth
-  	const Y = d3.map(data, y);
-    yDomain = [0, d3.max(Y)]	
+    const Y = d3.map(data, y);
+    yDomain = [0, d3.max(Y)]
     const yScale = d3.scaleLinear(yDomain, yRange);
 
-  	const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
+    const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
     yAxe.call(yAxis)
       .call(g => g.select(".domain").remove())
       .call(g => g.selectAll(".tick line").clone()
-          .attr("x2", width - marginLeft - marginRight)
-          .attr("stroke-opacity", 0.1))
+        .attr("x2", width - marginLeft - marginRight)
+        .attr("stroke-opacity", 0.1))
       .call(g => g.append("text")
-          .attr("x", -marginLeft)
-          .attr("y", 50)
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "start")
-          .text(yLabel));
+        .attr("x", -marginLeft)
+        .attr("y", 50)
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "start")
+        .text(yLabel));
 
     // update bar height
-	bar.transition().duration(500).attr("y", i => yScale(Y[i])).attr("height", i => yScale(0) - yScale(Y[i]))
+    bar.transition().duration(500).attr("y", i => yScale(Y[i])).attr("height", i => yScale(0) - yScale(Y[i]))
 
     // update text height
     bartext.transition().duration(500).attr("y", i => yScale(Y[i]) - 7)
 
     const formatValue = yScale.tickFormat(100, yFormat);
     title = i => `${formatValue(Y[i])}`;
-    
+
     bartext.data(I)
-    .join("text")
-      .attr("y", i => yScale(Y[i]) - 7)
-      .attr("x", i => xScale(X[i]) + xScale.bandwidth() / 3)
-      .attr("dy", "0.35em")
-      .attr("dx", -4)
-      .text(title)
-      .call(text=> text.filter(i => yScale(Y[i]) - yScale(0) < 20) // short bars
+      .join("text")
+        .attr("y", i => yScale(Y[i]) - 7)
+        .attr("x", i => xScale(X[i]) + xScale.bandwidth() / 3)
+        .attr("dy", "0.35em")
+        .attr("dx", -4)
+        .text(title)
+        .call(text=> text.filter(i => yScale(Y[i]) - yScale(0) < 20) // short bars
           .attr("dy", +4)
           .attr("fill", titleAltColor)
           .attr("text-anchor", "start"));
-    
-    
+
     return this
   }
-  
+
   return mod;
 }
 # %% [html]
@@ -912,7 +895,7 @@ function BarChartH(data, {
   data.map(get_meaning)
 
   var yDomain = d3.groupSort(data, ([d]) => d.count, d => d.category); // sort by descending frequency
-  
+
   // Compute values.
   const X = d3.map(data, x);
   const Y = d3.map(data, y);
@@ -948,35 +931,35 @@ function BarChartH(data, {
   }
 
   const svg = d3.select(`#${divName}`).append("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .attr("viewBox", [0, 0, width, height])
-      .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, width, height])
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
   //title
   svg.append("text")
-  	  .attr("x", (width / 2 + 30))             
-      .attr("y", 30 )
-      .attr("text-anchor", "middle")
-      .attr("font-family", "sans-serif")
-      .style("font-size", "13px") 
-      .text("Anzahl der Unfälle pro Schweregrad");
+    .attr("x", (width / 2 + 30))
+    .attr("y", 30 )
+    .attr("text-anchor", "middle")
+    .attr("font-family", "sans-serif")
+    .style("font-size", "13px")
+    .text("Anzahl der Unfälle pro Schweregrad");
 
   const xAxe = svg.append("g")
-      .attr("transform", `translate(0,${marginTop})`)
-      .call(xAxis)
-      .call(g => g.select(".domain").remove())
-      .call(g => g.selectAll(".tick line").clone()
-          .attr("y2", height - marginTop - marginBottom)
-          .attr("stroke-opacity", 0.1))
-      .call(g => g.append("text")
-          .attr("x", width - marginRight)
-          .attr("y", -22)
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "end")
-          .text(xLabel));
+    .attr("transform", `translate(0,${marginTop})`)
+    .call(xAxis)
+    .call(g => g.select(".domain").remove())
+    .call(g => g.selectAll(".tick line").clone()
+      .attr("y2", height - marginTop - marginBottom)
+      .attr("stroke-opacity", 0.1))
+    .call(g => g.append("text")
+      .attr("x", width - marginRight)
+      .attr("y", -22)
+      .attr("fill", "currentColor")
+      .attr("text-anchor", "end")
+      .text(xLabel));
 
-  const bar = svg.append("g") 
+  const bar = svg.append("g")
     .selectAll("rect")
     .data(I)
     .join("rect")
@@ -986,12 +969,12 @@ function BarChartH(data, {
       .attr("height", yScale.bandwidth())
       .attr("fill", i => col[i]);
 
-  
- const bar_title = svg.append("g")
-      .attr("fill", titleColor)
-      .attr("text-anchor", "end")
-      .attr("font-family", "sans-serif")
-      .attr("font-size", 10)
+
+  const bar_title = svg.append("g")
+    .attr("fill", titleColor)
+    .attr("text-anchor", "end")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", 10)
     .selectAll("text")
     .data(I)
     .join("text")
@@ -1001,61 +984,61 @@ function BarChartH(data, {
       .attr("dx", +30)
       .text(title)
       .call(text => text.filter(i => xScale(X[i]) - xScale(0) < 0) // short bars
-          .attr("dx", +4)
-          .attr("fill", titleAltColor)
-          .attr("text-anchor", "start"));
+        .attr("dx", +4)
+        .attr("fill", titleAltColor)
+        .attr("text-anchor", "start"));
 
   svg.append("g")
-      .attr("transform", `translate(${marginLeft},0)`)
-      .call(yAxis);
+    .attr("transform", `translate(${marginLeft},0)`)
+    .call(yAxis);
+
   mod = {};
   mod.update = function(data) {
-    
-   data = get_data_object_bar_chart(data, countGraveness);
-   data.map(get_meaning)
-    
+    data = get_data_object_bar_chart(data, countGraveness);
+    data.map(get_meaning)
+
     // update bar heigth
-  	const X = d3.map(data, x);
-    xDomain = [0, d3.max(X)]	
+    const X = d3.map(data, x);
+    xDomain = [0, d3.max(X)]
     const xScale =  d3.scaleLinear(xDomain, xRange);
 
-  	const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
-    
+    const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
+
     xAxe.call(xAxis)
       .call(g => g.select(".domain").remove())
       .call(g => g.selectAll(".tick line").clone()
-          .attr("y2", height - marginTop - marginBottom)
-          .attr("stroke-opacity", 0.1))
+        .attr("y2", height - marginTop - marginBottom)
+        .attr("stroke-opacity", 0.1))
       .call(g => g.append("text")
-          .attr("x", width - marginRight)
-          .attr("y", -22)
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "end")
-          .text(xLabel));
-    
-	bar.transition().duration(500)
+        .attr("x", width - marginRight)
+        .attr("y", -22)
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "end")
+        .text(xLabel));
+
+    bar.transition().duration(500)
       .attr("x", xScale(0))
       .attr("width", i => xScale(X[i]) - xScale(0));
 
-  	bar_title.transition().duration(500)
+    bar_title.transition().duration(500)
       .attr("x", i => xScale(X[i]))
-    
-  const formatValue = xScale.tickFormat(100, xFormat);
-  title = i => `${formatValue(X[i])}`;
-    
-  bar_title
-    .data(I)
-    .join("text")
-      .attr("x", i => xScale(X[i]))
-      .attr("y", i => yScale(Y[i]) + yScale.bandwidth() / 2)
-      .attr("dy", "0.35em")
-      .attr("dx", +30)
-      .text(title)
-      .call(text => text.filter(i => xScale(X[i]) - xScale(0) < 0) // short bars
+
+    const formatValue = xScale.tickFormat(100, xFormat);
+    title = i => `${formatValue(X[i])}`;
+
+    bar_title
+      .data(I)
+      .join("text")
+        .attr("x", i => xScale(X[i]))
+        .attr("y", i => yScale(Y[i]) + yScale.bandwidth() / 2)
+        .attr("dy", "0.35em")
+        .attr("dx", +30)
+        .text(title)
+        .call(text => text.filter(i => xScale(X[i]) - xScale(0) < 0) // short bars
           .attr("dx", +4)
           .attr("fill", titleAltColor)
           .attr("text-anchor", "start"));
-    
+
     return this
   }
 
@@ -1095,117 +1078,117 @@ function hist_all_over(data, histogram) {
 categories = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
 function swap_days_to_starting_at_monday(data){
   data.map(function(d){
-  	d.UWOCHENTAG = categories[d.UWOCHENTAG - 1];
+    d.UWOCHENTAG = categories[d.UWOCHENTAG - 1];
   });
   return data;
 }
 # %% [javascript]
 function RaincloudPlot(data) {
-// Build and Show the Y scale
+  // Build and Show the Y scale
 
-// set the dimensions and margins of the graph
-var margin = {top: 20, right: 40, bottom: 10, left: 300},
+  // set the dimensions and margins of the graph
+  var margin = {top: 20, right: 40, bottom: 10, left: 300},
     width = 1100 - margin.left - margin.right,
     height = 750; // - margin.top - margin.bottom;
 
-var x = d3.scaleLinear()
-  .domain([0, 24])          // Note that here the Y scale is set manually // days
-  .range([0, width])
-  
-// Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
-var y = d3.scaleBand()
-  .range([0, height])
-  .domain([1, 2, 3, 4, 5, 6, 7]) //days
-  .padding(0)     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
+  var x = d3.scaleLinear()
+    .domain([0, 24])          // Note that here the Y scale is set manually // days
+    .range([0, width])
 
-categories = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
-// Create the Y axis for names
-var yName = d3.scaleBand()
-  .domain(categories)
-  .range([0, height])
-  .paddingInner(0)
-  
-// Features of the histogram
-var histogram = d3.histogram()
-      .domain(x.domain())
-      .thresholds(x.ticks(24))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-      .value(d => d)
-  
-// Compute the binning for each group of the dataset and shift Sunday to be day 7
-var sumstat = hist_all_over(data, histogram);
-sumstat.push(sumstat[0])
-sumstat.shift()
+  // Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
+  var y = d3.scaleBand()
+    .range([0, height])
+    .domain([1, 2, 3, 4, 5, 6, 7]) //days
+    .padding(0)     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
 
-// What is the biggest number of value in a bin? We need it cause this value will have a width of 100% of the bandwidth.
-var maxNum = 0
-for ( i in sumstat ){
-  allBins = sumstat[i]
-  lengths = allBins.map(function(a){return a.length;})
-  longuest = d3.max(lengths)
-  if (longuest > maxNum) { maxNum = longuest }
-}
+  categories = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+  // Create the Y axis for names
+  var yName = d3.scaleBand()
+    .domain(categories)
+    .range([0, height])
+    .paddingInner(0)
 
-// adapt data structure inner array to dict
-help_array = [1, 2, 3, 4, 5, 6, 7];
-for ( i in sumstat ){
-  var dict =  {};
-  dict[help_array[i]] = sumstat[i];
-  sumstat[i] = dict;
-}
+  // Features of the histogram
+  var histogram = d3.histogram()
+    .domain(x.domain())
+    .thresholds(x.ticks(24))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+    .value(d => d)
 
-// The maximum width of a violin must be x.bandwidth = the width dedicated to a group
-var yNum = d3.scaleLinear()
-  .range([0, y.bandwidth()])
-  .domain([-maxNum, maxNum])
+  // Compute the binning for each group of the dataset and shift Sunday to be day 7
+  var sumstat = hist_all_over(data, histogram);
+  sumstat.push(sumstat[0])
+  sumstat.shift()
 
-// append the svg object to the body of the page
-const svg = d3.select("#test_violin")
-  .append("svg")
-    .attr("width", width)// + margin.left + margin.right)
-    .attr("height", height)// + margin.top + margin.bottom)
-  	.attr("viewBox", [-120, 0, width + 200, height + 30])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
-  
-svg.append("g")
-   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  // What is the biggest number of value in a bin? We need it cause this value will have a width of 100% of the bandwidth.
+  var maxNum = 0
+  for ( i in sumstat ){
+    allBins = sumstat[i]
+    lengths = allBins.map(function(a){return a.length;})
+    longuest = d3.max(lengths)
+    if (longuest > maxNum) { maxNum = longuest }
+  }
 
-// add x-axis
-svg.append("g")	
-  .attr("transform", "translate(0," + height + ")")
-  .call(d3.axisBottom(x)).selectAll("text").attr("font-size", 17).style("fill", "grey")
+  // adapt data structure inner array to dict
+  help_array = [1, 2, 3, 4, 5, 6, 7];
+  for ( i in sumstat ){
+    var dict =  {};
+    dict[help_array[i]] = sumstat[i];
+    sumstat[i] = dict;
+  }
 
-// add x-label 
-svg.append("text")
-      .attr("text-anchor", "end")
-      .attr("x", width/2 + 50)
-      .attr("y", height + 50)
-  	  .attr("font-size", 20)
-  	  .style("fill", "grey")
-      .text("Uhrzeit →");
+  // The maximum width of a violin must be x.bandwidth = the width dedicated to a group
+  var yNum = d3.scaleLinear()
+    .range([0, y.bandwidth()])
+    .domain([-maxNum, maxNum])
 
-// add Days to yaxis 
-svg.append("g")
-  .call(d3.axisLeft(yName).tickSize(0))
-  .selectAll("text").attr("font-size", 20).style("fill", "grey")
-  .select(".domain").remove()
+  // append the svg object to the body of the page
+  const svg = d3.select("#test_violin")
+    .append("svg")
+      .attr("width", width)// + margin.left + margin.right)
+      .attr("height", height)// + margin.top + margin.bottom)
+      .attr("viewBox", [-120, 0, width + 200, height + 30])
+      .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
-// Add the shape to this svg!
-svg.append("g")
-.selectAll("myViolin")
-.data(sumstat)
-.enter()        // So now we are working group per group
-.append("g")
-  .append("path") // append elemnt
-    .attr("transform", function(d){return("translate(0, " + (y(parseInt(Object.keys(d)[0])))+")")} ) // - verschiebung y axe
-    .datum(function(d){return(Object.values(d)[0])})     // So now we are working bin per bin
-    .style("stroke", "none")
-    .style("fill","grey")
-    .attr("d", d3.area()
+  svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  // add x-axis
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x)).selectAll("text").attr("font-size", 17).style("fill", "grey")
+
+  // add x-label
+  svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", width/2 + 50)
+    .attr("y", height + 50)
+    .attr("font-size", 20)
+    .style("fill", "grey")
+    .text("Uhrzeit →");
+
+  // add Days to yaxis
+  svg.append("g")
+    .call(d3.axisLeft(yName).tickSize(0))
+    .selectAll("text").attr("font-size", 20).style("fill", "grey")
+    .select(".domain").remove()
+
+  // Add the shape to this svg!
+  svg.append("g")
+    .selectAll("myViolin")
+    .data(sumstat)
+    .enter()        // So now we are working group per group
+    .append("g")
+    .append("path") // append elemnt
+      .attr("transform", function(d){return("translate(0, " + (y(parseInt(Object.keys(d)[0])))+")")} ) // - verschiebung y axe
+      .datum(function(d){return(Object.values(d)[0])})     // So now we are working bin per bin
+      .style("stroke", "none")
+      .style("fill","grey")
+      .attr("d", d3.area()
         .x(function(d){return(x(d.x0)) })
         .y0(function(d){return yNum(-d.length)}) // - => upper violin
         .y1(yNum(0)) // cuts half of the violin
         .curve(d3.curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
-    )
+      )
 
   return svg.node();
 }
