@@ -261,7 +261,7 @@ var projection = d3.geoIdentity()
 <body>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-  <h1 style="text-align:center">TITEL</h1>
+  <h1 style="text-align:center">Übersicht der Verkehrsunfälle in Berlin im Jahr 2021</h1>
   <svg id=legend></svg>
   <div id=main>
       <div id=map><h1>MAP</h1></div>
@@ -271,7 +271,7 @@ var projection = d3.geoIdentity()
         <div id=involvedDiagramm><h1>Beteiligte</h1></div>
       </div>
   </div>
-  <h3>QUELLE</h3>
+  <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
 </body>
 # %%--- [javascript]
 # properties:
@@ -415,6 +415,7 @@ function LeafletAccidentMap(data, {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: minZoom,
     maxZoom: maxZoom,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(mod.map);
 
   L.control.scale().addTo(mod.map);
