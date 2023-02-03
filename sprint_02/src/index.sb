@@ -582,8 +582,8 @@ function get_data_object_bar_chart(data, numberFct) {
 }
 
 // returns category without "Ist"
-function get_substring(cat){
-  cat.category = cat.category.substring(3);
+function toNiceNames(cat){
+  cat.category = involvedNames[cat.category];
 }
 
 // returns category with its meaning
@@ -624,7 +624,7 @@ function BarChart(data, {
   const mod = {}
 
   let barData = get_data_object_bar_chart(data, getInvolvedNumbers);
-  barData.map(get_substring)
+  barData.map(toNiceNames)
   // Compute values.
   let X = d3.map(barData, x);
   let Y = d3.map(barData, y);
@@ -731,7 +731,7 @@ function BarChart(data, {
       bar
         .transition()
         .duration(200)
-        .style("opacity", i => i === idx ? 1.0 : 0.4)
+        .style("opacity", i => i === cat ? 1.0 : 0.4)
       mod.focusedBar = cat;
     } else { // focus all again
       mod.manager.trigger({ involved: [] })
@@ -747,7 +747,7 @@ function BarChart(data, {
 
   mod.update = function(data) {
     let barData = get_data_object_bar_chart(data, getInvolvedNumbers);
-    barData.forEach(get_substring) // map -> principle of least astonishment
+    barData.forEach(toNiceNames) // map -> principle of least astonishment
 
     // update bar heigth
     let Y = d3.map(barData, y);
@@ -1183,7 +1183,11 @@ RaincloudPlot(data)
 # ---%%
 var manager = {
   initData: data,
-  currentFilters: {},
+  currentFilters: {
+    lor: undefined,
+    graveness: undefined,
+    involved: []
+  },
   combinedIgnores: {},
   members: [], // list of objects that have a module and a an ignore property (explained in addMember())
 
