@@ -613,6 +613,7 @@ function BarChart(data, {
   divName,
 } = {}) {
   removeAllChildren(divName);
+  const mod = {}
 
   let barData = get_data_object_bar_chart(data, getInvolvedNumbers);
   barData.map(get_substring)
@@ -686,10 +687,10 @@ function BarChart(data, {
       .attr("y", i => yScale(Y[i]))
       .attr("height", i => yScale(0) - yScale(Y[i]))
       .attr("width", xScale.bandwidth())
+      .attr("cursor", "pointer")
       .attr("fill", i => col[i]);
 
-  if (title) bar.append("title")
-      .text(title);
+  if (title) bar.append("title").text(title);
 
   let bartext = svg.append("g")
     .attr("fill", "currentColor")
@@ -713,7 +714,29 @@ function BarChart(data, {
     .attr("transform", `translate(0,${height - marginBottom})`)
     .call(xAxis);
 
-  const mod = {}
+  mod.focusedBar = undefined
+  mod.clickBar = function(cat) {
+    if (mod.focusedBar === undefined || mod.focusedBar != cat) {
+      let niceName = X[cat]
+      let officialName = Object.entries(involvedNames).find(([k, v]) => v === niceName)[0]
+      mod.manager.trigger({ involved: [officialName] })
+      bar
+        .transition()
+        .duration(200)
+        .style("opacity", i => i === idx ? 1.0 : 0.4)
+      mod.focusedBar = cat;
+    } else { // focus all again
+      mod.manager.trigger({ involved: [] })
+      bar
+        .transition()
+        .duration(200)
+        .style("opacity", 1.0)
+      mod.focusedBar = undefined;
+    }
+  }
+
+  bar.on("click", (e, cat), mod.barClick(cat))
+
   mod.update = function(data) {
     let barData = get_data_object_bar_chart(data, getInvolvedNumbers);
     barData.forEach(get_substring) // map -> principle of least astonishment
@@ -810,6 +833,7 @@ function BarChartH(data, {
   divName,
 } = {}) {
   removeAllChildren(divName)
+  mod = {};
 
   // get correct data format
   data = get_data_object_bar_chart(data, countGraveness);
@@ -888,8 +912,33 @@ function BarChartH(data, {
       .attr("y", i => yScale(Y[i]))
       .attr("width", i => xScale(X[i]) - xScale(0))
       .attr("height", yScale.bandwidth())
-      .attr("fill", i => col[i]);
+      .attr("fill", i => col[i])
+      .attr("cursor", "pointer")
+      .attr("category", i => i)
+      .style("opacity", 1.0);
 
+  mod.focusedBar = undefined
+  mod.clickBar = function(idx) {
+    let categoryNum = idx + 1
+    console.log(categoryNum)
+    if (mod.focusedBar === undefined || mod.focusedBar != idx) {
+      mod.manager.trigger({ graveness: categoryNum })
+      bar
+        .transition()
+        .duration(200)
+        .style("opacity", i => i === idx ? 1.0 : 0.4)
+      mod.focusedBar = idx;
+    } else { // focus all again
+      mod.manager.trigger({ graveness: undefined })
+      bar
+        .transition()
+        .duration(200)
+        .style("opacity", 1.0)
+      mod.focusedBar = undefined;
+    }
+  }
+
+  bar.on("click", (e, i_) => mod.clickBar(i_))
 
   const bar_title = svg.append("g")
     .attr("fill", titleColor)
@@ -912,8 +961,9 @@ function BarChartH(data, {
   svg.append("g")
     .attr("transform", `translate(${marginLeft},0)`)
     .call(yAxis);
+    .selectAll(".tick")
+      .on("click", (e, cat) => mod.clickBar(gravenessMeanings.indexOf(cat)))
 
-  mod = {};
   mod.update = function(data) {
     data = get_data_object_bar_chart(data, countGraveness);
     data.map(get_meaning)
