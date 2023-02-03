@@ -1410,7 +1410,10 @@ function RaincloudPlot(data) {
 # %% [html]
 
 <div id="test_violin"></div>
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
 removeAllChildren("test_violin");
 RaincloudPlot(data)
 # %%--- [javascript]
