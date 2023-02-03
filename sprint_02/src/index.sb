@@ -974,6 +974,7 @@ function BarChartH(data, {
     .attr("transform", `translate(${marginLeft},0)`)
     .call(yAxis)
     .selectAll(".tick")
+      .attr("cursor", "pointer")
       .on("click", (e, cat) => mod.clickBar(gravenessMeanings.indexOf(cat)))
 
   mod.update = function(data) {
