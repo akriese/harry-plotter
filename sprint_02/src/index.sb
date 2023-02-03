@@ -55,6 +55,14 @@ var accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall"
                       "Unfall im Längsverkehr", "Sonstiger Unfall"]
 var gravenessMeanings = ["Tödlich", "Schwer", "Leicht"]
 var involved = ["IstRad", "IstPKW", "IstFuss", "IstKrad", "IstGkfz", "IstSonstige"]
+var involvedNames = {
+  IstRad: "Fahrrad",
+  IstPKW: "PKW",
+  IstFuss: "Fußgänger",
+  IstKrad: "Motorrad",
+  IstGkfz: "LKW",
+  IstSonstige: "Sonstige"
+}
 
 // Some added properties for each data point
 data.forEach(d => {
@@ -735,7 +743,7 @@ function BarChart(data, {
     }
   }
 
-  bar.on("click", (e, cat), mod.barClick(cat))
+  bar.on("click", (e, cat) => mod.clickBar(cat))
 
   mod.update = function(data) {
     let barData = get_data_object_bar_chart(data, getInvolvedNumbers);
@@ -960,7 +968,7 @@ function BarChartH(data, {
 
   svg.append("g")
     .attr("transform", `translate(${marginLeft},0)`)
-    .call(yAxis);
+    .call(yAxis)
     .selectAll(".tick")
       .on("click", (e, cat) => mod.clickBar(gravenessMeanings.indexOf(cat)))
 
@@ -1262,15 +1270,19 @@ body {
 }
 
 #infoText {
-  height: 20%;
+  height: 15%;
+  margin: 20px
+  text-align: center
 }
 
 #gravenessDiagramm {
-  height: 40%;
+  height: 35%;
+  margin: 20px
 }
 
 #involvedDiagramm {
-  height: 40%;
+  height: 50%;
+  margin: 20px
 }
 
 /*
