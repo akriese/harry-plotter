@@ -274,15 +274,188 @@ LorWGS.features.forEach(f => {
 var projection = d3.geoIdentity()
   .reflectY(true)
   .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
+# %% [javascript]
+function reveal() {
+  var reveals = document.querySelectorAll(".reveal");
+  for (var i = 0; i < reveals.length; i++) {
+    var windowHeight = window.innerHeight;
+    var elementTop = reveals[i].getBoundingClientRect().top;
+    var elementVisible = 150;
+    if (elementTop < windowHeight - elementVisible) {
+      reveals[i].classList.add("active");
+    } else {
+      reveals[i].classList.remove("active");
+    }
+  }
+}
+window.addEventListener("scroll", reveal);
+reveal();
+# %% [css]
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Asap", sans-serif;
+}
+
+section{
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+section:nth-child(1){
+  color: #ff0808;
+  }
+
+section .container{
+  margin: 100px;
+  max-width: 100%;
+}
+section h1{
+  font-size: 3rem;
+  margin: 20px;
+}
+section h2{
+  font-size: 40px;
+  text-align: center;
+  text-transform: uppercase;
+}
+section .text-container{
+   display: flex;
+}
+section .text-container .text-box{
+  margin: 20px;
+  padding: 20px;
+}
+
+@media (max-width: 900px){
+  section h1{
+    font-size: 2rem;
+    text-align: center;
+  }
+  section .text-container{
+    flex-direction: column;
+  }
+}
+
+.reveal{
+  position: relative;
+  transform: translateY(150px);
+  opacity: 0;
+  transition: 1s all ease;
+}
+
+.reveal.active{
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.left-container {
+  float: left;
+  width: 50%;
+}
+
+.left-content {
+  width: 100%;
+}
+.right-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 40vw;
+  width: 50%;
+  float: left;
+}
+
+.right-content {
+  max-width: 70%;
 # %%--- [html]
 # properties:
-#   top_hidden: true
 #   run_on_load: true
 # ---%%
+
 <body>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-  <h1 style="text-align:center">Übersicht der Verkehrsunfälle in Berlin im Jahr 2021</h1>
+<section>
+    <div id= "titel" class="container reveal">
+  		<h1 style="text-align:center">Übersicht der Verkehrsunfälle in Berlin im Jahr 2021</h1>
+    </div>
+  </section>
+  <section>
+    <div id= "introduction" class="container ">
+      <h1 class= "reveal" style="text-align:center">Einleitung</h1>
+       <h2 class= "reveal" style="text-align:center">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa.</h2>
+    </div>
+  </section>
+
+  <section>
+    <div id="askforViolin" class="container">
+       	<h1 class= "reveal" style="text-align:center">Frage zu Violin blabla bla bla bla </h1>
+    </div>
+  </section>
+  
+  <section>
+    <div id="violin" class="left-container">
+      <div id="Mapgrafik" class="left-content">
+    	<div class= "reveal"  id=test_violin></div>
+    </div>
+      </div>
+
+            <div class="right-container">
+      <div class="right-content reveal">
+        Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. 
+        </div>
+    </div>
+  </section>
+
+    <section>
+      <div  class="left-content">
+    	<h1 class= "reveal"  style="text-align:center">Erklärung</h1>
+       <h2 class= "reveal" style="text-align:center">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa.</h2>
+    </div> 
+
+
+      </section>
+  <section>
+    <div id="map_e" class="left-container">
+    	 <div class="left-content">
+      		<h1 class= "reveal">Map</h1>
+        </div>
+    </div>
+    <div class="right-container">
+      <div class="right-content reveal">
+        Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. 
+        </div>
+    </div>
+  </section>
+
+      <section>
+    <div id="GRAVENESS_e" class="left-container">
+      <div id=gravenessDiagrammTutorial class= "reveal" ></div>
+    </div>
+          <div class="right-container">
+      <div class="right-content reveal">
+        Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. 
+        </div>
+    </div>
+  </section>
+
+      <section>
+    <div id="beteiligte_e" class="left-container">
+      <div id=involvedDiagrammTutorial  class= "reveal" ></div>
+    </div>
+          <div class="right-container">
+      <div class="right-content reveal">
+        Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. 
+        </div>
+    </div>
+  </section>  
+
+
+  <section>
+    <div class="container reveal">
   <svg id=legend></svg>
   <div id=main>
       <div id=map><h1>MAP</h1></div>
@@ -292,7 +465,9 @@ var projection = d3.geoIdentity()
         <div id=involvedDiagramm><h1>Beteiligte</h1></div>
       </div>
   </div>
-  <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
+      </div>
+  </section>
+    <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
 </body>
 # %% [markdown]
 ## Map implementation
@@ -799,10 +974,10 @@ function BarChart(data, {
 }
 # %%--- [javascript]
 # properties:
-#   top_hidden: true
 #   bottom_hidden: true
 #   run_on_load: true
 # ---%%
+
 var moduleInvolvedChart = BarChart(data, {
   x: d => d.category, // x=> xScale(X[i])). axis -> category
   y: d => d.count, // counts
@@ -812,6 +987,18 @@ var moduleInvolvedChart = BarChart(data, {
   divName: "involvedDiagramm",
   //title: "Anzahl der Unfälle per Beteiligte",
 })
+# %% [javascript]
+var moduleInvolvedChartTutorial = BarChart(data, {
+x: d => d.category, // x=> xScale(X\[i\])). axis -> category
+y: d => d.count, // counts
+yLabel: "↑ Anzahl",
+width: 500,
+height: 400, // think about deceptive design
+divName: "involvedDiagrammTutorial",
+//title: "Anzahl der Unfälle per Beteiligte",
+})
+# %% [javascript]
+moduleInvolvedChartTutorial.clickBar = () => {}
 # %% [markdown]
 ## Graveness chart
 # %%--- [javascript]
@@ -1031,10 +1218,10 @@ function BarChartH(data, {
 }
 # %%--- [javascript]
 # properties:
-#   top_hidden: true
 #   bottom_hidden: true
 #   run_on_load: true
 # ---%%
+
 var moduleGravenessChart = BarChartH(data, {
   x: d => d.count, // x axis -> counts
   y: d => d.category, // y-axis -> counts
@@ -1045,6 +1232,19 @@ var moduleGravenessChart = BarChartH(data, {
   divName: "gravenessDiagramm",
   //title: "Gesamtanzahl der Unfälle per Beteiligte",
 })
+# %% [javascript]
+var moduleGravenessChartTutorial = BarChartH(data, {
+  x: d => d.count, // x axis -> counts
+  y: d => d.category, // y-axis -> counts
+  xLabel: "Anzahl →",
+  width: 500,
+  height: 300, // think about deceptive design
+  marginLeft: 80,
+  divName: "gravenessDiagrammTutorial",
+  //title: "Gesamtanzahl der Unfälle per Beteiligte",
+})
+# %% [javascript]
+moduleGravenessChartTutorial.clickBar = () => {}
 # %% [markdown]
 ## Violin plot for amount of crash per days and hour
 
@@ -1176,6 +1376,7 @@ function RaincloudPlot(data) {
   return svg.node();
 }
 # %% [html]
+
 <div id="test_violin"></div>
 # %% [javascript]
 removeAllChildren("test_violin");
