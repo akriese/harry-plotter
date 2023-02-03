@@ -803,13 +803,12 @@ function BarChart(data, {
 #   bottom_hidden: true
 #   run_on_load: true
 # ---%%
-//
 var moduleInvolvedChart = BarChart(data, {
   x: d => d.category, // x=> xScale(X[i])). axis -> category
   y: d => d.count, // counts
   yLabel: "↑ Anzahl",
-  width: 400,
-  height: 200, // think about deceptive design
+  width: 500,
+  height: 400, // think about deceptive design
   divName: "involvedDiagramm",
   //title: "Anzahl der Unfälle per Beteiligte",
 })
@@ -1039,8 +1038,8 @@ var moduleGravenessChart = BarChartH(data, {
   x: d => d.count, // x axis -> counts
   y: d => d.category, // y-axis -> counts
   xLabel: "Anzahl →",
-  width: 400,
-  height: 200, // think about deceptive design
+  width: 500,
+  height: 300, // think about deceptive design
   marginLeft: 80,
   divName: "gravenessDiagramm",
   //title: "Gesamtanzahl der Unfälle per Beteiligte",
