@@ -554,7 +554,7 @@ function colorLegend(colorScale, {
 
   const svg = selection === undefined ?
     document.createElementNS('http://www.w3.org/2000/svg', 'svg') :
-    selection.append("svg").attr('transform', `translate(${300}, 20)`)
+    selection.append("svg");
 
   const defs = svg.append("defs");
   const linearGradient = defs.append("linearGradient")
