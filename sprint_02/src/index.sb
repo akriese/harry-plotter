@@ -1,4 +1,9 @@
-# %% [esm]
+# %%--- [esm]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 import * as tj from "https://cdn.skypack.dev/pin/topojson@v3.0.2-ovpHjX420lx9YlKkg1QF/mode=imports/optimized/topojson.js"
 import * as d3_ from "https://cdn.skypack.dev/d3@7.6.0"
 import proj from 'https://cdn.skypack.dev/proj4'
@@ -9,7 +14,12 @@ export const d3 = d3_;
 export const proj4 = proj;
 export const L = leaflet;
 export const Lm = leafletMarkercluster;
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 async function fetchJson(url) {
   return fetch(url).then(response => response.json())
 }
@@ -23,7 +33,12 @@ var data = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plot
 var berlin_lor_topo = await fetchJson("https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/lor_bezirksregionen_2021.topojson")
 berlin_lor_topo
 
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 /// We define the two different coordinate systems for proj4
 proj4.defs([["EPSG:32632","+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs +type=crs"],
            ["EPSG:32633", "+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +type=crs"],
@@ -32,13 +47,29 @@ function from32to33(coords) {
   return proj4("EPSG:32632", "EPSG:32633", coords)
 }
 
+var monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
+                    "August", "September", "Oktober", "November", "Dezember"]
+var dayNames = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+var accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
+                      "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
+                      "Unfall im Längsverkehr", "Sonstiger Unfall"]
+var gravenessMeanings = ["Tödlich", "Schwer", "Leicht"]
+var involved = ["IstRad", "IstPKW", "IstFuss", "IstKrad", "IstGkfz", "IstSonstige"]
+var involvedNames = {
+  IstRad: "Fahrrad",
+  IstPKW: "PKW",
+  IstFuss: "Fußgänger",
+  IstKrad: "Motorrad",
+  IstGkfz: "LKW",
+  IstSonstige: "Sonstige"
+}
 
 // Some added properties for each data point
 data.forEach(d => {
   // Assign each data point a new parameter 'coords' holding x AND y value
   // these coordinates now match the coordinates that are used by the topojson file :)
   d.coords = from32to33([d.LINREFX, d.LINREFY]);
-  
+
   // we have to cut off the last two digits of each number, as we want the "Bezirksregionen"
   // from https://www.statistik-berlin-brandenburg.de/raumbezuege#:~:text=Neue%20LOR%2DSystematik%20seit%202021
   d.lor = Math.floor(d.LOR_ab_2021 / 100);
@@ -51,8 +82,16 @@ data.forEach(d => {
     }
   }
   d.Beteiligte = arr
+
+  // shift the days to start at monday=0, sunday=6
+  // sunday is UWOCHENTAG 1
+  d.day = d.UWOCHENTAG == 1 ? 6 : (d.UWOCHENTAG - 2)
 })
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 /// Collection of functions that grab certain parts of the given data
 
 // general function to count occurences of a category in one data property
@@ -100,7 +139,7 @@ function countPerLOR(data) {
 // extract accident time data
 // mode: one of {"single", "array", "day_arrays"} defines how the data is returned
 function getDaysAndHours(data, mode="single") {
-  var filtered = data.map(accident => ({ day: accident.UWOCHENTAG, hour: accident.STUNDE }));
+  var filtered = data.map(accident => ({ day: accident.day, hour: accident.STUNDE }));
   if (mode === "single") return filtered;
   if (mode === "array" ) {
     return {
@@ -110,10 +149,7 @@ function getDaysAndHours(data, mode="single") {
   }
 
   // else: day_arrays
-  var result = {}
-  for (day of [1,2,3,4,5,6,7]) {
-    result[day] = []
-  }
+  var result = Array.from(Array(7), () => [])
 
   for (p of filtered) {
     result[p.day].push(p.hour)
@@ -124,7 +160,6 @@ function getDaysAndHours(data, mode="single") {
 
 // get numbers of how many accidents had e.g. cars involved
 function getInvolvedNumbers(data) {
-  var involved = ["IstRad", "IstPKW", "IstFuss", "IstKrad", "IstGkfz", "IstSonstige"]
   var results = {}
   for (x of involved) {
     results[x] = 0
@@ -138,7 +173,12 @@ function getInvolvedNumbers(data) {
 
   return results
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 /// Apply a filter on the overall data and return the chosen set
 function filterData(data, {
   lor = undefined, // int describing the focused lor; undefined means the whole city is focused
@@ -146,40 +186,40 @@ function filterData(data, {
   graveness = undefined, // int describing the chosen accidents with certain graveness (1,2,3); undefined means no filter
   involved = [] // list of strings, which kind parties are involved in an accident; empty means no filter
 }) {
-  return data.filter(
-    accident => {
-      if (lor !== undefined && accident.lor !== lor) {
-        return false
-      }
+  var filteredData = data
+  if (lor !== undefined) {
+    filteredData = filteredData.filter(acc => acc.lor === lor)
+  }
 
-      if (days.length != 0 && days.indexOf(accident.UWOCHENTAG) == -1) {
-        return false
-      }
+  if (days.length != 0) {
+    filteredData = filteredData.filter(acc => days.indexOf(acc.UWOCHENTAG) != -1)
+  }
 
-      if (graveness !== undefined && accident.UKATEGORIE != graveness) {
-        return false
-      }
+  if (graveness !== undefined) {
+    filteredData = filteredData.filter(acc => acc.UKATEGORIE == graveness)
+  }
 
-      if (involved.length != 0) {
-        var skip = false
-        for (inv of involved) {
-          if (!accident[inv]) {
-            skip = true
-            break
-          }
-        }
-
-        // if some required entity is not involved, we continue
-        if (skip) {
+  if (involved.length != 0) {
+    filteredData = filteredData.filter(acc => {
+      var skip = false
+      for (inv of involved) {
+        if (!acc[inv]) {
           return false
         }
       }
 
       return true
-    }
-  );
+    });
+  }
+
+  return filteredData
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // trying out the filter function
 function measureFiltering(filter) {
   console.time()
@@ -199,7 +239,12 @@ getDaysAndHours(data, mode="day_arrays")
 // trying out filters to precompute data for bar chart
 getInvolvedNumbers(measureFiltering({involved: ["IstRad"]}))
 countGraveness(data)
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // Berlin topographies
 var LorAreas = topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states)
 
@@ -217,6 +262,11 @@ LorWGS.features = LorAreas.features.map(feature => ({
   }
 }))
 
+var lorNames = {}
+LorWGS.features.forEach(f => {
+  lorNames[parseInt(f.properties.BZR_ID)] = f.properties.BZR_NAME
+})
+
 // TODO: probably not needed anymore since we are now using leaflets polygon function
 // statemesh should work as it looks like in the bubble map example
 //statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b) => a !== b)
@@ -224,211 +274,58 @@ LorWGS.features = LorAreas.features.map(feature => ({
 var projection = d3.geoIdentity()
   .reflectY(true)
   .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
-# %% [javascript]
-// For trying out different filters
-//module.update(filterData(data, { graveness: 2 }))
-# %% [html]
+# %%--- [html]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 <body>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-  <h1 style="text-align:center">TITEL</h1>
+  <h1 style="text-align:center">Übersicht der Verkehrsunfälle in Berlin im Jahr 2021</h1>
+  <svg id=legend></svg>
   <div id=main>
-      <div id=map><h1>MAP</h1><svg id=legend></svg></div>
+      <div id=map><h1>MAP</h1></div>
       <div id=right>
         <div id=infoText><h1>INFO</h1></div>
         <div id=gravenessDiagramm><h1>GRAVENESS</h1></div>
         <div id=involvedDiagramm><h1>Beteiligte</h1></div>
       </div>
   </div>
-  <h3>QUELLE</h3>
+  <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
 </body>
-# %%--- [css]
+# %% [markdown]
+## Map implementation
+# %%--- [javascript]
 # properties:
 #   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
 # ---%%
-#main {
-  height: 850px;
-  width: 1600px;
-  display: flex;
-}
-
-#map {
-  background-color: brown;
-  width: 70%;
-}
-
-#right {
-  background-color: coral;
-  width: 30%
-}
-
-#infoText {
-  height: 20%; 
-  background-color: white;
-}
-
-#gravenessDiagramm {
-  background-color: red;
-  height: 40%;
-}
-
-#involvedDiagramm {
-  background-color: yellow;
-  height: 40%;
-}
-
-# %% [html]
-<!-- Main div for the map svg -->
-<div id="content"></div>
-
-<body>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-  <div id=mother></div>
-  <svg id=legendSvg></svg>
-</body>
-# %%--- [css]
-# properties:
-#   top_hidden: true
-# ---%%
-<!-- Main div for the map svg -->
-<div id="content"></div>
-# %% [css]
-
-
-body {
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
-  font-size: 14px;
-  color: #333;
-}
-
-#mother {
-  height: 850px;
-  width: 1000px;
-}
-
-#legendSvg {
-  position: absolute;
-  height: 60px;
-  width: 300px;
-  top: 35px;
-  left: 700px;
-  /* Let mouse events go through to reach the map underneath */
-  pointer-events: none;
-  /* Make sure to be above the map pane (.leaflet-pane) */
-  z-index: 450;
-}
-
-/*
-  This is needed, as chrome is drawing a rectangle around the focused polygon
-  See: https://gis.stackexchange.com/questions/447502/prevent-leaflet-map-from-showing-rectangle-around-layer-on-click
-*/
-:focus {
-    outline: -webkit-focus-ring-color auto 0px;
-}
-
-.leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
-  background-color: #fff0;
-}
-
-.leaflet-popup-content h2 {
-  font-size: 20px;
-  text-decoration: underline;
-}
-
-.marker-cluster-large div {
-  background-color: rgba(255, 0, 0, 0.8)
-}
-.marker-cluster-large  {
-  background-color: rgba(255, 0, 0, 0.2)
-}
-.marker-cluster-medium div {
-  background-color: rgba(255, 173, 0, 0.8)
-}
-.marker-cluster-medium  {
-  background-color: rgba(255, 173, 0, 0.2)
-}
-.marker-cluster-small div {
-  background-color: rgba(247, 255, 0, 0.8)
-}
-.marker-cluster-small  {
-  background-color: rgba(247, 255, 0, 0.2)
-}
-
-/* Style of category legend text and circles */
-.legend text {
-  font-size: 0.8em;
-  fill: black;
-  font-family: sans-serif;
-}
-
-.legend circle {
-  stroke: black;
-  stroke-opacity: 0.5;
-}
-# %% [javascript]
-var manager = {
-  initData: data,
-  currentFilters: {},
-  members: [], // list of objects that have a module and a an ignore property (explained in addMember())
-  
-  // updates all members with the new information 
-  trigger(info) {
-    // merge the filters and the new info to create a new filter object, the new info 
-    // WILL OVERWRITE whatever the old filters were at the respective property!
-    this.currentFilters = {...this.currentFilters, ...info}
-    console.log(`Number of currently filtered data points: ${filterData(this.initData, this.currentFilters).length}`)
-    console.log("trigger called. updating all plots...")
-    for (member of this.members) {
-      const filteredData = filterData(this.initData, {...this.currentFilters, ...member.ignore})
-      member.module.update(filteredData)
-    }
-    console.log("Update finished.")
-  },
-  
-  // add a module to be kept in the update loop to the members
-  // ignoreFilter is a filter entity that is overwritten when updating the given module.
-  // E.g. we dont want to lose all points outside of a state when selecting it
-  // on the map. So the manager is told to ignore that filter just for the map module
-  addMember(module, { 
-    ignoreFilter = {}
-  }) {
-    // give the module a member 'manager', so it can
-    // call module.manager.trigger(info)
-    module.manager = this
-    this.members.push({module: module, ignore: ignoreFilter});
-  }
-}
-# %% [javascript]
-manager.addMember(module, {ignoreFilter: {lor: undefined}})
-# %% [javascript]
-const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
-                    "August", "September", "Oktober", "November", "Dezember"]
-const dayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
-const accidentTypes = ["Fahrunfall", "Abbiegeunfall", "Einbiegen / Kreuzen-Unfall",
-                      "Überschreiten-Unfall", "Unfall durch ruhenden Verkehr",
-                      "Unfall im Längsverkehr", "Sonstiger Unfall"]
-
 function makeTooltipContent(accident) {
   const info = accident
   const persons = "<b>Beteiligte:</b> " + info.Beteiligte.join(", ")
   const dateTime = "<b>Monat/Tag/Uhrzeit:</b> " + monthNames[info.UMONAT - 1] +
-                   "; " + dayNames[info.UWOCHENTAG - 1] +
+                   "; " + dayNames[info.day] +
                    "; " + info.USTUNDE + " Uhr";
-  const gs = ["Tödlich", "Schwer", "Leicht"]
-  const graveness = "<b>Schweregrad:</b> " + gs[info.UKATEGORIE - 1]
+  const graveness = "<b>Schweregrad:</b> " + gravenessMeanings[info.UKATEGORIE - 1]
 
   return "<b>" + accidentTypes[info.UTYP1 - 1] + "</b><br>"
                + dateTime + "<br>"
                + persons + "<br>"
                + graveness + "<br>";
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // Inspired by https://observablehq.com/@tmcw/d3-scalesequential-continuous-color-legend-example
 function colorLegend(colorScale, {
-  map = undefined, 
-  selection = undefined, 
-  width = 300, 
+  map = undefined,
+  selection = undefined,
+  width = 300,
   height = 50,
   margin = ({top: 40, right: 40, bottom: 30, left: 40}),
   barHeight = 20
@@ -436,7 +333,7 @@ function colorLegend(colorScale, {
   axisScale = d3.scaleLinear()
     .domain(colorScale.domain())
     .range([margin.left, width - margin.right])
-  
+
   axisBottom = g => g
     .attr("class", `x-axis`)
     .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -445,36 +342,41 @@ function colorLegend(colorScale, {
       .tickSize(-barHeight))
   //DOM.svg(width, height)
 
-  const svg = selection === undefined ? 
+  const svg = selection === undefined ?
     document.createElementNS('http://www.w3.org/2000/svg', 'svg') :
     selection.append("svg").attr('transform', `translate(${300}, 20)`)
-  
+
   const defs = svg.append("defs");
   const linearGradient = defs.append("linearGradient")
-      .attr("id", "linear-gradient");
-  
+    .attr("id", "linear-gradient");
+
   linearGradient.selectAll("stop")
     .data(colorScale.ticks().map((t, i, n) => ({ offset: `${100*i/n.length}%`, color: colorScale(t) })))
     .enter().append("stop")
     .attr("offset", d => d.offset)
     .attr("stop-color", d => d.color);
-  
+
   svg.append('g')
     .attr("transform", `translate(0,${height - margin.bottom - barHeight})`)
     .append("rect")
     .attr('transform', `translate(${margin.left}, 0)`)
-	.attr("width", width - margin.right - margin.left)
-	.attr("height", barHeight)
-	.style("fill", "url(#linear-gradient)");
-  
+    .attr("width", width - margin.right - margin.left)
+    .attr("height", barHeight)
+    .style("fill", "url(#linear-gradient)");
+
   svg.append('g')
     .call(axisBottom);
 
   if (map) map.getContainer().appendChild(selection.node())
-  
+
   return svg.node();
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 function StateColors(counts) {
   counts.dummy = 0
   const c = Object.entries(counts).map(([_, count]) => count)
@@ -497,7 +399,6 @@ var blackMarkerIcon = L.icon({
     iconAnchor:   [iconSize[0] / 2, iconSize[1]], // point of the icon which will correspond to marker's location
     popupAnchor:  [-15, -38] // point from which the popup should open relative to the iconAnchor
 });
-
 
 function LeafletAccidentMap(data, {
   topo,
@@ -529,6 +430,7 @@ function LeafletAccidentMap(data, {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: minZoom,
     maxZoom: maxZoom,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(mod.map);
 
   L.control.scale().addTo(mod.map);
@@ -639,23 +541,29 @@ function LeafletAccidentMap(data, {
 
   return mod;
 }
-# %% [javascript]
-// Uncomment and execute to be able to reload the map
-//module.map.remove()
-# %% [javascript]
-var module = LeafletAccidentMap(data, {
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
+var mapModule = LeafletAccidentMap(data, {
   topo: berlin_lor_topo,
   states: LorWGS,
+  divName: "map",
+  legendSvgName: "legend",
   dotCoords: d => ([d.XGCSWGS84, d.YGCSWGS84]),
   tooltipContent: acc => makeTooltipContent(acc),
   stateTitle: f => f.properties.BZR_NAME,
   stateCount: countPerLOR,
   stateId: p => parseInt(p.properties.BZR_ID),
 })
-
-// try out update, only show weekend accidents
-//module.update(filterData(data, { days: [1,7] }))
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 function removeAllChildren(name) {
   const div = document.getElementById(name);
   let child = div.lastElementChild;
@@ -665,29 +573,34 @@ function removeAllChildren(name) {
   }
 }
 # %% [markdown]
-### Sorted Bar chart category
-# %% [javascript]
+## Involved chart
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // helper functions to model data as needed
-function get_data_object_bar_chart(data, number_fct) {
-  categorys_counts = number_fct(data);
-  entries = Object.entries(categorys_counts)
-  let data_entry = entries.map(([key, val] = entry) => {
-  		return {category: key, count: val};
-	});
-  return data_entry
+function get_data_object_bar_chart(data, numberFct) {
+  let categoryCounts = numberFct(data);
+  return Object.entries(categoryCounts).map(([key, val]) => ({category: key, count: val}));
 }
 
 // returns category without "Ist"
-function get_substring(data_dict){
-  data_dict.category = data_dict.category.substring(3);
+function toNiceNames(cat){
+  cat.category = involvedNames[cat.category];
 }
 
 // returns category with its meaning
 function get_meaning(data_dict){
-  cat_graveness_dict = {1: "Tote", 2: "Schwerverletzte", 3: "Leichtverletzte"};
-  data_dict.category = cat_graveness_dict[data_dict.category];
+  data_dict.category = gravenessMeanings[data_dict.category - 1];
 }
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // Copyright 2021 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/bar-chart
@@ -708,17 +621,19 @@ function BarChart(data, {
   xPadding = 0.1, // amount of x-range to reserve to separate bars
   yFormat, // a format specifier string for the y-axis
   yLabel, // a label for the y-axis
-  color = "currentColor", // bar fill color
   titleColor = "black", // title fill color when atop bar
   titleAltColor = "currentColor", // title fill color when atop background
+  divName,
 } = {}) {
+  removeAllChildren(divName);
+  const mod = {}
 
-  data = get_data_object_bar_chart(data, getInvolvedNumbers);
-  data.map(get_substring)  
+  let barData = get_data_object_bar_chart(data, getInvolvedNumbers);
+  barData.map(toNiceNames)
   // Compute values.
-  const X = d3.map(data, x);
-  const Y = d3.map(data, y);
-  var xDomain = d3.groupSort(data, ([d]) => -d.count, d => d.category); // sort by descending frequency;
+  let X = d3.map(barData, x);
+  let Y = d3.map(barData, y);
+  let xDomain = d3.groupSort(barData, ([d]) => -d.count, d => d.category); // sort by descending frequency;
 
   // Compute default domains, and unique the x-domain.
   if (xDomain === undefined) xDomain = X;
@@ -726,30 +641,29 @@ function BarChart(data, {
   xDomain = new d3.InternSet(xDomain);
 
   // Omit any data not present in the x-domain.
-  const I = d3.range(X.length).filter(i => xDomain.has(X[i]));
+  let I = d3.range(X.length).filter(i => xDomain.has(X[i]));
 
   // Construct scales, axes, and formats.
-  const xScale = d3.scaleBand(xDomain, xRange).padding(xPadding);
-  const yScale = d3.scaleLinear(yDomain, yRange);//d3.scaleBand(yDomain, yRange);
-  const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
-  const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
-  // setted color can be changed by using another schemeCategory
-  var color = d3.scaleOrdinal(data.map(d => d.category), d3.schemeCategory10).unknown("red");
-  const col = d3.map(data, (d) => color(d.category));
+  let xScale = d3.scaleBand(xDomain, xRange).padding(xPadding);
+  let yScale = d3.scaleLinear(yDomain, yRange);//d3.scaleBand(yDomain, yRange);
+  let xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
+  let yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
 
-  const mod = {yScale: yScale, yDomain: yDomain, heigth: height, yRange: yRange, col: col, xScale: xScale};
-  
+  // setted color can be changed by using another schemeCategory
+  let color = d3.scaleOrdinal(barData.map(d => d.category), d3.schemeCategory10).unknown("red");
+  let col = d3.map(barData, (d) => color(d.category));
+
   // Compute titles.
- if (title === undefined) {
-    const formatValue = yScale.tickFormat(100, yFormat);
+  if (title === undefined) {
+    let formatValue = yScale.tickFormat(100, yFormat);
     title = i => `${formatValue(Y[i])}`;
   } else {
-    const O = d3.map(data, d => d);
-    const T = title;
-    title = i => T(O[i], i, data);
+    let O = d3.map(barData, d => d);
+    let T = title;
+    title = i => T(O[i], i, barData);
   }
 
-  const svg = d3.select("#test").append("svg")
+  let svg = d3.select(`#${divName}`).append("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", [0, 0, width, height])
@@ -757,28 +671,28 @@ function BarChart(data, {
 
   //title
   svg.append("text")
-  	  .attr("x", (width / 2 + 30))             
-      .attr("y", 30 )
-      .attr("text-anchor", "middle")
-      .attr("font-family", "sans-serif")
-      .style("font-size", "13px") 
-      .text("Anzahl der Unfälle pro Beteiligte");
+    .attr("x", (width / 2 + 30))
+    .attr("y", 30 )
+    .attr("text-anchor", "middle")
+    .attr("font-family", "sans-serif")
+    .style("font-size", "16px")
+    .text("Anzahl der Unfälle je Gruppe von Beteiligten");
 
- const yAxe = svg.append("g")
-      .attr("transform", `translate(${marginLeft},0)`)
-	  .call(yAxis)
-      .call(g => g.select(".domain").remove())
-      .call(g => g.selectAll(".tick line").clone()
-          .attr("x2", width - marginLeft - marginRight)
-          .attr("stroke-opacity", 0.1))
-      .call(g => g.append("text")
-          .attr("x", -marginLeft)
-          .attr("y", 50)
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "start")
-          .text(yLabel));
-  
-  const bar = svg.append("g")
+  let yAxe = svg.append("g")
+    .attr("transform", `translate(${marginLeft},0)`)
+    .call(yAxis)
+    .call(g => g.select(".domain").remove())
+    .call(g => g.selectAll(".tick line").clone()
+      .attr("x2", width - marginLeft - marginRight)
+      .attr("stroke-opacity", 0.1))
+    .call(g => g.append("text")
+      .attr("x", -marginLeft)
+      .attr("y", 50)
+      .attr("fill", "currentColor")
+      .attr("text-anchor", "start")
+      .text(yLabel));
+
+  let bar = svg.append("g")
     .selectAll("rect")
     .data(I)
     .join("rect")
@@ -786,16 +700,16 @@ function BarChart(data, {
       .attr("y", i => yScale(Y[i]))
       .attr("height", i => yScale(0) - yScale(Y[i]))
       .attr("width", xScale.bandwidth())
-	  .attr("fill", i => col[i]);
-  
-  if (title) bar.append("title")
-      .text(title);
+      .attr("cursor", "pointer")
+      .attr("fill", i => col[i]);
 
-const bartext = svg.append("g")
-      .attr("fill", "currentColor")
-      .attr("text-anchor", "end")
-      .attr("font-family", "sans-serif")
-      .attr("font-size", 10)
+  if (title) bar.append("title").text(title);
+
+  let bartext = svg.append("g")
+    .attr("fill", "currentColor")
+    .attr("text-anchor", "end")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", 10)
     .selectAll("text")
     .data(I)
     .join("text")
@@ -805,31 +719,52 @@ const bartext = svg.append("g")
       .attr("dx", -4)
       .text(title)
       .call(text=> text.filter(i => yScale(Y[i]) - yScale(0) < 20) // short bars
-          .attr("dy", +4)
-          .attr("fill", titleAltColor)
-          .attr("text-anchor", "start"));
-  
-svg.append("g")
-      .attr("transform", `translate(0,${height - marginBottom})`)
-      .call(xAxis);
-  
-  mod.update = function(data) {
-    
-    data = get_data_object_bar_chart(data, getInvolvedNumbers);
-	data.map(get_substring) // map -> principle of least astonishment
-    
-    // update bar heigth
-  	const Y = d3.map(data, y);
-    yDomain = [0, d3.max(Y)]	
-    const yScale = d3.scaleLinear(yDomain, yRange);
+        .attr("dy", +4)
+        .attr("fill", titleAltColor)
+        .attr("text-anchor", "start"));
 
-  	const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
-    yAxe.call(yAxis)
-      .call(g => g.select(".domain").remove())
-      .call(g => g.selectAll(".tick line").clone()
-          .attr("x2", width - marginLeft - marginRight)
-          .attr("stroke-opacity", 0.1))
-      .call(g => g.append("text")
+  svg.append("g")
+    .attr("transform", `translate(0,${height - marginBottom})`)
+    .call(xAxis);
+
+  mod.focusedBar = undefined
+  mod.clickBar = function(cat) {
+    if (mod.focusedBar === undefined || mod.focusedBar != cat) {
+      let niceName = X[cat]
+      let officialName = Object.entries(involvedNames).find(([k, v]) => v === niceName)[0]
+      mod.manager.trigger({ involved: [officialName] })
+      bar
+        .transition()
+        .duration(200)
+        .style("opacity", i => i === cat ? 1.0 : 0.4)
+      mod.focusedBar = cat;
+    } else { // focus all again
+      mod.manager.trigger({ involved: [] })
+      bar
+        .transition()
+        .duration(200)
+        .style("opacity", 1.0)
+      mod.focusedBar = undefined;
+    }
+  }
+
+  bar.on("click", (e, cat) => mod.clickBar(cat))
+
+  mod.update = function(data) {
+    let barData = get_data_object_bar_chart(data, getInvolvedNumbers);
+    barData.forEach(toNiceNames) // map -> principle of least astonishment
+
+    // update bar heigth
+    let Y = d3.map(barData, y);
+    let yDomain = [0, d3.max(Y)]
+    let yScale = d3.scaleLinear(yDomain, yRange);
+
+    let yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
+    yAxe.selectAll("*").remove()
+    yAxe.attr("transform", `translate(${marginLeft},0)`)
+      .call(yAxis)
+        .call(g => g.select(".domain").remove())
+        .call(g => g.append("text")
           .attr("x", -marginLeft)
           .attr("y", 50)
           .attr("fill", "currentColor")
@@ -837,50 +772,54 @@ svg.append("g")
           .text(yLabel));
 
     // update bar height
-	bar.transition().duration(500).attr("y", i => yScale(Y[i])).attr("height", i => yScale(0) - yScale(Y[i]))
+    bar.transition().duration(500).attr("y", i => yScale(Y[i])).attr("height", i => yScale(0) - yScale(Y[i]))
 
     // update text height
     bartext.transition().duration(500).attr("y", i => yScale(Y[i]) - 7)
 
-    const formatValue = yScale.tickFormat(100, yFormat);
+    let formatValue = yScale.tickFormat(100, yFormat);
     title = i => `${formatValue(Y[i])}`;
-    
+
     bartext.data(I)
-    .join("text")
-      .attr("y", i => yScale(Y[i]) - 7)
-      .attr("x", i => xScale(X[i]) + xScale.bandwidth() / 3)
-      .attr("dy", "0.35em")
-      .attr("dx", -4)
-      .text(title)
-      .call(text=> text.filter(i => yScale(Y[i]) - yScale(0) < 20) // short bars
+      .join("text")
+        .attr("y", i => yScale(Y[i]) - 7)
+        .attr("x", i => xScale(X[i]) + xScale.bandwidth() / 3)
+        .attr("dy", "0.35em")
+        .attr("dx", -4)
+        .text(title)
+        .call(text => text.filter(i => yScale(Y[i]) - yScale(0) < 20) // short bars
           .attr("dy", +4)
           .attr("fill", titleAltColor)
           .attr("text-anchor", "start"));
-    
-    
+
     return this
   }
-  
+
   return mod;
 }
-# %% [html]
-<div id="test"></div>
-
-# %% [javascript]
-removeAllChildren("test");
-module = BarChart(data, {
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
+var moduleInvolvedChart = BarChart(data, {
   x: d => d.category, // x=> xScale(X[i])). axis -> category
   y: d => d.count, // counts
   yLabel: "↑ Anzahl",
-  width: 400,
-  height: 200, // think about deceptive design
+  width: 500,
+  height: 400, // think about deceptive design
+  divName: "involvedDiagramm",
   //title: "Anzahl der Unfälle per Beteiligte",
 })
-# %% [javascript]
-module.update(filterData(data, { graveness: 2 }))
 # %% [markdown]
-## sorted horizontal bar chart graveness
-# %% [javascript]
+## Graveness chart
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 // Copyright 2021 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/horizontal-bar-chart
@@ -903,15 +842,17 @@ function BarChartH(data, {
   color = "currentColor", // bar fill color
   titleColor = "black", // title fill color when atop bar
   titleAltColor = "currentColor", // title fill color when atop background
+  divName,
 } = {}) {
+  removeAllChildren(divName)
+  mod = {};
 
   // get correct data format
-  const cat_graveness_dict = {1: "Unfall mit Getöteten", 2: "Unfall mit Schwerverletzten", 3: "Unfall mit Leichtverletzten"};
   data = get_data_object_bar_chart(data, countGraveness);
   data.map(get_meaning)
 
   var yDomain = d3.groupSort(data, ([d]) => d.count, d => d.category); // sort by descending frequency
-  
+
   // Compute values.
   const X = d3.map(data, x);
   const Y = d3.map(data, y);
@@ -946,36 +887,36 @@ function BarChartH(data, {
     title = i => T(O[i], i, data);
   }
 
-  const svg = d3.select("#test_horizontal").append("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .attr("viewBox", [0, 0, width, height])
-      .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+  const svg = d3.select(`#${divName}`).append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, width, height])
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
   //title
   svg.append("text")
-  	  .attr("x", (width / 2 + 30))             
-      .attr("y", 30 )
-      .attr("text-anchor", "middle")
-      .attr("font-family", "sans-serif")
-      .style("font-size", "13px") 
-      .text("Anzahl der Unfälle pro Schweregrad");
+    .attr("x", (width / 2 + 30))
+    .attr("y", 30 )
+    .attr("text-anchor", "middle")
+    .attr("font-family", "sans-serif")
+    .style("font-size", "16px")
+    .text("Anzahl der Unfälle je Schweregrad");
 
   const xAxe = svg.append("g")
-      .attr("transform", `translate(0,${marginTop})`)
-      .call(xAxis)
-      .call(g => g.select(".domain").remove())
-      .call(g => g.selectAll(".tick line").clone()
-          .attr("y2", height - marginTop - marginBottom)
-          .attr("stroke-opacity", 0.1))
-      .call(g => g.append("text")
-          .attr("x", width - marginRight)
-          .attr("y", -22)
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "end")
-          .text(xLabel));
+    .attr("transform", `translate(0,${marginTop})`)
+    .call(xAxis)
+    .call(g => g.select(".domain").remove())
+    .call(g => g.selectAll(".tick line").clone()
+      .attr("y2", height - marginTop - marginBottom)
+      .attr("stroke-opacity", 0.1))
+    .call(g => g.append("text")
+      .attr("x", width - marginRight)
+      .attr("y", -22)
+      .attr("fill", "currentColor")
+      .attr("text-anchor", "end")
+      .text(xLabel));
 
-  const bar = svg.append("g") 
+  const bar = svg.append("g")
     .selectAll("rect")
     .data(I)
     .join("rect")
@@ -983,14 +924,39 @@ function BarChartH(data, {
       .attr("y", i => yScale(Y[i]))
       .attr("width", i => xScale(X[i]) - xScale(0))
       .attr("height", yScale.bandwidth())
-      .attr("fill", i => col[i]);
+      .attr("fill", i => col[i])
+      .attr("cursor", "pointer")
+      .attr("category", i => i)
+      .style("opacity", 1.0);
 
-  
- const bar_title = svg.append("g")
-      .attr("fill", titleColor)
-      .attr("text-anchor", "end")
-      .attr("font-family", "sans-serif")
-      .attr("font-size", 10)
+  mod.focusedBar = undefined
+  mod.clickBar = function(idx) {
+    let categoryNum = idx + 1
+    console.log(categoryNum)
+    if (mod.focusedBar === undefined || mod.focusedBar != idx) {
+      mod.manager.trigger({ graveness: categoryNum })
+      bar
+        .transition()
+        .duration(200)
+        .style("opacity", i => i === idx ? 1.0 : 0.4)
+      mod.focusedBar = idx;
+    } else { // focus all again
+      mod.manager.trigger({ graveness: undefined })
+      bar
+        .transition()
+        .duration(200)
+        .style("opacity", 1.0)
+      mod.focusedBar = undefined;
+    }
+  }
+
+  bar.on("click", (e, i_) => mod.clickBar(i_))
+
+  const bar_title = svg.append("g")
+    .attr("fill", titleColor)
+    .attr("text-anchor", "end")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", 10)
     .selectAll("text")
     .data(I)
     .join("text")
@@ -1000,82 +966,85 @@ function BarChartH(data, {
       .attr("dx", +30)
       .text(title)
       .call(text => text.filter(i => xScale(X[i]) - xScale(0) < 0) // short bars
-          .attr("dx", +4)
-          .attr("fill", titleAltColor)
-          .attr("text-anchor", "start"));
+        .attr("dx", +4)
+        .attr("fill", titleAltColor)
+        .attr("text-anchor", "start"));
 
   svg.append("g")
-      .attr("transform", `translate(${marginLeft},0)`)
-      .call(yAxis);
-  mod = {};
+    .attr("transform", `translate(${marginLeft},0)`)
+    .call(yAxis)
+    .selectAll(".tick")
+      .attr("cursor", "pointer")
+      .on("click", (e, cat) => mod.clickBar(gravenessMeanings.indexOf(cat)))
+
   mod.update = function(data) {
-    
-   data = get_data_object_bar_chart(data, countGraveness);
-   data.map(get_meaning)
-    
+    data = get_data_object_bar_chart(data, countGraveness);
+    data.map(get_meaning)
+
     // update bar heigth
-  	const X = d3.map(data, x);
-    xDomain = [0, d3.max(X)]	
+    const X = d3.map(data, x);
+    xDomain = [0, d3.max(X)]
     const xScale =  d3.scaleLinear(xDomain, xRange);
 
-  	const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
-    
+    const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
+
+    xAxe.selectAll("*").remove()
     xAxe.call(xAxis)
       .call(g => g.select(".domain").remove())
       .call(g => g.selectAll(".tick line").clone()
-          .attr("y2", height - marginTop - marginBottom)
-          .attr("stroke-opacity", 0.1))
+        .attr("y2", height - marginTop - marginBottom)
+        .attr("stroke-opacity", 0.1))
       .call(g => g.append("text")
-          .attr("x", width - marginRight)
-          .attr("y", -22)
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "end")
-          .text(xLabel));
-    
-	bar.transition().duration(500)
+        .attr("x", width - marginRight)
+        .attr("y", -22)
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "end")
+        .text(xLabel));
+
+    bar.transition().duration(500)
       .attr("x", xScale(0))
       .attr("width", i => xScale(X[i]) - xScale(0));
 
-  	bar_title.transition().duration(500)
+    bar_title.transition().duration(500)
       .attr("x", i => xScale(X[i]))
-    
-  const formatValue = xScale.tickFormat(100, xFormat);
-  title = i => `${formatValue(X[i])}`;
-    
-  bar_title
-    .data(I)
-    .join("text")
-      .attr("x", i => xScale(X[i]))
-      .attr("y", i => yScale(Y[i]) + yScale.bandwidth() / 2)
-      .attr("dy", "0.35em")
-      .attr("dx", +30)
-      .text(title)
-      .call(text => text.filter(i => xScale(X[i]) - xScale(0) < 0) // short bars
+
+    const formatValue = xScale.tickFormat(100, xFormat);
+    title = i => `${formatValue(X[i])}`;
+
+    bar_title
+      .data(I)
+      .join("text")
+        .attr("x", i => xScale(X[i]))
+        .attr("y", i => yScale(Y[i]) + yScale.bandwidth() / 2)
+        .attr("dy", "0.35em")
+        .attr("dx", +30)
+        .text(title)
+        .call(text => text.filter(i => xScale(X[i]) - xScale(0) < 0) // short bars
           .attr("dx", +4)
           .attr("fill", titleAltColor)
           .attr("text-anchor", "start"));
-    
+
     return this
   }
 
   return mod;
 }
-# %% [html]
-<div id="test_horizontal"></div>
-# %% [javascript]
-removeAllChildren("test_horizontal");
-modu = BarChartH(data, {
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
+var moduleGravenessChart = BarChartH(data, {
   x: d => d.count, // x axis -> counts
   y: d => d.category, // y-axis -> counts
   xLabel: "Anzahl →",
-  width: 400,
-  height: 200, // think about deceptive design
+  width: 500,
+  height: 300, // think about deceptive design
   marginLeft: 80,
+  divName: "gravenessDiagramm",
   //title: "Gesamtanzahl der Unfälle per Beteiligte",
 })
-# %% [javascript]
-
-modu.update(filterData(data, { graveness: 3}))
 # %% [markdown]
 ## Violin plot for amount of crash per days and hour
 
@@ -1083,128 +1052,126 @@ modu.update(filterData(data, { graveness: 3}))
 
 \
 
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 function hist_all_over(data, histogram) {
-  sorted_data = data.slice().sort((a, b) => d3.ascending(a.UWOCHENTAG, b.UWOCHENTAG));
-  data_grouped = d3.group(sorted_data,  d => d.UWOCHENTAG);
+  sorted_data = data.slice().sort((a, b) => d3.ascending(a.day, b.day));
+  data_grouped = d3.group(sorted_data, d => d.day);
   bins = Array.from(data_grouped).map(d => d[1].map(d => d.USTUNDE)).map(histogram);
   return bins
 };
-
-categories = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
-function swap_days_to_starting_at_monday(data){
-  data.map(function(d){
-  	d.UWOCHENTAG = categories[d.UWOCHENTAG - 1];
-  });
-  return data;
-}
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
 function RaincloudPlot(data) {
-// Build and Show the Y scale
+  // Build and Show the Y scale
 
-// set the dimensions and margins of the graph
-var margin = {top: 20, right: 40, bottom: 10, left: 300},
+  // set the dimensions and margins of the graph
+  var margin = {top: 20, right: 40, bottom: 10, left: 300},
     width = 1100 - margin.left - margin.right,
     height = 750; // - margin.top - margin.bottom;
 
-var x = d3.scaleLinear()
-  .domain([0, 24])          // Note that here the Y scale is set manually // days
-  .range([0, width])
-  
-// Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
-var y = d3.scaleBand()
-  .range([0, height])
-  .domain([1, 2, 3, 4, 5, 6, 7]) //days
-  .padding(0)     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
+  var x = d3.scaleLinear()
+    .domain([0, 24])          // Note that here the Y scale is set manually // days
+    .range([0, width])
 
-categories = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
-// Create the Y axis for names
-var yName = d3.scaleBand()
-  .domain(categories)
-  .range([0, height])
-  .paddingInner(0)
-  
-// Features of the histogram
-var histogram = d3.histogram()
-      .domain(x.domain())
-      .thresholds(x.ticks(24))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
-      .value(d => d)
-  
-// Compute the binning for each group of the dataset and shift Sunday to be day 7
-var sumstat = hist_all_over(data, histogram);
-sumstat.push(sumstat[0])
-sumstat.shift()
+  // Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
+  var y = d3.scaleBand()
+    .range([0, height])
+    .domain([...Array(7).keys()]) // days
+    .padding(0)     // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
 
-// What is the biggest number of value in a bin? We need it cause this value will have a width of 100% of the bandwidth.
-var maxNum = 0
-for ( i in sumstat ){
-  allBins = sumstat[i]
-  lengths = allBins.map(function(a){return a.length;})
-  longuest = d3.max(lengths)
-  if (longuest > maxNum) { maxNum = longuest }
-}
+  // Create the Y axis for names
+  var yName = d3.scaleBand()
+    .domain(dayNames)
+    .range([0, height])
+    .paddingInner(0)
 
-// adapt data structure inner array to dict
-help_array = [1, 2, 3, 4, 5, 6, 7];
-for ( i in sumstat ){
-  var dict =  {};
-  dict[help_array[i]] = sumstat[i];
-  sumstat[i] = dict;
-}
+  // Features of the histogram
+  var histogram = d3.histogram()
+    .domain(x.domain())
+    .thresholds(x.ticks(24))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+    .value(d => d)
 
-// The maximum width of a violin must be x.bandwidth = the width dedicated to a group
-var yNum = d3.scaleLinear()
-  .range([0, y.bandwidth()])
-  .domain([-maxNum, maxNum])
+  // Compute the binning for each group of the dataset
+  var sumstat = hist_all_over(data, histogram);
 
-// append the svg object to the body of the page
-const svg = d3.select("#test_violin")
-  .append("svg")
-    .attr("width", width)// + margin.left + margin.right)
-    .attr("height", height)// + margin.top + margin.bottom)
-  	.attr("viewBox", [-120, 0, width + 200, height + 30])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
-  
-svg.append("g")
-   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  // What is the biggest number of value in a bin? We need it cause this value will have a width of 100% of the bandwidth.
+  var maxNum = 0
+  for (i in sumstat){
+    let allBins = sumstat[i]
+    let lengths = allBins.map(a => a.length)
+    let longest = d3.max(lengths)
+    if (longest > maxNum) { maxNum = longest }
+  }
 
-// add x-axis
-svg.append("g")	
-  .attr("transform", "translate(0," + height + ")")
-  .call(d3.axisBottom(x)).selectAll("text").attr("font-size", 17).style("fill", "grey")
+  // adapt data structure inner array to dict
+  for (i in sumstat){
+    let dict = {};
+    dict[i] = sumstat[i];
+    sumstat[i] = dict;
+  }
 
-// add x-label 
-svg.append("text")
-      .attr("text-anchor", "end")
-      .attr("x", width/2 + 50)
-      .attr("y", height + 50)
-  	  .attr("font-size", 20)
-  	  .style("fill", "grey")
-      .text("Uhrzeit →");
+  // The maximum width of a violin must be x.bandwidth = the width dedicated to a group
+  var yNum = d3.scaleLinear()
+    .range([0, y.bandwidth()])
+    .domain([-maxNum, maxNum])
 
-// add Days to yaxis 
-svg.append("g")
-  .call(d3.axisLeft(yName).tickSize(0))
-  .selectAll("text").attr("font-size", 20).style("fill", "grey")
-  .select(".domain").remove()
+  // append the svg object to the body of the page
+  const svg = d3.select("#test_violin")
+    .append("svg")
+      .attr("width", width)// + margin.left + margin.right)
+      .attr("height", height)// + margin.top + margin.bottom)
+      .attr("viewBox", [-120, 0, width + 200, height + 30])
+      .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
-// Add the shape to this svg!
-svg.append("g")
-.selectAll("myViolin")
-.data(sumstat)
-.enter()        // So now we are working group per group
-.append("g")
-  .append("path") // append elemnt
-    .attr("transform", function(d){return("translate(0, " + (y(parseInt(Object.keys(d)[0])))+")")} ) // - verschiebung y axe
-    .datum(function(d){return(Object.values(d)[0])})     // So now we are working bin per bin
-    .style("stroke", "none")
-    .style("fill","grey")
-    .attr("d", d3.area()
-        .x(function(d){return(x(d.x0)) })
-        .y0(function(d){return yNum(-d.length)}) // - => upper violin
+  svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  // add x-axis
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x)).selectAll("text").attr("font-size", 17).style("fill", "grey")
+
+  // add x-label
+  svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", width/2 + 50)
+    .attr("y", height + 50)
+    .attr("font-size", 20)
+    .style("fill", "grey")
+    .text("Uhrzeit →");
+
+  // add Days to yaxis
+  svg.append("g")
+    .call(d3.axisLeft(yName).tickSize(0))
+    .selectAll("text").attr("font-size", 20).style("fill", "grey")
+    .select(".domain").remove()
+
+  // Add the shape to this svg!
+  svg.append("g")
+    .selectAll("myViolin")
+    .data(sumstat)
+    .enter()        // So now we are working group per group
+    .append("g")
+    .append("path") // append elemnt
+      .attr("transform", d => ("translate(0, " + (y(parseInt(Object.keys(d)[0])))+")") ) // - verschiebung y axe
+      .datum(d => Object.values(d)[0])     // So now we are working bin per bin
+      .style("stroke", "none")
+      .style("fill","grey")
+      .attr("d", d3.area()
+        .x(d => x(d.x0))
+        .y0(d => yNum(-d.length)) // - => upper violin
         .y1(yNum(0)) // cuts half of the violin
         .curve(d3.curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
-    )
+      )
 
   return svg.node();
 }
@@ -1213,3 +1180,190 @@ svg.append("g")
 # %% [javascript]
 removeAllChildren("test_violin");
 RaincloudPlot(data)
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
+var manager = {
+  initData: data,
+  currentFilters: {
+    lor: undefined,
+    graveness: undefined,
+    involved: []
+  },
+  combinedIgnores: {},
+  members: [], // list of objects that have a module and a an ignore property (explained in addMember())
+  infoTextDiv: document.getElementById("infoText"),
+
+  // updates all members with the new information
+  trigger(info) {
+    // merge the filters and the new info to create a new filter object, the new info
+    // WILL OVERWRITE whatever the old filters were at the respective property!
+    this.currentFilters = {...this.currentFilters, ...info}
+    // we use this to prefilter the data to do less work later when filtering for every member separately
+    const currentDataToFilterFurther = filterData(this.initData, {...this.currentFilters, ...this.combinedIgnores})
+    console.log(`Number of currently filtered data points: ${filterData(this.initData, this.currentFilters).length}`)
+    console.log(`Size of the prefiltered data: ${currentDataToFilterFurther.length}`)
+    console.log("trigger called. updating all plots...")
+    for (member of this.members) {
+      const filteredData = filterData(currentDataToFilterFurther, {...this.currentFilters, ...member.ignore})
+      if (!member.noUpdate) member.module.update(filteredData)
+    }
+    this.updateInfoText()
+    console.log("Update finished.")
+  },
+
+  updateInfoText() {
+    const f = this.currentFilters
+    const area = f.lor === undefined ? "ganz Berlin" : lorNames[f.lor]
+    const gs = f.graveness === undefined ? "Alle" : `${gravenessMeanings[f.graveness - 1]}e`
+    let inv = ""
+    if (f.involved.length > 0) {
+      const category = involvedNames[f.involved[0]]
+      if (category == "Sonstige") {
+        inv = `mit Beteiligung <span style="color: #7f11e0">Sonstiger</span>`
+      } else {
+        inv = `mit <span style="color: #7f11e0">${category}</span>-Beteiligung`
+      }
+    }
+    console.log(inv)
+    const text = `<p style="font-size:20px; color:#000000; font-weight:bold;">
+                  Momentan im Fokus: <br>
+                  <span style="color: #2222ff">${gs}</span> Unfälle in <span style="color: #bb2727cc">${area}</span> <br>
+                  ${inv}
+                </p>`
+    this.infoTextDiv.innerHTML = text
+  },
+
+  // add a module to be kept in the update loop to the members
+  // ignoreFilter is a filter entity that is overwritten when updating the given module.
+  // E.g. we dont want to lose all points outside of a state when selecting it
+  // on the map. So the manager is told to ignore that filter just for the map module
+  addMember(module, {
+    ignoreFilter = {},
+    noUpdate = false
+  }) {
+    // give the module a member 'manager', so it can
+    // call module.manager.trigger(info)
+    module.manager = this
+    this.members.push({module: module, ignore: ignoreFilter, noUpdate: noUpdate});
+    this.combinedIgnores = {...this.combinedIgnores, ...ignoreFilter}
+  }
+}
+
+manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }, noUpdate: false}) // seems a little leaky
+manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }, noUpdate: false}) // seems leaky
+manager.addMember(mapModule, {ignoreFilter: {lor: undefined}})
+manager.updateInfoText()
+# %% [javascript]
+// Uncomment and execute to be able to reload the map
+mapModule.map.remove()
+# %%--- [css]
+# properties:
+#   top_hidden: true
+# ---%%
+/* We need this to make all cells wider */
+:root {
+  --cell-base-width: 1600px;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+#main {
+  height: 850px;
+  width: 1600px;
+  display: flex;
+}
+
+#map {
+  background-color: white;
+  width: 1100px;
+}
+
+#legend {
+  position: absolute;
+  height: 60px;
+  width: 300px;
+  top: 35px;
+  left: 800px;
+  /* Let mouse events go through to reach the map underneath */
+  pointer-events: none;
+  /* Make sure to be above the map pane (.leaflet-pane) */
+  z-index: 450;
+}
+
+#right {
+  background-color: lightgray;
+  width: 30%;
+}
+
+#infoText {
+  height: 10%;
+  margin: 20px;
+  text-align: center;
+}
+
+#gravenessDiagramm {
+  height: 35%;
+  margin: 20px;
+}
+
+#involvedDiagramm {
+  height: 50%;
+  margin: 20px;
+}
+
+/*
+  This is needed, as chrome is drawing a rectangle around the focused polygon
+  See: https://gis.stackexchange.com/questions/447502/prevent-leaflet-map-from-showing-rectangle-around-layer-on-click
+*/
+:focus {
+  outline: -webkit-focus-ring-color auto 0px;
+}
+
+.leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
+  background-color: #fff0;
+}
+
+.leaflet-popup-content h2 {
+  font-size: 20px;
+  text-decoration: underline;
+}
+
+/* Change colors of cluster bubbles */
+.marker-cluster-large div {
+  background-color: rgba(255, 0, 0, 0.8);
+}
+.marker-cluster-large  {
+  background-color: rgba(255, 0, 0, 0.2);
+}
+.marker-cluster-medium div {
+  background-color: rgba(255, 173, 0, 0.8);
+}
+.marker-cluster-medium  {
+  background-color: rgba(255, 173, 0, 0.2);
+}
+.marker-cluster-small div {
+  background-color: rgba(247, 255, 0, 0.8);
+}
+.marker-cluster-small  {
+  background-color: rgba(247, 255, 0, 0.2);
+}
+
+/* Style of category legend text and circles */
+.legend text {
+  font-size: 0.8em;
+  fill: black;
+  font-family: sans-serif;
+}
+
+.legend circle {
+  stroke: black;
+  stroke-opacity: 0.5;
+}
