@@ -274,7 +274,12 @@ LorWGS.features.forEach(f => {
 var projection = d3.geoIdentity()
   .reflectY(true)
   .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 function reveal() {
   var reveals = document.querySelectorAll(".reveal");
   for (var i = 0; i < reveals.length; i++) {
@@ -290,7 +295,11 @@ function reveal() {
 }
 window.addEventListener("scroll", reveal);
 reveal();
-# %% [css]
+# %%--- [css]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 *{
   margin: 0;
   padding: 0;
@@ -369,10 +378,11 @@ section .text-container .text-box{
 }
 
 .right-content {
-  max-width: 70%;
+  max-width: 70%;}
 # %%--- [html]
 # properties:
 #   run_on_load: true
+#   top_hidden: true
 # ---%%
 
 <body>
@@ -974,8 +984,9 @@ function BarChart(data, {
 }
 # %%--- [javascript]
 # properties:
-#   bottom_hidden: true
 #   run_on_load: true
+#   top_hidden: true
+#   bottom_hidden: true
 # ---%%
 
 var moduleInvolvedChart = BarChart(data, {
@@ -987,7 +998,12 @@ var moduleInvolvedChart = BarChart(data, {
   divName: "involvedDiagramm",
   //title: "Anzahl der Unfälle per Beteiligte",
 })
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 var moduleInvolvedChartTutorial = BarChart(data, {
 x: d => d.category, // x=> xScale(X\[i\])). axis -> category
 y: d => d.count, // counts
@@ -997,7 +1013,12 @@ height: 400, // think about deceptive design
 divName: "involvedDiagrammTutorial",
 //title: "Anzahl der Unfälle per Beteiligte",
 })
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
 moduleInvolvedChartTutorial.clickBar = () => {}
 # %% [markdown]
 ## Graveness chart
@@ -1219,6 +1240,7 @@ function BarChartH(data, {
 # %%--- [javascript]
 # properties:
 #   bottom_hidden: true
+#   top_hidden: true
 #   run_on_load: true
 # ---%%
 
@@ -1232,7 +1254,12 @@ var moduleGravenessChart = BarChartH(data, {
   divName: "gravenessDiagramm",
   //title: "Gesamtanzahl der Unfälle per Beteiligte",
 })
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 var moduleGravenessChartTutorial = BarChartH(data, {
   x: d => d.count, // x axis -> counts
   y: d => d.category, // y-axis -> counts
@@ -1243,7 +1270,12 @@ var moduleGravenessChartTutorial = BarChartH(data, {
   divName: "gravenessDiagrammTutorial",
   //title: "Gesamtanzahl der Unfälle per Beteiligte",
 })
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
 moduleGravenessChartTutorial.clickBar = () => {}
 # %% [markdown]
 ## Violin plot for amount of crash per days and hour
