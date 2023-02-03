@@ -533,6 +533,10 @@ function makeTooltipContent(accident) {
                + persons + "<br>"
                + graveness + "<br>";
 }
+# %% [html]
+<div id=testtest></div>
+# %% [javascript]
+colorLegend(StateColors({1: 0, 2: 400}, {selection: d3.select("#testtest")}))
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -558,7 +562,6 @@ function colorLegend(colorScale, {
     .call(d3.axisBottom(axisScale)
       .ticks(width / 50)
       .tickSize(-barHeight))
-  //DOM.svg(width, height)
 
   const svg = selection === undefined ?
     document.createElementNS('http://www.w3.org/2000/svg', 'svg') :
@@ -585,7 +588,7 @@ function colorLegend(colorScale, {
   svg.append('g')
     .call(axisBottom);
 
-  if (map) map.getContainer().appendChild(selection.node())
+  if (map !== undefined) map.getContainer().appendChild(selection.node())
 
   return svg.node();
 }
