@@ -78,7 +78,7 @@ data.forEach(d => {
   var arr = []
   for (const [key, value] of Object.entries(d)) {
     if (key.startsWith("Ist") && value === true) {
-      arr.push(key.replace("Ist", ""))
+      arr.push(involvedNames[key])
     }
   }
   d.Beteiligte = arr
@@ -1465,18 +1465,19 @@ var manager = {
     this.currentFilters = {...this.currentFilters, ...info}
     // we use this to prefilter the data to do less work later when filtering for every member separately
     const currentDataToFilterFurther = filterData(this.initData, {...this.currentFilters, ...this.combinedIgnores})
-    console.log(`Number of currently filtered data points: ${filterData(this.initData, this.currentFilters).length}`)
+    const totalFocused = filterData(this.initData, this.currentFilters).length
+    console.log(`Number of currently filtered data points: ${totalFocused}`)
     console.log(`Size of the prefiltered data: ${currentDataToFilterFurther.length}`)
     console.log("trigger called. updating all plots...")
     for (member of this.members) {
       const filteredData = filterData(currentDataToFilterFurther, {...this.currentFilters, ...member.ignore})
       if (!member.noUpdate) member.module.update(filteredData)
     }
-    this.updateInfoText()
+    this.updateInfoText(totalFocused)
     console.log("Update finished.")
   },
 
-  updateInfoText() {
+  updateInfoText(totalFocused) {
     const f = this.currentFilters
     const area = f.lor === undefined ? "ganz Berlin" : lorNames[f.lor]
     const gs = f.graveness === undefined ? "Alle" : `${gravenessMeanings[f.graveness - 1]}e`
@@ -1484,16 +1485,16 @@ var manager = {
     if (f.involved.length > 0) {
       const category = involvedNames[f.involved[0]]
       if (category == "Sonstige") {
-        inv = `mit Beteiligung <span style="color: #7f11e0">Sonstiger</span>`
+        inv = `mit Beteiligung <span style="color: #7f11e0">Sonstiger</span> <br>`
       } else {
-        inv = `mit <span style="color: #7f11e0">${category}</span>-Beteiligung`
+        inv = `mit <span style="color: #7f11e0">${category}</span>-Beteiligung <br>`
       }
     }
     console.log(inv)
     const text = `<p style="font-size:20px; color:#000000; font-weight:bold;">
                   Momentan im Fokus: <br>
                   <span style="color: #2222ff">${gs}</span> Unfälle in <span style="color: #bb2727cc">${area}</span> <br>
-                  ${inv}
+                  ${inv} (${totalFocused} Unfälle)
                 </p>`
     this.infoTextDiv.innerHTML = text
   },
@@ -1517,7 +1518,7 @@ var manager = {
 manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }, noUpdate: false}) // seems a little leaky
 manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }, noUpdate: false}) // seems leaky
 manager.addMember(mapModule, {ignoreFilter: {lor: undefined}})
-manager.updateInfoText()
+manager.updateInfoText(data.length)
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
 mapModule.map.remove()
