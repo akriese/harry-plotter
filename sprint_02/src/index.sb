@@ -262,6 +262,11 @@ LorWGS.features = LorAreas.features.map(feature => ({
   }
 }))
 
+var lorNames = {}
+LorWGS.features.forEach(f => {
+  lorNames[parseInt(f.properties.BZR_ID)] = f.properties.BZR_NAME
+})
+
 // TODO: probably not needed anymore since we are now using leaflets polygon function
 // statemesh should work as it looks like in the bubble map example
 //statemesh = topojson.mesh(berlin_lor_topo, berlin_lor_topo.objects.states, (a, b) => a !== b)
@@ -1190,6 +1195,7 @@ var manager = {
   },
   combinedIgnores: {},
   members: [], // list of objects that have a module and a an ignore property (explained in addMember())
+  infoTextDiv: document.getElementById("infoText"),
 
   // updates all members with the new information
   trigger(info) {
@@ -1205,7 +1211,30 @@ var manager = {
       const filteredData = filterData(currentDataToFilterFurther, {...this.currentFilters, ...member.ignore})
       if (!member.noUpdate) member.module.update(filteredData)
     }
+    this.updateInfoText()
     console.log("Update finished.")
+  },
+
+  updateInfoText() {
+    const f = this.currentFilters
+    const area = f.lor === undefined ? "ganz Berlin" : lorNames[f.lor]
+    const gs = f.graveness === undefined ? "Alle" : `${gravenessMeanings[f.graveness - 1]}e`
+    let inv = ""
+    if (f.involved.length > 0) {
+      const category = involvedNames[f.involved[0]]
+      if (category == "Sonstige") {
+        inv = `mit Beteiligung <span style="color: #7f11e0">Sonstiger</span>`
+      } else {
+        inv = `mit <span style="color: #7f11e0">${category}</span>-Beteiligung`
+      }
+    }
+    console.log(inv)
+    const text = `<p style="font-size:20px; color:#000000; font-weight:bold;">
+                  Momentan im Fokus: <br>
+                  <span style="color: #2222ff">${gs}</span> Unfälle in <span style="color: #bb2727cc">${area}</span> <br>
+                  ${inv}
+                </p>`
+    this.infoTextDiv.innerHTML = text
   },
 
   // add a module to be kept in the update loop to the members
@@ -1269,24 +1298,24 @@ body {
 }
 
 #right {
-    background-color: lightgray;
-  width: 30%
+  background-color: lightgray;
+  width: 30%;
 }
 
 #infoText {
-  height: 15%;
-  margin: 20px
-  text-align: center
+  height: 10%;
+  margin: 20px;
+  text-align: center;
 }
 
 #gravenessDiagramm {
   height: 35%;
-  margin: 20px
+  margin: 20px;
 }
 
 #involvedDiagramm {
   height: 50%;
-  margin: 20px
+  margin: 20px;
 }
 
 /*
@@ -1294,7 +1323,7 @@ body {
   See: https://gis.stackexchange.com/questions/447502/prevent-leaflet-map-from-showing-rectangle-around-layer-on-click
 */
 :focus {
-    outline: -webkit-focus-ring-color auto 0px;
+  outline: -webkit-focus-ring-color auto 0px;
 }
 
 .leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img {
@@ -1308,22 +1337,22 @@ body {
 
 /* Change colors of cluster bubbles */
 .marker-cluster-large div {
-  background-color: rgba(255, 0, 0, 0.8)
+  background-color: rgba(255, 0, 0, 0.8);
 }
 .marker-cluster-large  {
-  background-color: rgba(255, 0, 0, 0.2)
+  background-color: rgba(255, 0, 0, 0.2);
 }
 .marker-cluster-medium div {
-  background-color: rgba(255, 173, 0, 0.8)
+  background-color: rgba(255, 173, 0, 0.8);
 }
 .marker-cluster-medium  {
-  background-color: rgba(255, 173, 0, 0.2)
+  background-color: rgba(255, 173, 0, 0.2);
 }
 .marker-cluster-small div {
-  background-color: rgba(247, 255, 0, 0.8)
+  background-color: rgba(247, 255, 0, 0.8);
 }
 .marker-cluster-small  {
-  background-color: rgba(247, 255, 0, 0.2)
+  background-color: rgba(247, 255, 0, 0.2);
 }
 
 /* Style of category legend text and circles */
