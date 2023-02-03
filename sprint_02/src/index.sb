@@ -1256,6 +1256,7 @@ var manager = {
 manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }, noUpdate: false}) // seems a little leaky
 manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }, noUpdate: false}) // seems leaky
 manager.addMember(mapModule, {ignoreFilter: {lor: undefined}})
+manager.updateInfoText()
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
 mapModule.map.remove()
