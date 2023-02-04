@@ -533,10 +533,6 @@ function makeTooltipContent(accident) {
                + persons + "<br>"
                + graveness + "<br>";
 }
-# %% [html]
-<div id=testtest></div>
-# %% [javascript]
-colorLegend(StateColors({1: 0, 2: 400}, {selection: d3.select("#testtest")}))
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -548,9 +544,10 @@ function colorLegend(colorScale, {
   map = undefined,
   selection = undefined,
   width = 300,
-  height = 50,
-  margin = ({top: 40, right: 40, bottom: 30, left: 40}),
-  barHeight = 20
+  height = 80,
+  margin = ({top: 20, right: 40, bottom: 30, left: 40}),
+  barHeight = 20,
+  titleSize = 13
 }) {
   axisScale = d3.scaleLinear()
     .domain(colorScale.domain())
@@ -587,6 +584,13 @@ function colorLegend(colorScale, {
 
   svg.append('g')
     .call(axisBottom);
+
+  const legendTitle = svg.append("text")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`)
+    .attr("font-size", `${titleSize}px`)
+    .attr("font-color", "black")
+    .attr("font-weight", "bold")
+    .text("Unfälle pro Lebensorientiertem Raum")
 
   if (map !== undefined) map.getContainer().appendChild(selection.node())
 
