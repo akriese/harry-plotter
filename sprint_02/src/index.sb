@@ -501,11 +501,12 @@ section .text-container .text-box{
     <div class="container reveal">
   <svg id=legend></svg>
   <div id=main>
-      <div id=map><h1>MAP</h1></div>
+      <div id=map></div>
       <div id=right>
-        <div id=infoText><h1>INFO</h1></div>
-        <div id=gravenessDiagramm><h1>GRAVENESS</h1></div>
-        <div id=involvedDiagramm><h1>Beteiligte</h1></div>
+        <div id=infoText></div>
+        <div id=gravenessDiagramm></div>
+        <div id=involvedDiagramm></div>
+        <button id="resetAll">Alle Filter zurücksetzen</button>
       </div>
   </div>
       </div>
@@ -762,6 +763,10 @@ function LeafletAccidentMap(data, {
     mod.states.forEach((s) => s.setStyle({ fillOpacity: newOpacity }))
   });
 
+  mod.reset = function() {
+    mod.map.fitBounds(mod.initBounds)
+  }
+
   mod.update(data)
 
   return mod;
@@ -953,18 +958,18 @@ function BarChart(data, {
     .call(xAxis);
 
   mod.focusedBar = undefined
-  mod.clickBar = function(cat) {
+  mod.clickBar = function(cat, noUpdate=false) {
     if (mod.focusedBar === undefined || mod.focusedBar != cat) {
       let niceName = X[cat]
       let officialName = Object.entries(involvedNames).find(([k, v]) => v === niceName)[0]
-      mod.manager.trigger({ involved: [officialName] })
+      if (!noUpdate && mod.manager !== undefined) mod.manager.trigger({ involved: [officialName] })
       bar
         .transition()
         .duration(200)
         .style("opacity", i => i === cat ? 1.0 : 0.4)
       mod.focusedBar = cat;
     } else { // focus all again
-      mod.manager.trigger({ involved: [] })
+      if (!noUpdate && mod.manager !== undefined) mod.manager.trigger({ involved: [] })
       bar
         .transition()
         .duration(200)
@@ -1021,6 +1026,11 @@ function BarChart(data, {
           .attr("text-anchor", "start"));
 
     return this
+  }
+
+  mod.reset = function() {
+    if (this.focusedBar === undefined) return;
+    mod.clickBar(this.focusedBar, true)
   }
 
   return mod;
@@ -1182,18 +1192,18 @@ function BarChartH(data, {
       .style("opacity", 1.0);
 
   mod.focusedBar = undefined
-  mod.clickBar = function(idx) {
+  mod.clickBar = function(idx, noUpdate=false) {
     let categoryNum = idx + 1
     console.log(categoryNum)
     if (mod.focusedBar === undefined || mod.focusedBar != idx) {
-      mod.manager.trigger({ graveness: categoryNum })
+      if (!noUpdate && mod.manager !== undefined) mod.manager.trigger({ graveness: categoryNum })
       bar
         .transition()
         .duration(200)
         .style("opacity", i => i === idx ? 1.0 : 0.4)
       mod.focusedBar = idx;
     } else { // focus all again
-      mod.manager.trigger({ graveness: undefined })
+      if (!noUpdate && mod.manager !== undefined) mod.manager.trigger({ graveness: undefined })
       bar
         .transition()
         .duration(200)
@@ -1277,6 +1287,11 @@ function BarChartH(data, {
           .attr("text-anchor", "start"));
 
     return this
+  }
+
+  mod.reset = function() {
+    if (this.focusedBar === undefined) return;
+    mod.clickBar(this.focusedBar, true)
   }
 
   return mod;
@@ -1510,13 +1525,25 @@ var manager = {
         inv = `mit <span style="color: #7f11e0">${category}</span>-Beteiligung <br>`
       }
     }
-    console.log(inv)
     const text = `<p style="font-size:20px; color:#000000; font-weight:bold;">
                   Momentan im Fokus: <br>
                   <span style="color: #2222ff">${gs}</span> Unfälle in <span style="color: #bb2727cc">${area}</span> <br>
                   ${inv} (${totalFocused} Unfälle)
                 </p>`
     this.infoTextDiv.innerHTML = text
+  },
+
+  resetAll() {
+    this.currentFilters = {
+      lor: undefined,
+      graveness: undefined,
+      involved: []
+    }
+
+    for (member in this.members) {
+      member.module.update(initData)
+      member.module.reset()
+    }
   },
 
   // add a module to be kept in the update loop to the members
@@ -1587,18 +1614,23 @@ body {
 
 #infoText {
   height: 10%;
-  margin: 20px;
+  margin: 15px;
   text-align: center;
 }
 
 #gravenessDiagramm {
   height: 35%;
-  margin: 20px;
+  margin: 15px;
 }
 
 #involvedDiagramm {
-  height: 50%;
-  margin: 20px;
+  height: 40%;
+  margin: 15px;
+}
+
+#resetAll {
+  margin-left: 25px;
+  margin-top: 20px;
 }
 
 /*
