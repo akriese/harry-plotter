@@ -396,7 +396,7 @@ section .text-container .text-box{
   
   <section>
     <div id= "introduction" class="container ">
-      <h1 class= "reveal" style="text-align:center">Im Jahr 2021 wurden in Berlin ca. 11300 Menschen bei Verkehrsunfällen verletzt oder getötet.</h1>
+      <h1 class= "reveal" style="text-align:center">2021 wurden in Berlin ca. 15.000 Menschen bei Verkehrsunfällen verletzt oder getötet.</h1>
     </div>
   </section>
   
@@ -404,7 +404,7 @@ section .text-container .text-box{
     <div id= "introduction2" class="container ">
        <h1 class= "reveal" style="text-align:center">Dieses interaktive Tool soll Ihnen als Stadt- oder Verkehrsplaner eine Hilfe sein, Verkehrsunfälle aus 
          unterschiedlichen Blickwinkeln zu betrachten, mögliche Ursachen zu erforschen und besonders gefährdete Gebiete zu erkennen.
-         <br><br>Lassen Sie uns zunächst den zetlichen Aspekt betrachten.</h1>
+         <br><br>Lassen Sie uns zunächst den zeitlichen Aspekt betrachten.</h1>
     </div>
   </section>
   
@@ -447,7 +447,8 @@ section .text-container .text-box{
     <div class="right-container">
       <div class="right-content reveal">
         Das Hauptelement der Darstellung ist eine Karte. Sie können darin wie gewohnt rein- und rauszoomen indem Sie scrollen, und die Karte mit der linken Maustaste bewegen. Die Farbe der eingezeichneten 
-        lebensorientierten Räume (LOR) zeigt die unnormierte Anzahl der Verkehrsunfälle in dem jeweiligen LOR an. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem 
+        lebensorientierten Räume (LOR) zeigt die unnormierte Anzahl der Verkehrsunfälle in dem jeweiligen LOR an. Durch Klicken auf einen LOR wird in diesen hereingezoomt und die seitlichen Grafiken werden
+        aktualisiert, um nur Daten aus diesem LOR anzuzeigen. Erneutes klicken auf den LOR hebt die Auswahl wieder auf. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem 
         momentanen Zoomlevel nah beieinander liegen. Durch reinzoomen werden diese in der Regel in kleinere Agglomerationen aufgeteilt, bis ab einem gewissen Zoomfaktor nur die einzelnen Unfallstellen 
         sichtbar sind. Um die einzelnen Unfallstellen sichtbar zu machen, kann auch auf einen der farbigen Kreise geklickt werden. Wenn Sie mit der Maus über einem der LORs oder einer einzelnen Unfallstelle
         hovern, erscheint ein Tooltip mit näheren Informationen.
@@ -461,8 +462,8 @@ section .text-container .text-box{
     </div>
           <div class="right-container">
       <div class="right-content reveal">
-        In diesem Graphen wird der maximale Schweregrad der Unfälle dargestellt. Wenn Sie auf einen der LOR in der Karte klicken wird diese Darstellung aktualisiert und es werden nur Informationen zu
-        dem jeweiligen LOR gezeigt. Ebenso können Sie auf einen der Balken oder eine der Beschriftungen der y-Axe klicken, um z.B. nur Unfälle mit Schwerverletzten anzuzeigen. Dies gilt auch für die nächste Darstellung.
+        In diesem Graphen wird der maximale Schweregrad der Unfälle dargestellt. Sie können auf einen der Balken oder eine der Beschriftungen der y-Axe klicken, um z.B. nur Unfälle mit Schwerverletzten
+        anzuzeigen. Wie auch bei der Auswahl der LORs, wird hier durch erneutes Klicken die Auswahl aufgehoben. Dies gilt auch für die nächste Darstellung.
         </div>
     </div>
   </section>
@@ -473,7 +474,8 @@ section .text-container .text-box{
     </div>
           <div class="right-container">
       <div class="right-content reveal">
-        Ähnlich wie bei dem darüberliegenden Graphen, können Sie auch hier einen der Balken anklicken, um sich z.B. nur Unfälle mit PKW-Beteiligung anzeigen zu lassen. Sowohl die Karte,
+        Diese Darstellung beschreibt, wie viele Verkehrsteilnehmer einer bestimmten Gruppe in Unfälle verwickelt waren. Ähnlich wie bei dem darüberliegenden Graphen, können Sie auch hier
+        einen der Balken anklicken, um sich z.B. nur Unfälle mit PKW-Beteiligung anzeigen zu lassen, wobei dies auch Unfälle miteinschließt, an denen z.B. PKWs und Fahrradfahrer beteiligt waren. Sowohl die Karte,
         als auch das Balkendiagramm mit Schweregraden werden dadurch aktualisiert. Falls Sie nicht mehr sicher sein sollten, was Sie im Moment ausgewählt haben, wird Ihnen diese Information
         in der rechten oberen Ecke der Gesamtdarstellung angezeigt.
         </div>
