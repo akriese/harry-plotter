@@ -1096,14 +1096,14 @@ function BarChartH(data, {
   const mod = {};
 
   // get correct data format
-  data = get_data_object_bar_chart(data, countGraveness);
-  data.map(get_meaning)
+  const barData = get_data_object_bar_chart(data, countGraveness);
+  barData.map(get_meaning)
 
-  var yDomain = d3.groupSort(data, ([d]) => d.count, d => d.category); // sort by descending frequency
+  var yDomain = d3.groupSort(barData, ([d]) => d.count, d => d.category); // sort by descending frequency
 
   // Compute values.
-  const X = d3.map(data, x);
-  const Y = d3.map(data, y);
+  const X = d3.map(barData, x);
+  const Y = d3.map(barData, y);
 
   // Compute default domains, and unique the y-domain.
   if (xDomain === undefined) xDomain = [0, d3.max(X)];
@@ -1122,17 +1122,17 @@ function BarChartH(data, {
   const yScale = d3.scaleBand(yDomain, yRange).padding(yPadding);
   const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
   const yAxis = d3.axisLeft(yScale).tickSizeOuter(0);
-  var color = d3.scaleOrdinal(data.map(d => d.category), ["red", "orange", "green"]).unknown("grey");
-  const col = d3.map(data, (d) => color(d.category));
+  var color = d3.scaleOrdinal(barData.map(d => d.category), ["red", "orange", "green"]).unknown("grey");
+  const col = d3.map(barData, (d) => color(d.category));
 
   // Compute titles.
   if (title === undefined) {
     const formatValue = xScale.tickFormat(100, xFormat);
     title = i => `${formatValue(X[i])}`;
   } else {
-    const O = d3.map(data, d => d);
+    const O = d3.map(barData, d => d);
     const T = title;
-    title = i => T(O[i], i, data);
+    title = i => T(O[i], i, barData);
   }
 
   const svg = d3.select(`#${divName}`).append("svg")
@@ -1226,11 +1226,11 @@ function BarChartH(data, {
       .on("click", (e, cat) => mod.clickBar(gravenessMeanings.indexOf(cat)))
 
   mod.update = function(data) {
-    data = get_data_object_bar_chart(data, countGraveness);
-    data.map(get_meaning)
+    const barData = get_data_object_bar_chart(data, countGraveness);
+    barData.map(get_meaning)
 
     // update bar heigth
-    const X = d3.map(data, x);
+    const X = d3.map(barData, x);
     xDomain = [0, d3.max(X)]
     const xScale =  d3.scaleLinear(xDomain, xRange);
 
