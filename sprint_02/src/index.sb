@@ -382,6 +382,7 @@ section .text-container .text-box{
 # %%--- [html]
 # properties:
 #   run_on_load: true
+#   top_hidden: true
 # ---%%
 
 <body>
