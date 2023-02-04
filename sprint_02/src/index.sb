@@ -1093,7 +1093,7 @@ function BarChartH(data, {
   divName,
 } = {}) {
   removeAllChildren(divName)
-  mod = {};
+  const mod = {};
 
   // get correct data format
   data = get_data_object_bar_chart(data, countGraveness);
