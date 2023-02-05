@@ -14,6 +14,193 @@ export const d3 = d3_;
 export const proj4 = proj;
 export const L = leaflet;
 export const Lm = leafletMarkercluster;
+# %%--- [html]
+# properties:
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+<body>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+   <section>
+      <div id= "titel" class="container reveal">
+         <h1 style="text-align:center">Übersicht der Verkehrsunfälle in Berlin im Jahr 2021</h1>
+         <p style="text-align:center">
+         <p> </p>
+         <p> </p>
+         <div class="arrow">       <span></span>        <span></span>       <span></span></div>
+         </p>
+      </div>
+   </section>
+   <section>
+      <div id= "introduction" class="container ">
+         <h1 class= "reveal" style="text-align:center">2021 wurden in Berlin ca. 15.000 Menschen bei Verkehrsunfällen verletzt oder getötet.</h1>
+         <p style="text-align:center">
+         <p class= "reveal" style="text-align:center">
+            <a class="button">Weiter</a>
+         </p>
+      </div>
+   </section>
+   <section>
+      <div id= "introduction2" class="container ">
+         <h1 class= "reveal" style="text-align:center">Dieses interaktive Tool soll Ihnen als Stadt- oder Verkehrsplaner eine Hilfe sein, Verkehrsunfälle aus
+            unterschiedlichen Blickwinkeln zu betrachten, mögliche Ursachen zu erforschen und besonders gefährdete Gebiete zu erkennen.
+            <br><br>Lassen Sie uns zunächst den zeitlichen Aspekt betrachten.
+         </h1>
+         <p class= "reveal" style="text-align:center">
+            <a class="button">Weiter</a>
+         </p>
+      </div>
+   </section>
+   <section>
+      <div id="askforViolin" class="container">
+         <h1 class= "reveal" style="text-align:center">Zu welchen Zeiten finden die meisten Verkehrsunfälle statt?</h1>
+         <p class= "reveal" style="text-align:center">
+            <a class="button">Weiter</a>
+         </p>
+      </div>
+   </section>
+   <section>
+      <div class="container">
+         <h2 class= "reveal" style="text-align:center">Zu welchen Zeiten finden die meisten Verkehrsunfälle statt?</h2>
+         <div id="violin" class="left-container">
+            <div id="Mapgrafik" class="left-content">
+               <div class= "reveal"  id=test_violin></div>
+            </div>
+         </div>
+         <div class="right-container">
+            <div class="right-content reveal">
+               Hier sehen Sie die Verteilung der Unfälle über Tage und Stunden. Besonders auffällig ist, dass am Wochenende (insbesondere am Sonntag) die
+               wenigsten Unfälle stattfinden. An Werktagen lassen sich zwischen 7-9 Uhr und zwischen 15-18 Uhr zwei Peaks erkennen, die in etwa den Zeiten
+               entsprechen, zu denen viele Menschen zur Arbeit/von der Arbeit nach Hause fahren. Allerdings finden auch dazwischen recht viele Unfälle statt.
+               Zu Zeiten, zu denen üblicherweise geschlafen wird und somit auch auf den Straßen wenig los ist, finden - wie zu erwarten - kaum Unfälle statt.
+               <p class= "reveal" style="text-align:center">
+               <p></p>
+               <a  class="button">Weiter</a>
+               </p>
+            </div>
+         </div>
+      </div>
+      </div>
+   </section>
+   <section>
+      <div  class="container">
+         <h1 class= "reveal"  style="text-align:center">Nun folgt eine kleine Einführung in die verschiedenen interaktiven Elemente unseres Tools,
+            um Ihnen den Umgang damit zu erleichtern und Sie auf bestimmte Funktionsweisen aufmerksam zu machen.
+         </h1>
+         <p class= "reveal" style="text-align:center">
+            <a  class="button">Weiter</a>
+         </p>
+      </div>
+   </section>
+   <section>
+      <div class="container">
+         <h2 class= "reveal" style="text-align:center">Übersicht der Visualisierung</h2>
+      <div id="map_e" class="left-container">
+    	 <div class="left-content center">
+      		<img class= "reveal" src="https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/final_viz_all.png" width="1000" height="430">
+        </div>
+    </div>
+    <div class="right-container">
+      <div class="right-content reveal">
+        Das Hauptelement der Darstellung ist eine Karte. Sie können darin wie gewohnt rein- und rauszoomen indem Sie scrollen, und die Karte mit der linken Maustaste bewegen. Die Farbe der eingezeichneten lebensorientierten Räume (LOR) zeigt die unnormierte Anzahl der Verkehrsunfälle in dem jeweiligen LOR an. 
+          <p class= "reveal" style="text-align:center">
+        <p></p>
+      <a  class="button">Weiter</a>
+      </p>
+	  </div>
+          </div>
+      </div>
+   </section>
+   <section>
+      <div class="container">
+         <h2 style="text-align:center">Übersicht der Visualisierung</h2>
+      <div id="map_e" class="left-container">
+    	 <div class="left-content center"  >
+      		<img class= "reveal" src="https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/final_viz_filtered.png" width="900" height="430">
+        </div>
+    </div>
+    <div class="right-container">
+      <div class="right-content reveal">
+        Durch Klicken auf einen LOR wird in diesen hereingezoomt und die seitlichen Grafiken werden aktualisiert, um nur Daten aus diesem LOR anzuzeigen. Erneutes Klicken auf den LOR hebt die Auswahl wieder auf. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem momentanen Zoomlevel nah beieinander liegen. Durch reinzoomen werden diese in der Regel in kleinere Agglomerationen aufgeteilt, bis ab einem gewissen Zoomfaktor nur die einzelnen Unfallstellen sichtbar sind. Um die einzelnen Unfallstellen sichtbar zu machen, kann auch auf einen der farbigen Kreise geklickt werden. Wenn Sie mit der Maus über einem der LORs oder einer einzelnen Unfallstelle hovern, erscheint ein Tooltip mit näheren Informationen.
+        <p class= "reveal" style="text-align:center">
+        <p></p>
+      <a  class="button">Weiter</a>
+      </p>
+	  </div>
+          </div>
+      </div>
+   </section>
+
+   <section>
+      <div class="container">
+         <h2 class= "reveal" style="text-align:center">Unfälle je Schweregrad</h2>
+         <div id="GRAVENESS_e" class="left-container">
+            <div id=gravenessDiagrammTutorial class= "reveal" ></div>
+         </div>
+         <div class="right-container">
+            <div class="right-content reveal">
+               In diesem Graphen wird der maximale Schweregrad der Unfälle dargestellt. Sie können auf einen der Balken oder eine der Beschriftungen der y-Axe klicken, um z.B. nur Unfälle mit Schwerverletzten
+               anzuzeigen. Wie auch bei der Auswahl der LORs, wird hier durch erneutes Klicken die Auswahl aufgehoben. Dies gilt auch für die nächste Darstellung.
+               <p class= "reveal" style="text-align:center">
+               <p></p>
+               <a  class="button">Weiter</a>
+               </p>
+            </div>
+         </div>
+         </p>
+      </div>
+   </section>
+   <section>
+      <div class="container">
+         <h2 class= "reveal" style="text-align:center">Unfälle je Gruppe von Beteiligten</h2>
+         <div id="beteiligte_e" class="left-container">
+            <div id=involvedDiagrammTutorial  class= "reveal" ></div>
+         </div>
+         <div class="right-container">
+            <div class="right-content reveal">
+               Diese Darstellung beschreibt, wie viele Verkehrsteilnehmer einer bestimmten Gruppe in Unfälle verwickelt waren. Ähnlich wie bei dem darüberliegenden Graphen, können Sie auch hier
+               einen der Balken anklicken, um sich z.B. nur Unfälle mit PKW-Beteiligung anzeigen zu lassen, wobei dies auch Unfälle miteinschließt, an denen z.B. PKWs und Fahrradfahrer beteiligt waren. Sowohl die Karte,
+               als auch das Balkendiagramm mit Schweregraden werden dadurch aktualisiert. Falls Sie nicht mehr sicher sein sollten, was Sie im Moment ausgewählt haben, wird Ihnen diese Information
+               in der rechten oberen Ecke der Gesamtdarstellung angezeigt. Sämtliche Daten wurden der Website <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a> entnommen.
+               <p class= "reveal" style="text-align:center">
+               <p></p>
+               <a  class="button">Weiter</a>
+               </p>
+            </div>
+         </div>
+      </div>
+   </section>
+   <section>
+      <div id="mainVis" class="container">
+         <div  class="left-content">
+            <h1 class= "reveal"  style="text-align:center">Welche Orte sind besonders gefährlich - und für wen?
+               <br><br>Wo bedarf es zusätzlicher Maßnahmen zur Verkehrssicherheit?
+            </h1>
+            <p></p>
+         </div>
+         <p  class= "reveal" style="text-align:center">
+            <a class="button">Weiter</a>
+         </p>
+      </div>
+   </section>
+   <section>
+      <div class="container reveal">
+         <h2 class= "reveal" style="text-align:center">Verkehrsunfälle in Berlin im Jahr 2021</h2>
+         <svg id=legend></svg>
+         <div id=main>
+            <div id=map></div>
+            <div id=right>
+               <div id=infoText></div>
+               <div id=gravenessDiagramm></div>
+               <div id=involvedDiagramm></div>
+               <button id="resetAll">Alle Filter zurücksetzen</button>
+            </div>
+         </div>
+      </div>
+   </section>
+   <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
+</body>
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -496,192 +683,6 @@ a {
   margin-left: auto;
   margin-right: auto;
 }
-# %%--- [html]
-# properties:
-#   top_hidden: true
-# ---%%
-<body>
-   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
-   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-   <section>
-      <div id= "titel" class="container reveal">
-         <h1 style="text-align:center">Übersicht der Verkehrsunfälle in Berlin im Jahr 2021</h1>
-         <p style="text-align:center">
-         <p> </p>
-         <p> </p>
-         <div class="arrow">       <span></span>        <span></span>       <span></span></div>
-         </p>
-      </div>
-   </section>
-   <section>
-      <div id= "introduction" class="container ">
-         <h1 class= "reveal" style="text-align:center">2021 wurden in Berlin ca. 15.000 Menschen bei Verkehrsunfällen verletzt oder getötet.</h1>
-         <p style="text-align:center">
-         <p class= "reveal" style="text-align:center">
-            <a class="button">Weiter</a>
-         </p>
-      </div>
-   </section>
-   <section>
-      <div id= "introduction2" class="container ">
-         <h1 class= "reveal" style="text-align:center">Dieses interaktive Tool soll Ihnen als Stadt- oder Verkehrsplaner eine Hilfe sein, Verkehrsunfälle aus
-            unterschiedlichen Blickwinkeln zu betrachten, mögliche Ursachen zu erforschen und besonders gefährdete Gebiete zu erkennen.
-            <br><br>Lassen Sie uns zunächst den zeitlichen Aspekt betrachten.
-         </h1>
-         <p class= "reveal" style="text-align:center">
-            <a class="button">Weiter</a>
-         </p>
-      </div>
-   </section>
-   <section>
-      <div id="askforViolin" class="container">
-         <h1 class= "reveal" style="text-align:center">Zu welchen Zeiten finden die meisten Verkehrsunfälle statt?</h1>
-         <p class= "reveal" style="text-align:center">
-            <a class="button">Weiter</a>
-         </p>
-      </div>
-   </section>
-   <section>
-      <div class="container">
-         <h2 class= "reveal" style="text-align:center">Zu welchen Zeiten finden die meisten Verkehrsunfälle statt?</h2>
-         <div id="violin" class="left-container">
-            <div id="Mapgrafik" class="left-content">
-               <div class= "reveal"  id=test_violin></div>
-            </div>
-         </div>
-         <div class="right-container">
-            <div class="right-content reveal">
-               Hier sehen Sie die Verteilung der Unfälle über Tage und Stunden. Besonders auffällig ist, dass am Wochenende (insbesondere am Sonntag) die
-               wenigsten Unfälle stattfinden. An Werktagen lassen sich zwischen 7-9 Uhr und zwischen 15-18 Uhr zwei Peaks erkennen, die in etwa den Zeiten
-               entsprechen, zu denen viele Menschen zur Arbeit/von der Arbeit nach Hause fahren. Allerdings finden auch dazwischen recht viele Unfälle statt.
-               Zu Zeiten, zu denen üblicherweise geschlafen wird und somit auch auf den Straßen wenig los ist, finden - wie zu erwarten - kaum Unfälle statt.
-               <p class= "reveal" style="text-align:center">
-               <p></p>
-               <a  class="button">Weiter</a>
-               </p>
-            </div>
-         </div>
-      </div>
-      </div>
-   </section>
-   <section>
-      <div  class="container">
-         <h1 class= "reveal"  style="text-align:center">Nun folgt eine kleine Einführung in die verschiedenen interaktiven Elemente unseres Tools,
-            um Ihnen den Umgang damit zu erleichtern und Sie auf bestimmte Funktionsweisen aufmerksam zu machen.
-         </h1>
-         <p class= "reveal" style="text-align:center">
-            <a  class="button">Weiter</a>
-         </p>
-      </div>
-   </section>
-   <section>
-      <div class="container">
-         <h2 class= "reveal" style="text-align:center">Übersicht der Visualisierung</h2>
-      <div id="map_e" class="left-container">
-    	 <div class="left-content center">
-      		<img class= "reveal" src="https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/final_viz_all.png" width="1000" height="430">
-        </div>
-    </div>
-    <div class="right-container">
-      <div class="right-content reveal">
-        Das Hauptelement der Darstellung ist eine Karte. Sie können darin wie gewohnt rein- und rauszoomen indem Sie scrollen, und die Karte mit der linken Maustaste bewegen. Die Farbe der eingezeichneten lebensorientierten Räume (LOR) zeigt die unnormierte Anzahl der Verkehrsunfälle in dem jeweiligen LOR an. 
-          <p class= "reveal" style="text-align:center">
-        <p></p>
-      <a  class="button">Weiter</a>
-      </p>
-	  </div>
-          </div>
-      </div>
-   </section>
-   <section>
-      <div class="container">
-         <h2 style="text-align:center">Übersicht der Visualisierung</h2>
-      <div id="map_e" class="left-container">
-    	 <div class="left-content center"  >
-      		<img class= "reveal" src="https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/final_viz_filtered.png" width="900" height="430">
-        </div>
-    </div>
-    <div class="right-container">
-      <div class="right-content reveal">
-        Durch Klicken auf einen LOR wird in diesen hereingezoomt und die seitlichen Grafiken werden aktualisiert, um nur Daten aus diesem LOR anzuzeigen. Erneutes Klicken auf den LOR hebt die Auswahl wieder auf. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem momentanen Zoomlevel nah beieinander liegen. Durch reinzoomen werden diese in der Regel in kleinere Agglomerationen aufgeteilt, bis ab einem gewissen Zoomfaktor nur die einzelnen Unfallstellen sichtbar sind. Um die einzelnen Unfallstellen sichtbar zu machen, kann auch auf einen der farbigen Kreise geklickt werden. Wenn Sie mit der Maus über einem der LORs oder einer einzelnen Unfallstelle hovern, erscheint ein Tooltip mit näheren Informationen.
-        <p class= "reveal" style="text-align:center">
-        <p></p>
-      <a  class="button">Weiter</a>
-      </p>
-	  </div>
-          </div>
-      </div>
-   </section>
-
-   <section>
-      <div class="container">
-         <h2 class= "reveal" style="text-align:center">Unfälle je Schweregrad</h2>
-         <div id="GRAVENESS_e" class="left-container">
-            <div id=gravenessDiagrammTutorial class= "reveal" ></div>
-         </div>
-         <div class="right-container">
-            <div class="right-content reveal">
-               In diesem Graphen wird der maximale Schweregrad der Unfälle dargestellt. Sie können auf einen der Balken oder eine der Beschriftungen der y-Axe klicken, um z.B. nur Unfälle mit Schwerverletzten
-               anzuzeigen. Wie auch bei der Auswahl der LORs, wird hier durch erneutes Klicken die Auswahl aufgehoben. Dies gilt auch für die nächste Darstellung.
-               <p class= "reveal" style="text-align:center">
-               <p></p>
-               <a  class="button">Weiter</a>
-               </p>
-            </div>
-         </div>
-         </p>
-      </div>
-   </section>
-   <section>
-      <div class="container">
-         <h2 class= "reveal" style="text-align:center">Unfälle je Gruppe von Beteiligten</h2>
-         <div id="beteiligte_e" class="left-container">
-            <div id=involvedDiagrammTutorial  class= "reveal" ></div>
-         </div>
-         <div class="right-container">
-            <div class="right-content reveal">
-               Diese Darstellung beschreibt, wie viele Verkehrsteilnehmer einer bestimmten Gruppe in Unfälle verwickelt waren. Ähnlich wie bei dem darüberliegenden Graphen, können Sie auch hier
-               einen der Balken anklicken, um sich z.B. nur Unfälle mit PKW-Beteiligung anzeigen zu lassen, wobei dies auch Unfälle miteinschließt, an denen z.B. PKWs und Fahrradfahrer beteiligt waren. Sowohl die Karte,
-               als auch das Balkendiagramm mit Schweregraden werden dadurch aktualisiert. Falls Sie nicht mehr sicher sein sollten, was Sie im Moment ausgewählt haben, wird Ihnen diese Information
-               in der rechten oberen Ecke der Gesamtdarstellung angezeigt. Sämtliche Daten wurden der Website daten.berlin.de entnommen.
-               <p class= "reveal" style="text-align:center">
-               <p></p>
-               <a  class="button">Weiter</a>
-               </p>
-            </div>
-         </div>
-      </div>
-   </section>
-   <section>
-      <div id="mainVis" class="container">
-         <div  class="left-content">
-            <h1 class= "reveal"  style="text-align:center">Welche Orte sind besonders gefährlich - und für wen?
-               <br><br>Wo bedarf es zusätzlicher Maßnahmen zur Verkehrssicherheit?
-            </h1>
-            <p></p>
-         </div>
-         <p  class= "reveal" style="text-align:center">
-            <a class="button">Weiter</a>
-         </p>
-      </div>
-   </section>
-   <section>
-      <div class="container reveal">
-         <h2 class= "reveal" style="text-align:center">Verkehrsunfälle in Berlin im Jahr 2021</h2>
-         <svg id=legend></svg>
-         <div id=main>
-            <div id=map></div>
-            <div id=right>
-               <div id=infoText></div>
-               <div id=gravenessDiagramm></div>
-               <div id=involvedDiagramm></div>
-               <button id="resetAll">Alle Filter zurücksetzen</button>
-            </div>
-         </div>
-      </div>
-   </section>
-   <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
-</body>
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -968,6 +969,7 @@ function LeafletAccidentMap(data, {
 # properties:
 #   bottom_hidden: true
 #   run_on_load: true
+#   top_hidden: true
 # ---%%
 var mapModule = LeafletAccidentMap(data, {
   topo: berlin_lor_topo,
@@ -1507,6 +1509,7 @@ var moduleGravenessChart = BarChartH(data, {
 # properties:
 #   run_on_load: true
 #   bottom_hidden: true
+#   top_hidden: true
 # ---%%
 var moduleGravenessChartTutorial = BarChartH(data, {
   x: d => d.count, // x axis -> counts
