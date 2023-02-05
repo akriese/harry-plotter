@@ -764,6 +764,7 @@ function LeafletAccidentMap(data, {
   });
 
   mod.reset = function() {
+    mod.currentlyFocusedState.unfocus()
     mod.map.fitBounds(mod.initBounds)
   }
 
@@ -773,7 +774,6 @@ function LeafletAccidentMap(data, {
 }
 # %%--- [javascript]
 # properties:
-#   top_hidden: true
 #   bottom_hidden: true
 #   run_on_load: true
 # ---%%
@@ -1469,7 +1469,6 @@ function RaincloudPlot(data) {
   return svg.node();
 }
 # %% [html]
-
 <div id="test_violin"></div>
 # %%--- [javascript]
 # properties:
@@ -1541,10 +1540,12 @@ var manager = {
       involved: []
     }
 
-    for (member in this.members) {
-      member.module.update(initData)
+    for (member of this.members) {
       member.module.reset()
+      member.module.update(this.initData)
     }
+
+    this.updateInfoText(this.initData.length)
   },
 
   // add a module to be kept in the update loop to the members
@@ -1563,10 +1564,11 @@ var manager = {
   }
 }
 
-manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }, noUpdate: false}) // seems a little leaky
-manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }, noUpdate: false}) // seems leaky
-manager.addMember(mapModule, {ignoreFilter: {lor: undefined}})
+manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }})
+manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }})
+manager.addMember(mapModule, { ignoreFilter: { lor: undefined }})
 manager.updateInfoText(data.length)
+document.getElementById("resetAll").onclick = () => { manager.resetAll() }
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
 mapModule.map.remove()
