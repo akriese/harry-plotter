@@ -642,6 +642,7 @@ function LeafletAccidentMap(data, {
   stateStrokeInactive = 0.0, // state border stroke thickness, while neither focused nor hovered over
   stateStrokeClicked = 3.0, // state border stroke thickness, while focused
   stateStrokeHover = 1.0, // state border stroke thickness, while hovered over
+  stateOpacityDomain = [0.05, 0.4], // min and maximum state color opacity
 }) {
   // get topo bounds and convert them to WGS84, but with LatLong format (x and y switched)
   var bounds = topojson.bbox(topo)
@@ -679,7 +680,7 @@ function LeafletAccidentMap(data, {
   // create the LOR polygons and give them click behavior
   mod.states = states.features.map(f => {
     const polygon = L.polygon(f.geometry.coordinates[0],
-            { stroke: true, color: "black", weight: stateStrokeInactive, fillOpacity: 0.8 })
+            { stroke: true, color: "black", weight: stateStrokeInactive, fillOpacity: stateOpacityDomain[1] })
 
     // change stroke when focussing state
     polygon.focus = function(e) {
@@ -755,8 +756,7 @@ function LeafletAccidentMap(data, {
   // change polygon color scale on zoom
   mod.map.on('zoomend', () => {
     var zoom = mod.map.getZoom();
-    const minOpacity = 0.01 // zoom == maxZoom => opacity = minOpacity
-    const maxOpacity = 0.8 // zoom == minZoom => opacity = maxOpacity
+    const [minOpacity, maxOpacity] = stateOpacityDomain // zoom == maxZoom => opacity = minOpacity; zoom == minZoom => opacity = maxOpacity
     const multiplier = (maxZoom - zoom) / (maxZoom - minZoom) // number between 0 and 1; zoom normalized
     // do a cubic descent of opacity to see the underlying map earlier
     const newOpacity = (maxOpacity - minOpacity) * Math.pow(multiplier, 3) + minOpacity
@@ -787,6 +787,7 @@ var mapModule = LeafletAccidentMap(data, {
   stateTitle: f => f.properties.BZR_NAME,
   stateCount: countPerLOR,
   stateId: p => parseInt(p.properties.BZR_ID),
+  stateOpacityDomain: [0.05, 0.6],
 })
 # %%--- [javascript]
 # properties:
