@@ -1057,10 +1057,6 @@ function BarChart(data, {
   let xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
   let yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
 
-  // setted color can be changed by using another schemeCategory
-  let color = d3.scaleOrdinal(barData.map(d => d.category), d3.schemeCategory10).unknown("red");
-  let col = d3.map(barData, (d) => color(d.category));
-
   // Compute titles.
   if (title === undefined) {
     let formatValue = yScale.tickFormat(100, yFormat);
@@ -1109,7 +1105,7 @@ function BarChart(data, {
       .attr("height", i => yScale(0) - yScale(Y[i]))
       .attr("width", xScale.bandwidth())
       .attr("cursor", "pointer")
-      .attr("fill", i => col[i]);
+      .attr("fill", "#7f11e0");
 
   if (title) bar.append("title").text(title);
 
@@ -1314,7 +1310,7 @@ function BarChartH(data, {
   const yScale = d3.scaleBand(yDomain, yRange).padding(yPadding);
   const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
   const yAxis = d3.axisLeft(yScale).tickSizeOuter(0);
-  var color = d3.scaleOrdinal(barData.map(d => d.category), ["red", "orange", "green"]).unknown("grey");
+  var color = d3.scaleOrdinal(barData.map(d => d.category), ["#000099", "#003399", "#3366cc"]).unknown("grey");
   const col = d3.map(barData, (d) => color(d.category));
 
   // Compute titles.
@@ -1364,7 +1360,7 @@ function BarChartH(data, {
       .attr("y", i => yScale(Y[i]))
       .attr("width", i => xScale(X[i]) - xScale(0))
       .attr("height", yScale.bandwidth())
-      .attr("fill", i => col[i])
+      .attr("fill", i => col[i]) //"#2222ff")
       .attr("cursor", "pointer")
       .attr("category", i => i)
       .style("opacity", 1.0);
@@ -1704,7 +1700,7 @@ var manager = {
     }
     const text = `<p style="font-size:20px; color:#000000; font-weight:bold;">
                   Momentan im Fokus: <br>
-                  <span style="color: #2222ff">${gs}</span> Unfälle in <span style="color: #bb2727cc">${area}</span> <br>
+                  <span style="color: #003399">${gs}</span> Unfälle in <span style="color: #bb2727cc">${area}</span> <br>
                   ${inv} (${totalFocused} Unfälle)
                 </p>`
     this.infoTextDiv.innerHTML = text
