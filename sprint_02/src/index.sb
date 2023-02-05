@@ -274,15 +274,223 @@ LorWGS.features.forEach(f => {
 var projection = d3.geoIdentity()
   .reflectY(true)
   .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
-# %%--- [html]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
+function reveal() {
+  var reveals = document.querySelectorAll(".reveal");
+  for (var i = 0; i < reveals.length; i++) {
+    var windowHeight = window.innerHeight;
+    var elementTop = reveals[i].getBoundingClientRect().top;
+    var elementVisible = 150;
+    if (elementTop < windowHeight - elementVisible) {
+      reveals[i].classList.add("active");
+    } else {
+      reveals[i].classList.remove("active");
+    }
+  }
+}
+window.addEventListener("scroll", reveal);
+reveal();
+# %%--- [css]
 # properties:
 #   top_hidden: true
 #   run_on_load: true
 # ---%%
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Asap", sans-serif;
+}
+
+section{
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+section:nth-child(1){
+  color: #ff0808;
+  }
+
+section .container{
+  margin: 100px;
+  max-width: 100%;
+}
+section h1{
+  font-size: 3rem;
+  margin: 20px;
+}
+section h2{
+  font-size: 40px;
+  text-align: center;
+  text-transform: uppercase;
+}
+section .text-container{
+   display: flex;
+}
+section .text-container .text-box{
+  margin: 20px;
+  padding: 20px;
+}
+
+@media (max-width: 900px){
+  section h1{
+    font-size: 2rem;
+    text-align: center;
+  }
+  section .text-container{
+    flex-direction: column;
+  }
+}
+
+.reveal{
+  position: relative;
+  transform: translateY(150px);
+  opacity: 0;
+  transition: 1s all ease;
+}
+
+.reveal.active{
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.left-container {
+  float: left;
+  width: 50%;
+}
+
+.left-content {
+  width: 100%;
+}
+.right-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 40vw;
+  width: 50%;
+  float: left;
+}
+
+.right-content {
+  max-width: 70%;}
+# %%--- [html]
+# properties:
+#   run_on_load: true
+#   top_hidden: true
+# ---%%
+
 <body>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-  <h1 style="text-align:center">Übersicht der Verkehrsunfälle in Berlin im Jahr 2021</h1>
+<section>
+    <div id= "titel" class="container reveal">
+  		<h1 style="text-align:center">Übersicht der Verkehrsunfälle in Berlin im Jahr 2021</h1>
+    </div>
+  </section>
+  
+  <section>
+    <div id= "introduction" class="container ">
+      <h1 class= "reveal" style="text-align:center">2021 wurden in Berlin ca. 15.000 Menschen bei Verkehrsunfällen verletzt oder getötet.</h1>
+    </div>
+  </section>
+  
+ <section>
+    <div id= "introduction2" class="container ">
+       <h1 class= "reveal" style="text-align:center">Dieses interaktive Tool soll Ihnen als Stadt- oder Verkehrsplaner eine Hilfe sein, Verkehrsunfälle aus 
+         unterschiedlichen Blickwinkeln zu betrachten, mögliche Ursachen zu erforschen und besonders gefährdete Gebiete zu erkennen.
+         <br><br>Lassen Sie uns zunächst den zeitlichen Aspekt betrachten.</h1>
+    </div>
+  </section>
+  
+  <section>
+    <div id="askforViolin" class="container">
+       	<h1 class= "reveal" style="text-align:center">Zu welchen Zeiten finden die meisten Verkehrsunfälle statt?</h1>
+    </div>
+  </section>
+  
+  <section>
+    <div id="violin" class="left-container">
+      <div id="Mapgrafik" class="left-content">
+    	<div class= "reveal"  id=test_violin></div>
+    </div>
+      </div>
+
+            <div class="right-container">
+      <div class="right-content reveal">
+        Hier sehen Sie die Verteilung der Unfälle über Tage und Stunden. Besonders auffällig ist, dass am Wochenende (insbesondere am Sonntag) die 
+        wenigsten Unfälle stattfinden. An Werktagen lassen sich zwischen 7-9 Uhr und zwischen 15-18 Uhr zwei Peaks erkennen, die in etwa den Zeiten 
+        entsprechen, zu denen viele Menschen zur Arbeit/von der Arbeit nach Hause fahren. Allerdingsfinden auch dazwischen recht viele Unfälle statt.
+        Zu Zeiten, zu denen üblicherweise geschlafen wird und somit auch auf den Straßen wenig los ist, finden - wie zu erwarten - kaum Unfälle statt.
+        </div>
+    </div>
+  </section>
+
+    <section>
+      <div  class="left-content">
+    	<h1 class= "reveal"  style="text-align:center">Nun folgt eine kleine Einführung in die verschiedenen interaktiven Elemente unseres Tools,
+          um Ihnen den Umgang damit zu erleichtern und Sie auf bestimmte Funktionsweisen aufmerksam zu machen.</h1>
+    </div> 
+      </section>
+  
+  <section>
+    <div id="map_e" class="left-container">
+    	 <div class="left-content">
+      		<h1 class= "reveal">Map</h1>
+        </div>
+    </div>
+    <div class="right-container">
+      <div class="right-content reveal">
+        Das Hauptelement der Darstellung ist eine Karte. Sie können darin wie gewohnt rein- und rauszoomen indem Sie scrollen, und die Karte mit der linken Maustaste bewegen. Die Farbe der eingezeichneten 
+        lebensorientierten Räume (LOR) zeigt die unnormierte Anzahl der Verkehrsunfälle in dem jeweiligen LOR an. Durch Klicken auf einen LOR wird in diesen hereingezoomt und die seitlichen Grafiken werden
+        aktualisiert, um nur Daten aus diesem LOR anzuzeigen. Erneutes klicken auf den LOR hebt die Auswahl wieder auf. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem 
+        momentanen Zoomlevel nah beieinander liegen. Durch reinzoomen werden diese in der Regel in kleinere Agglomerationen aufgeteilt, bis ab einem gewissen Zoomfaktor nur die einzelnen Unfallstellen 
+        sichtbar sind. Um die einzelnen Unfallstellen sichtbar zu machen, kann auch auf einen der farbigen Kreise geklickt werden. Wenn Sie mit der Maus über einem der LORs oder einer einzelnen Unfallstelle
+        hovern, erscheint ein Tooltip mit näheren Informationen.
+	  </div>
+    </div>
+  </section>
+
+      <section>
+    <div id="GRAVENESS_e" class="left-container">
+      <div id=gravenessDiagrammTutorial class= "reveal" ></div>
+    </div>
+          <div class="right-container">
+      <div class="right-content reveal">
+        In diesem Graphen wird der maximale Schweregrad der Unfälle dargestellt. Sie können auf einen der Balken oder eine der Beschriftungen der y-Axe klicken, um z.B. nur Unfälle mit Schwerverletzten
+        anzuzeigen. Wie auch bei der Auswahl der LORs, wird hier durch erneutes Klicken die Auswahl aufgehoben. Dies gilt auch für die nächste Darstellung.
+        </div>
+    </div>
+  </section>
+
+      <section>
+    <div id="beteiligte_e" class="left-container">
+      <div id=involvedDiagrammTutorial  class= "reveal" ></div>
+    </div>
+          <div class="right-container">
+      <div class="right-content reveal">
+        Diese Darstellung beschreibt, wie viele Verkehrsteilnehmer einer bestimmten Gruppe in Unfälle verwickelt waren. Ähnlich wie bei dem darüberliegenden Graphen, können Sie auch hier
+        einen der Balken anklicken, um sich z.B. nur Unfälle mit PKW-Beteiligung anzeigen zu lassen, wobei dies auch Unfälle miteinschließt, an denen z.B. PKWs und Fahrradfahrer beteiligt waren. Sowohl die Karte,
+        als auch das Balkendiagramm mit Schweregraden werden dadurch aktualisiert. Falls Sie nicht mehr sicher sein sollten, was Sie im Moment ausgewählt haben, wird Ihnen diese Information
+        in der rechten oberen Ecke der Gesamtdarstellung angezeigt.
+        </div>
+    </div>
+  </section>  
+
+  <section>
+      <div  class="left-content">
+    	<h1 class= "reveal"  style="text-align:center">Welche Orte sind besonders gefährlich - und für wen?
+        <br><br>Wo bedarf es zusätzlicher Schutzmaßnahmen?</h1>
+    </div> 
+      </section>
+
+  <section>
+    <div class="container reveal">
   <svg id=legend></svg>
   <div id=main>
       <div id=map><h1>MAP</h1></div>
@@ -292,7 +500,9 @@ var projection = d3.geoIdentity()
         <div id=involvedDiagramm><h1>Beteiligte</h1></div>
       </div>
   </div>
-  <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
+      </div>
+  </section>
+    <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
 </body>
 # %% [markdown]
 ## Map implementation
@@ -799,10 +1009,11 @@ function BarChart(data, {
 }
 # %%--- [javascript]
 # properties:
+#   run_on_load: true
 #   top_hidden: true
 #   bottom_hidden: true
-#   run_on_load: true
 # ---%%
+
 var moduleInvolvedChart = BarChart(data, {
   x: d => d.category, // x=> xScale(X[i])). axis -> category
   y: d => d.count, // counts
@@ -812,6 +1023,28 @@ var moduleInvolvedChart = BarChart(data, {
   divName: "involvedDiagramm",
   //title: "Anzahl der Unfälle per Beteiligte",
 })
+# %%--- [javascript]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+var moduleInvolvedChartTutorial = BarChart(data, {
+x: d => d.category, // x=> xScale(X\[i\])). axis -> category
+y: d => d.count, // counts
+yLabel: "↑ Anzahl",
+width: 500,
+height: 400, // think about deceptive design
+divName: "involvedDiagrammTutorial",
+//title: "Anzahl der Unfälle per Beteiligte",
+})
+# %%--- [javascript]
+# properties:
+#   bottom_hidden: true
+#   top_hidden: true
+#   run_on_load: true
+# ---%%
+moduleInvolvedChartTutorial.clickBar = () => {}
 # %% [markdown]
 ## Graveness chart
 # %%--- [javascript]
@@ -1031,10 +1264,11 @@ function BarChartH(data, {
 }
 # %%--- [javascript]
 # properties:
-#   top_hidden: true
 #   bottom_hidden: true
+#   top_hidden: true
 #   run_on_load: true
 # ---%%
+
 var moduleGravenessChart = BarChartH(data, {
   x: d => d.count, // x axis -> counts
   y: d => d.category, // y-axis -> counts
@@ -1045,6 +1279,29 @@ var moduleGravenessChart = BarChartH(data, {
   divName: "gravenessDiagramm",
   //title: "Gesamtanzahl der Unfälle per Beteiligte",
 })
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
+var moduleGravenessChartTutorial = BarChartH(data, {
+  x: d => d.count, // x axis -> counts
+  y: d => d.category, // y-axis -> counts
+  xLabel: "Anzahl →",
+  width: 500,
+  height: 300, // think about deceptive design
+  marginLeft: 80,
+  divName: "gravenessDiagrammTutorial",
+  //title: "Gesamtanzahl der Unfälle per Beteiligte",
+})
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+# ---%%
+moduleGravenessChartTutorial.clickBar = () => {}
 # %% [markdown]
 ## Violin plot for amount of crash per days and hour
 
@@ -1176,8 +1433,12 @@ function RaincloudPlot(data) {
   return svg.node();
 }
 # %% [html]
+
 <div id="test_violin"></div>
-# %% [javascript]
+# %%--- [javascript]
+# properties:
+#   run_on_load: true
+# ---%%
 removeAllChildren("test_violin");
 RaincloudPlot(data)
 # %%--- [javascript]
