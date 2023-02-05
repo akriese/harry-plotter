@@ -392,7 +392,7 @@ section .text-container .text-box{
 .right-content {
   max-width: 50%;}
 
-.button{
+.button, #resetAll {
   position: relative;
   background-color: black;
   border-radius: 4em;
@@ -407,6 +407,14 @@ section .text-container .text-box{
   transition-duration: 0.4s;
   -webkit-transition-duration: 0.4s; /* Safari */
 }
+
+#resetAll {
+  font-size: 12px;
+  border-radius: 3em;
+  padding: 0.6em 1.2em;
+  background-color: gray;
+}
+
 a:hover {
   color:  white;
 }
@@ -899,7 +907,8 @@ function LeafletAccidentMap(data, {
     this.states.forEach(p => {
       const id = stateId(p)
       p.setStyle({fillColor: scaler(id)})
-      p.bindTooltip(`${stateTitle(p)} (${counts[id]} Unfälle)`) // TODO: maybe handle case count == 1?
+      let countsOrZero = counts[id] === undefined ? 0 : counts[id]
+      p.bindTooltip(`${stateTitle(p)} (${countsOrZero} Unfälle)`) // TODO: maybe handle case count == 1?
     })
 
     // update color legend (by replacing it completely)
@@ -1057,10 +1066,6 @@ function BarChart(data, {
   let xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
   let yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
 
-  // setted color can be changed by using another schemeCategory
-  let color = d3.scaleOrdinal(barData.map(d => d.category), d3.schemeCategory10).unknown("red");
-  let col = d3.map(barData, (d) => color(d.category));
-
   // Compute titles.
   if (title === undefined) {
     let formatValue = yScale.tickFormat(100, yFormat);
@@ -1109,7 +1114,7 @@ function BarChart(data, {
       .attr("height", i => yScale(0) - yScale(Y[i]))
       .attr("width", xScale.bandwidth())
       .attr("cursor", "pointer")
-      .attr("fill", i => col[i]);
+      .attr("fill", "#7f11e0");
 
   if (title) bar.append("title").text(title);
 
@@ -1314,7 +1319,7 @@ function BarChartH(data, {
   const yScale = d3.scaleBand(yDomain, yRange).padding(yPadding);
   const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
   const yAxis = d3.axisLeft(yScale).tickSizeOuter(0);
-  var color = d3.scaleOrdinal(barData.map(d => d.category), ["red", "orange", "green"]).unknown("grey");
+  var color = d3.scaleOrdinal(barData.map(d => d.category), ["#000099", "#003399", "#3366cc"]).unknown("grey");
   const col = d3.map(barData, (d) => color(d.category));
 
   // Compute titles.
@@ -1364,7 +1369,7 @@ function BarChartH(data, {
       .attr("y", i => yScale(Y[i]))
       .attr("width", i => xScale(X[i]) - xScale(0))
       .attr("height", yScale.bandwidth())
-      .attr("fill", i => col[i])
+      .attr("fill", i => col[i]) //"#2222ff")
       .attr("cursor", "pointer")
       .attr("category", i => i)
       .style("opacity", 1.0);
@@ -1693,18 +1698,21 @@ var manager = {
     const f = this.currentFilters
     const area = f.lor === undefined ? "ganz Berlin" : lorNames[f.lor]
     const gs = f.graveness === undefined ? "Alle" : `${gravenessMeanings[f.graveness - 1]}e`
+    const involvedSpan = text => `<span style="color: #7f11e0">${text}</span>`
     let inv = ""
     if (f.involved.length > 0) {
       const category = involvedNames[f.involved[0]]
       if (category == "Sonstige") {
-        inv = `mit Beteiligung <span style="color: #7f11e0">Sonstiger</span> <br>`
+        inv = `mit Beteiligung ${involvedSpan("Sonstiger")} <br>`
       } else {
-        inv = `mit <span style="color: #7f11e0">${category}</span>-Beteiligung <br>`
+        inv = `mit ${involvedSpan(category)}-Beteiligung <br>`
       }
+    } else {
+      inv = `mit ${involvedSpan("beliebiger")} Beteiligung`
     }
     const text = `<p style="font-size:20px; color:#000000; font-weight:bold;">
                   Momentan im Fokus: <br>
-                  <span style="color: #2222ff">${gs}</span> Unfälle in <span style="color: #bb2727cc">${area}</span> <br>
+                  <span style="color: #003399">${gs}</span> Unfälle in <span style="color: #bb2727cc">${area}</span> <br>
                   ${inv} (${totalFocused} Unfälle)
                 </p>`
     this.infoTextDiv.innerHTML = text
