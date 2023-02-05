@@ -305,8 +305,8 @@ window.addEventListener("scroll", reveal);
 reveal();
 # %%--- [css]
 # properties:
-#   top_hidden: true
 #   run_on_load: true
+#   top_hidden: true
 # ---%%
 
 
@@ -336,9 +336,7 @@ section h1{
   margin: 20px;
 }
 section h2{
-  font-size: 40px;
-  text-align: center;
-  text-transform: uppercase;
+
 }
 section .text-container{
    display: flex;
@@ -494,7 +492,6 @@ a {
 #   run_on_load: true
 #   top_hidden: true
 # ---%%
-
 <body>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
