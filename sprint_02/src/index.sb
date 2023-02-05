@@ -1740,10 +1740,7 @@ document.getElementById("resetAll").onclick = () => { manager.resetAll() }
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
 mapModule.map.remove()
-# %%--- [css]
-# properties:
-#   top_hidden: true
-# ---%%
+# %% [css]
 /* We need this to make all cells wider */
 :root {
   --cell-base-width: 1600px;
@@ -1759,6 +1756,9 @@ body {
   height: 850px;
   width: 1600px;
   display: flex;
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
 }
 
 #map {
@@ -1779,19 +1779,27 @@ body {
 }
 
 #right {
-  background-color: lightgray;
+  background-color: white;
   width: 30%;
+
 }
 
 #infoText {
   height: 10%;
   margin: 15px;
   text-align: center;
+  border-bottom-color: #c8c8c8;
+  border-bottom-width: 1px;
+  border-bottom-style:   solid;
 }
 
 #gravenessDiagramm {
   height: 35%;
   margin: 15px;
+  border-bottom-color: #c8c8c8;
+  border-bottom-width: 1px;
+  border-bottom-style:   solid;
+  
 }
 
 #involvedDiagramm {
