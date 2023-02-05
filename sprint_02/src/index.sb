@@ -308,6 +308,8 @@ reveal();
 #   top_hidden: true
 #   run_on_load: true
 # ---%%
+
+
 *{
   margin: 0;
   padding: 0;
@@ -371,6 +373,7 @@ section .text-container .text-box{
 .left-container {
   float: left;
   width: 50%;
+  height:90%;
 }
 
 .left-content {
@@ -380,13 +383,112 @@ section .text-container .text-box{
   display: flex;
   align-items: center;
   justify-content: space-around;
-  height: 40vw;
+  height:90%;
   width: 50%;
   float: left;
+  font-size: 18px;
 }
 
 .right-content {
-  max-width: 70%;}
+  max-width: 50%;}
+
+.button{
+  position: relative;
+  background-color: black;
+  border-radius: 4em;
+  font-size: 16px;
+  color: white;
+  padding: 0.8em 1.8em;
+  cursor:pointer;
+  user-select:none;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition-duration: 0.4s;
+  -webkit-transition-duration: 0.4s; /* Safari */
+}
+a:hover {
+  color:  white;
+}
+a {
+  color:  white;
+}
+
+.button:hover {
+  transition-duration: 0.1s;
+  background-color: #3A3A3A;
+}
+
+.button:after {
+  content: "";
+  display: block;
+  position: absolute;
+  border-radius: 4em;
+  left: 0;
+  top:0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: all 0.5s;
+  box-shadow: 0 0 10px 40px white;
+}
+
+.button:active:after {
+  box-shadow: 0 0 0 0 white;
+  position: absolute;
+  border-radius: 4em;
+  left: 0;
+  top:0;
+  opacity: 1;
+  transition: 0s;
+}
+
+.button:active {
+  top: 1px;
+}
+
+.arrow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transform: rotate(0deg);
+    cursor: pointer;
+}
+
+.arrow span {
+    display: block;
+    width: 1.5vw;
+    height: 1.5vw;
+    border-bottom: 5px solid rgb(0, 0, 0);
+    border-right: 5px solid rgb(0, 0, 0);
+    transform: rotate(45deg);
+    margin: 20px;
+    animation: animate 2s infinite;
+}
+
+.arrow span:nth-child(2) {
+    animation-delay: -0.2s;
+}
+
+.arrow span:nth-child(3) {
+    animation-delay: -0.4s;
+}
+
+@keyframes animate {
+    0% {
+        opacity: 0;
+        transform: rotate(45deg) translate(-20px, -20px);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(45deg) translate(20px, 20px);
+    }
+}
+
 # %%--- [html]
 # properties:
 #   run_on_load: true
@@ -399,12 +501,21 @@ section .text-container .text-box{
 <section>
     <div id= "titel" class="container reveal">
   		<h1 style="text-align:center">Übersicht der Verkehrsunfälle in Berlin im Jahr 2021</h1>
+      <p style="text-align:center">
+        <p> </p>
+         <p> </p>
+      <div class="arrow">       <span></span>        <span></span>       <span></span></div>
+      </p>
     </div>
   </section>
 
   <section>
     <div id= "introduction" class="container ">
       <h1 class= "reveal" style="text-align:center">2021 wurden in Berlin ca. 15.000 Menschen bei Verkehrsunfällen verletzt oder getötet.</h1>
+      <p style="text-align:center">
+      <p class= "reveal" style="text-align:center">
+        <a class="button">Weiter</a>
+      </p>
     </div>
   </section>
 
@@ -413,16 +524,23 @@ section .text-container .text-box{
        <h1 class= "reveal" style="text-align:center">Dieses interaktive Tool soll Ihnen als Stadt- oder Verkehrsplaner eine Hilfe sein, Verkehrsunfälle aus
          unterschiedlichen Blickwinkeln zu betrachten, mögliche Ursachen zu erforschen und besonders gefährdete Gebiete zu erkennen.
          <br><br>Lassen Sie uns zunächst den zeitlichen Aspekt betrachten.</h1>
+               <p class= "reveal" style="text-align:center">
+      <a class="button">Weiter</a>
+      </p>
     </div>
   </section>
 
   <section>
     <div id="askforViolin" class="container">
        	<h1 class= "reveal" style="text-align:center">Zu welchen Zeiten finden die meisten Verkehrsunfälle statt?</h1>
+               <p class= "reveal" style="text-align:center">
+      <a class="button">Weiter</a>
+      </p>
     </div>
   </section>
 
   <section>
+     <div class="container">
     <div id="violin" class="left-container">
       <div id="Mapgrafik" class="left-content">
     	<div class= "reveal"  id=test_violin></div>
@@ -435,19 +553,31 @@ section .text-container .text-box{
         wenigsten Unfälle stattfinden. An Werktagen lassen sich zwischen 7-9 Uhr und zwischen 15-18 Uhr zwei Peaks erkennen, die in etwa den Zeiten
         entsprechen, zu denen viele Menschen zur Arbeit/von der Arbeit nach Hause fahren. Allerdings finden auch dazwischen recht viele Unfälle statt.
         Zu Zeiten, zu denen üblicherweise geschlafen wird und somit auch auf den Straßen wenig los ist, finden - wie zu erwarten - kaum Unfälle statt.
+          <p class= "reveal" style="text-align:center">
+             <p></p>
+      <a  class="button">Weiter</a>
+      </p>
+
         </div>
     </div>
+      </div>
+      </div>
   </section>
 
     <section>
-      <div  class="left-content">
+      <div  class="container">
     	<h1 class= "reveal"  style="text-align:center">Nun folgt eine kleine Einführung in die verschiedenen interaktiven Elemente unseres Tools,
           um Ihnen den Umgang damit zu erleichtern und Sie auf bestimmte Funktionsweisen aufmerksam zu machen.</h1>
-    </div>
-      </section>
 
+                    <p class= "reveal" style="text-align:center">
+      <a  class="button">Weiter</a>
+      </p>
+    </div>
+
+      </section>
   <section>
-    <div id="map_e" class="left-container">
+        <div class="container">
+     <div id="map_e" class="left-container">
     	 <div class="left-content">
       		<h1 class= "reveal">Map</h1>
         </div>
@@ -460,11 +590,17 @@ section .text-container .text-box{
         momentanen Zoomlevel nah beieinander liegen. Durch reinzoomen werden diese in der Regel in kleinere Agglomerationen aufgeteilt, bis ab einem gewissen Zoomfaktor nur die einzelnen Unfallstellen
         sichtbar sind. Um die einzelnen Unfallstellen sichtbar zu machen, kann auch auf einen der farbigen Kreise geklickt werden. Wenn Sie mit der Maus über einem der LORs oder einer einzelnen Unfallstelle
         hovern, erscheint ein Tooltip mit näheren Informationen.
+          <p class= "reveal" style="text-align:center">
+        <p></p>
+      <a  class="button">Weiter</a>
+      </p>
 	  </div>
+    </div>
     </div>
   </section>
 
       <section>
+        <div class="container">
     <div id="GRAVENESS_e" class="left-container">
       <div id=gravenessDiagrammTutorial class= "reveal" ></div>
     </div>
@@ -472,11 +608,18 @@ section .text-container .text-box{
       <div class="right-content reveal">
         In diesem Graphen wird der maximale Schweregrad der Unfälle dargestellt. Sie können auf einen der Balken oder eine der Beschriftungen der y-Axe klicken, um z.B. nur Unfälle mit Schwerverletzten
         anzuzeigen. Wie auch bei der Auswahl der LORs, wird hier durch erneutes Klicken die Auswahl aufgehoben. Dies gilt auch für die nächste Darstellung.
+              <p class= "reveal" style="text-align:center">
+        <p></p>
+      <a  class="button">Weiter</a>
+      </p>
         </div>
+    </div>
+      </p>
     </div>
   </section>
 
       <section>
+        <div class="container">
     <div id="beteiligte_e" class="left-container">
       <div id=involvedDiagrammTutorial  class= "reveal" ></div>
     </div>
@@ -486,14 +629,26 @@ section .text-container .text-box{
         einen der Balken anklicken, um sich z.B. nur Unfälle mit PKW-Beteiligung anzeigen zu lassen, wobei dies auch Unfälle miteinschließt, an denen z.B. PKWs und Fahrradfahrer beteiligt waren. Sowohl die Karte,
         als auch das Balkendiagramm mit Schweregraden werden dadurch aktualisiert. Falls Sie nicht mehr sicher sein sollten, was Sie im Moment ausgewählt haben, wird Ihnen diese Information
         in der rechten oberen Ecke der Gesamtdarstellung angezeigt.
+
+              <p class= "reveal" style="text-align:center">
+        <p></p>
+      <a  class="button">Weiter</a>
+      </p>
         </div>
+    </div>
     </div>
   </section>
 
   <section>
+    <div class="container">
       <div  class="left-content">
     	<h1 class= "reveal"  style="text-align:center">Welche Orte sind besonders gefährlich - und für wen?
         <br><br>Wo bedarf es zusätzlicher Maßnahmen zur Verkehrssicherheit?</h1>
+        <p></p>
+    </div>
+       <p  class= "reveal" style="text-align:center">
+      <a class="button">Weiter</a>
+      </p>
     </div>
       </section>
 
@@ -513,6 +668,28 @@ section .text-container .text-box{
   </section>
     <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
 </body>
+# %%--- [javascript]
+# properties:
+#   top_hidden: true
+#   bottom_hidden: true
+#   run_on_load: true
+# ---%%
+function clickbutton(buttonName){
+  $(`${buttonName}`).on("click", function(e) {
+    container = $(this).parent();
+    while (    document != container[0] // not reached root
+            && container.find('~.container, ~:has(.container)').length == 0)
+        container = container.parent(); // search siblings of parent instead
+    nextdiv = container.nextAll('.container, :has(.container)').first();
+    // no next .container found, go back to first container
+    if (nextdiv.length==0) nextdiv = $(document).find('.container:first');
+    $(document).scrollTop(nextdiv.offset().top);
+    // $(this).parent().next() // this is the next div container.
+    return false;
+	});
+}
+clickbutton(".button")
+clickbutton(".arrow")
 # %% [markdown]
 ## Map implementation
 # %%--- [javascript]
