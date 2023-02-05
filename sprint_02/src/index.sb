@@ -494,6 +494,11 @@ a {
     }
 }
 
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 # %%--- [html]
 # properties:
 #   run_on_load: true
@@ -576,27 +581,42 @@ a {
    <section>
       <div class="container">
          <h2 class= "reveal" style="text-align:center">Übersicht der Visualization</h2>
-         <div id="map_e" class="left-container">
-            <div class="left-content">
-               <h1 class= "reveal">Map</h1>
-            </div>
-         </div>
-         <div class="right-container">
-            <div class="right-content reveal">
-               Das Hauptelement der Darstellung ist eine Karte. Sie können darin wie gewohnt rein- und rauszoomen indem Sie scrollen, und die Karte mit der linken Maustaste bewegen. Die Farbe der eingezeichneten
-               lebensorientierten Räume (LOR) zeigt die unnormierte Anzahl der Verkehrsunfälle in dem jeweiligen LOR an. Durch Klicken auf einen LOR wird in diesen hereingezoomt und die seitlichen Grafiken werden
-               aktualisiert, um nur Daten aus diesem LOR anzuzeigen. Erneutes Klicken auf den LOR hebt die Auswahl wieder auf. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem
-               momentanen Zoomlevel nah beieinander liegen. Durch reinzoomen werden diese in der Regel in kleinere Agglomerationen aufgeteilt, bis ab einem gewissen Zoomfaktor nur die einzelnen Unfallstellen
-               sichtbar sind. Um die einzelnen Unfallstellen sichtbar zu machen, kann auch auf einen der farbigen Kreise geklickt werden. Wenn Sie mit der Maus über einem der LORs oder einer einzelnen Unfallstelle
-               hovern, erscheint ein Tooltip mit näheren Informationen.
-               <p class= "reveal" style="text-align:center">
-               <p></p>
-               <a  class="button">Weiter</a>
-               </p>
-            </div>
-         </div>
+      <div id="map_e" class="left-container">
+    	 <div class="left-content center">
+      		<img class= "reveal" src="https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/final_viz_all.png" width="800" height="425">
+        </div>
+    </div>
+    <div class="right-container">
+      <div class="right-content reveal">
+        Das Hauptelement der Darstellung ist eine Karte. Sie können darin wie gewohnt rein- und rauszoomen indem Sie scrollen, und die Karte mit der linken Maustaste bewegen. Die Farbe der eingezeichneten lebensorientierten Räume (LOR) zeigt die unnormierte Anzahl der Verkehrsunfälle in dem jeweiligen LOR an. 
+          <p class= "reveal" style="text-align:center">
+        <p></p>
+      <a  class="button">Weiter</a>
+      </p>
+	  </div>
+          </div>
       </div>
    </section>
+   <section>
+      <div class="container">
+         <h2 style="text-align:center">Übersicht der Visualization</h2>
+      <div id="map_e" class="left-container">
+    	 <div class="left-content center"  >
+      		<img class= "reveal" src="https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/final_viz_filtered.png" width="800" height="425">
+        </div>
+    </div>
+    <div class="right-container">
+      <div class="right-content reveal">
+        Durch Klicken auf einen LOR wird in diesen hereingezoomt und die seitlichen Grafiken werden aktualisiert, um nur Daten aus diesem LOR anzuzeigen. Erneutes Klicken auf den LOR hebt die Auswahl wieder auf. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem momentanen Zoomlevel nah beieinander liegen. Durch reinzoomen werden diese in der Regel in kleinere Agglomerationen aufgeteilt, bis ab einem gewissen Zoomfaktor nur die einzelnen Unfallstellen sichtbar sind. Um die einzelnen Unfallstellen sichtbar zu machen, kann auch auf einen der farbigen Kreise geklickt werden. Wenn Sie mit der Maus über einem der LORs oder einer einzelnen Unfallstelle hovern, erscheint ein Tooltip mit näheren Informationen.
+        <p class= "reveal" style="text-align:center">
+        <p></p>
+      <a  class="button">Weiter</a>
+      </p>
+	  </div>
+          </div>
+      </div>
+   </section>
+
    <section>
       <div class="container">
          <h2 class= "reveal" style="text-align:center">Unfälle je Schweregrad</h2>
@@ -666,7 +686,6 @@ a {
    </section>
    <h6>Quelle: <a href="https://daten.berlin.de/datensaetze/stra%C3%9Fenverkehrsunf%C3%A4lle-nach-unfallort-berlin-2021">daten.berlin.de</a></h6>
 </body>
-
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
