@@ -78,7 +78,7 @@ data.forEach(d => {
   var arr = []
   for (const [key, value] of Object.entries(d)) {
     if (key.startsWith("Ist") && value === true) {
-      arr.push(key.replace("Ist", ""))
+      arr.push(involvedNames[key])
     }
   }
   d.Beteiligte = arr
@@ -274,6 +274,14 @@ LorWGS.features.forEach(f => {
 var projection = d3.geoIdentity()
   .reflectY(true)
   .fitSize([1500, 1000], topojson.feature(berlin_lor_topo, berlin_lor_topo.objects.states))
+
+// set d3's number local to the german one https://gitlab.com/-/snippets/1703535
+var localeGerman = d3.formatDefaultLocale({
+  "decimal": ",",
+  "thousands": ".",
+  "grouping": [3],
+  "currency": ["€", ""]
+});
 # %%--- [javascript]
 # properties:
 #   run_on_load: true
@@ -393,27 +401,27 @@ section .text-container .text-box{
   		<h1 style="text-align:center">Übersicht der Verkehrsunfälle in Berlin im Jahr 2021</h1>
     </div>
   </section>
-  
+
   <section>
     <div id= "introduction" class="container ">
       <h1 class= "reveal" style="text-align:center">2021 wurden in Berlin ca. 15.000 Menschen bei Verkehrsunfällen verletzt oder getötet.</h1>
     </div>
   </section>
-  
+
  <section>
     <div id= "introduction2" class="container ">
-       <h1 class= "reveal" style="text-align:center">Dieses interaktive Tool soll Ihnen als Stadt- oder Verkehrsplaner eine Hilfe sein, Verkehrsunfälle aus 
+       <h1 class= "reveal" style="text-align:center">Dieses interaktive Tool soll Ihnen als Stadt- oder Verkehrsplaner eine Hilfe sein, Verkehrsunfälle aus
          unterschiedlichen Blickwinkeln zu betrachten, mögliche Ursachen zu erforschen und besonders gefährdete Gebiete zu erkennen.
          <br><br>Lassen Sie uns zunächst den zeitlichen Aspekt betrachten.</h1>
     </div>
   </section>
-  
+
   <section>
     <div id="askforViolin" class="container">
        	<h1 class= "reveal" style="text-align:center">Zu welchen Zeiten finden die meisten Verkehrsunfälle statt?</h1>
     </div>
   </section>
-  
+
   <section>
     <div id="violin" class="left-container">
       <div id="Mapgrafik" class="left-content">
@@ -423,8 +431,8 @@ section .text-container .text-box{
 
             <div class="right-container">
       <div class="right-content reveal">
-        Hier sehen Sie die Verteilung der Unfälle über Tage und Stunden. Besonders auffällig ist, dass am Wochenende (insbesondere am Sonntag) die 
-        wenigsten Unfälle stattfinden. An Werktagen lassen sich zwischen 7-9 Uhr und zwischen 15-18 Uhr zwei Peaks erkennen, die in etwa den Zeiten 
+        Hier sehen Sie die Verteilung der Unfälle über Tage und Stunden. Besonders auffällig ist, dass am Wochenende (insbesondere am Sonntag) die
+        wenigsten Unfälle stattfinden. An Werktagen lassen sich zwischen 7-9 Uhr und zwischen 15-18 Uhr zwei Peaks erkennen, die in etwa den Zeiten
         entsprechen, zu denen viele Menschen zur Arbeit/von der Arbeit nach Hause fahren. Allerdings finden auch dazwischen recht viele Unfälle statt.
         Zu Zeiten, zu denen üblicherweise geschlafen wird und somit auch auf den Straßen wenig los ist, finden - wie zu erwarten - kaum Unfälle statt.
         </div>
@@ -435,9 +443,9 @@ section .text-container .text-box{
       <div  class="left-content">
     	<h1 class= "reveal"  style="text-align:center">Nun folgt eine kleine Einführung in die verschiedenen interaktiven Elemente unseres Tools,
           um Ihnen den Umgang damit zu erleichtern und Sie auf bestimmte Funktionsweisen aufmerksam zu machen.</h1>
-    </div> 
+    </div>
       </section>
-  
+
   <section>
     <div id="map_e" class="left-container">
     	 <div class="left-content">
@@ -446,10 +454,10 @@ section .text-container .text-box{
     </div>
     <div class="right-container">
       <div class="right-content reveal">
-        Das Hauptelement der Darstellung ist eine Karte. Sie können darin wie gewohnt rein- und rauszoomen indem Sie scrollen, und die Karte mit der linken Maustaste bewegen. Die Farbe der eingezeichneten 
+        Das Hauptelement der Darstellung ist eine Karte. Sie können darin wie gewohnt rein- und rauszoomen indem Sie scrollen, und die Karte mit der linken Maustaste bewegen. Die Farbe der eingezeichneten
         lebensorientierten Räume (LOR) zeigt die unnormierte Anzahl der Verkehrsunfälle in dem jeweiligen LOR an. Durch Klicken auf einen LOR wird in diesen hereingezoomt und die seitlichen Grafiken werden
-        aktualisiert, um nur Daten aus diesem LOR anzuzeigen. Erneutes Klicken auf den LOR hebt die Auswahl wieder auf. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem 
-        momentanen Zoomlevel nah beieinander liegen. Durch reinzoomen werden diese in der Regel in kleinere Agglomerationen aufgeteilt, bis ab einem gewissen Zoomfaktor nur die einzelnen Unfallstellen 
+        aktualisiert, um nur Daten aus diesem LOR anzuzeigen. Erneutes Klicken auf den LOR hebt die Auswahl wieder auf. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem
+        momentanen Zoomlevel nah beieinander liegen. Durch reinzoomen werden diese in der Regel in kleinere Agglomerationen aufgeteilt, bis ab einem gewissen Zoomfaktor nur die einzelnen Unfallstellen
         sichtbar sind. Um die einzelnen Unfallstellen sichtbar zu machen, kann auch auf einen der farbigen Kreise geklickt werden. Wenn Sie mit der Maus über einem der LORs oder einer einzelnen Unfallstelle
         hovern, erscheint ein Tooltip mit näheren Informationen.
 	  </div>
@@ -480,24 +488,25 @@ section .text-container .text-box{
         in der rechten oberen Ecke der Gesamtdarstellung angezeigt.
         </div>
     </div>
-  </section>  
+  </section>
 
   <section>
       <div  class="left-content">
     	<h1 class= "reveal"  style="text-align:center">Welche Orte sind besonders gefährlich - und für wen?
         <br><br>Wo bedarf es zusätzlicher Maßnahmen zur Verkehrssicherheit?</h1>
-    </div> 
+    </div>
       </section>
 
   <section>
     <div class="container reveal">
   <svg id=legend></svg>
   <div id=main>
-      <div id=map><h1>MAP</h1></div>
+      <div id=map></div>
       <div id=right>
-        <div id=infoText><h1>INFO</h1></div>
-        <div id=gravenessDiagramm><h1>GRAVENESS</h1></div>
-        <div id=involvedDiagramm><h1>Beteiligte</h1></div>
+        <div id=infoText></div>
+        <div id=gravenessDiagramm></div>
+        <div id=involvedDiagramm></div>
+        <button id="resetAll">Alle Filter zurücksetzen</button>
       </div>
   </div>
       </div>
@@ -536,9 +545,10 @@ function colorLegend(colorScale, {
   map = undefined,
   selection = undefined,
   width = 300,
-  height = 50,
-  margin = ({top: 40, right: 40, bottom: 30, left: 40}),
-  barHeight = 20
+  height = 80,
+  margin = ({top: 20, right: 40, bottom: 30, left: 40}),
+  barHeight = 20,
+  titleSize = 13
 }) {
   axisScale = d3.scaleLinear()
     .domain(colorScale.domain())
@@ -550,11 +560,10 @@ function colorLegend(colorScale, {
     .call(d3.axisBottom(axisScale)
       .ticks(width / 50)
       .tickSize(-barHeight))
-  //DOM.svg(width, height)
 
   const svg = selection === undefined ?
     document.createElementNS('http://www.w3.org/2000/svg', 'svg') :
-    selection.append("svg").attr('transform', `translate(${300}, 20)`)
+    selection.append("svg");
 
   const defs = svg.append("defs");
   const linearGradient = defs.append("linearGradient")
@@ -577,7 +586,14 @@ function colorLegend(colorScale, {
   svg.append('g')
     .call(axisBottom);
 
-  if (map) map.getContainer().appendChild(selection.node())
+  const legendTitle = svg.append("text")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`)
+    .attr("font-size", `${titleSize}px`)
+    .attr("font-color", "black")
+    .attr("font-weight", "bold")
+    .text("Unfälle pro Lebensorientiertem Raum")
+
+  if (map !== undefined) map.getContainer().appendChild(selection.node())
 
   return svg.node();
 }
@@ -626,6 +642,7 @@ function LeafletAccidentMap(data, {
   stateStrokeInactive = 0.0, // state border stroke thickness, while neither focused nor hovered over
   stateStrokeClicked = 3.0, // state border stroke thickness, while focused
   stateStrokeHover = 1.0, // state border stroke thickness, while hovered over
+  stateOpacityDomain = [0.05, 0.4], // min and maximum state color opacity
 }) {
   // get topo bounds and convert them to WGS84, but with LatLong format (x and y switched)
   var bounds = topojson.bbox(topo)
@@ -663,7 +680,7 @@ function LeafletAccidentMap(data, {
   // create the LOR polygons and give them click behavior
   mod.states = states.features.map(f => {
     const polygon = L.polygon(f.geometry.coordinates[0],
-            { stroke: true, color: "black", weight: stateStrokeInactive, fillOpacity: 0.8 })
+            { stroke: true, color: "black", weight: stateStrokeInactive, fillOpacity: stateOpacityDomain[1] })
 
     // change stroke when focussing state
     polygon.focus = function(e) {
@@ -739,13 +756,17 @@ function LeafletAccidentMap(data, {
   // change polygon color scale on zoom
   mod.map.on('zoomend', () => {
     var zoom = mod.map.getZoom();
-    const minOpacity = 0.01 // zoom == maxZoom => opacity = minOpacity
-    const maxOpacity = 0.8 // zoom == minZoom => opacity = maxOpacity
+    const [minOpacity, maxOpacity] = stateOpacityDomain // zoom == maxZoom => opacity = minOpacity; zoom == minZoom => opacity = maxOpacity
     const multiplier = (maxZoom - zoom) / (maxZoom - minZoom) // number between 0 and 1; zoom normalized
     // do a cubic descent of opacity to see the underlying map earlier
     const newOpacity = (maxOpacity - minOpacity) * Math.pow(multiplier, 3) + minOpacity
     mod.states.forEach((s) => s.setStyle({ fillOpacity: newOpacity }))
   });
+
+  mod.reset = function() {
+    mod.currentlyFocusedState.unfocus()
+    mod.map.fitBounds(mod.initBounds)
+  }
 
   mod.update(data)
 
@@ -753,7 +774,6 @@ function LeafletAccidentMap(data, {
 }
 # %%--- [javascript]
 # properties:
-#   top_hidden: true
 #   bottom_hidden: true
 #   run_on_load: true
 # ---%%
@@ -767,6 +787,7 @@ var mapModule = LeafletAccidentMap(data, {
   stateTitle: f => f.properties.BZR_NAME,
   stateCount: countPerLOR,
   stateId: p => parseInt(p.properties.BZR_ID),
+  stateOpacityDomain: [0.05, 0.6],
 })
 # %%--- [javascript]
 # properties:
@@ -938,18 +959,18 @@ function BarChart(data, {
     .call(xAxis);
 
   mod.focusedBar = undefined
-  mod.clickBar = function(cat) {
+  mod.clickBar = function(cat, noUpdate=false) {
     if (mod.focusedBar === undefined || mod.focusedBar != cat) {
       let niceName = X[cat]
       let officialName = Object.entries(involvedNames).find(([k, v]) => v === niceName)[0]
-      mod.manager.trigger({ involved: [officialName] })
+      if (!noUpdate && mod.manager !== undefined) mod.manager.trigger({ involved: [officialName] })
       bar
         .transition()
         .duration(200)
         .style("opacity", i => i === cat ? 1.0 : 0.4)
       mod.focusedBar = cat;
     } else { // focus all again
-      mod.manager.trigger({ involved: [] })
+      if (!noUpdate && mod.manager !== undefined) mod.manager.trigger({ involved: [] })
       bar
         .transition()
         .duration(200)
@@ -974,6 +995,9 @@ function BarChart(data, {
     yAxe.attr("transform", `translate(${marginLeft},0)`)
       .call(yAxis)
         .call(g => g.select(".domain").remove())
+        .call(g => g.selectAll(".tick line").clone()
+          .attr("x2", width - marginLeft - marginRight)
+          .attr("stroke-opacity", 0.1))
         .call(g => g.append("text")
           .attr("x", -marginLeft)
           .attr("y", 50)
@@ -1005,6 +1029,11 @@ function BarChart(data, {
     return this
   }
 
+  mod.reset = function() {
+    if (this.focusedBar === undefined) return;
+    mod.clickBar(this.focusedBar, true)
+  }
+
   return mod;
 }
 # %%--- [javascript]
@@ -1020,6 +1049,7 @@ var moduleInvolvedChart = BarChart(data, {
   yLabel: "↑ Anzahl",
   width: 500,
   height: 400, // think about deceptive design
+  yFormat: ",.0f",
   divName: "involvedDiagramm",
   //title: "Anzahl der Unfälle per Beteiligte",
 })
@@ -1078,17 +1108,17 @@ function BarChartH(data, {
   divName,
 } = {}) {
   removeAllChildren(divName)
-  mod = {};
+  const mod = {};
 
   // get correct data format
-  data = get_data_object_bar_chart(data, countGraveness);
-  data.map(get_meaning)
+  const barData = get_data_object_bar_chart(data, countGraveness);
+  barData.map(get_meaning)
 
-  var yDomain = d3.groupSort(data, ([d]) => d.count, d => d.category); // sort by descending frequency
+  var yDomain = d3.groupSort(barData, ([d]) => d.count, d => d.category); // sort by descending frequency
 
   // Compute values.
-  const X = d3.map(data, x);
-  const Y = d3.map(data, y);
+  const X = d3.map(barData, x);
+  const Y = d3.map(barData, y);
 
   // Compute default domains, and unique the y-domain.
   if (xDomain === undefined) xDomain = [0, d3.max(X)];
@@ -1107,17 +1137,17 @@ function BarChartH(data, {
   const yScale = d3.scaleBand(yDomain, yRange).padding(yPadding);
   const xAxis = d3.axisTop(xScale).ticks(width / 80, xFormat);
   const yAxis = d3.axisLeft(yScale).tickSizeOuter(0);
-  var color = d3.scaleOrdinal(data.map(d => d.category), ["red", "orange", "green"]).unknown("grey");
-  const col = d3.map(data, (d) => color(d.category));
+  var color = d3.scaleOrdinal(barData.map(d => d.category), ["red", "orange", "green"]).unknown("grey");
+  const col = d3.map(barData, (d) => color(d.category));
 
   // Compute titles.
   if (title === undefined) {
     const formatValue = xScale.tickFormat(100, xFormat);
     title = i => `${formatValue(X[i])}`;
   } else {
-    const O = d3.map(data, d => d);
+    const O = d3.map(barData, d => d);
     const T = title;
-    title = i => T(O[i], i, data);
+    title = i => T(O[i], i, barData);
   }
 
   const svg = d3.select(`#${divName}`).append("svg")
@@ -1163,18 +1193,18 @@ function BarChartH(data, {
       .style("opacity", 1.0);
 
   mod.focusedBar = undefined
-  mod.clickBar = function(idx) {
+  mod.clickBar = function(idx, noUpdate=false) {
     let categoryNum = idx + 1
     console.log(categoryNum)
     if (mod.focusedBar === undefined || mod.focusedBar != idx) {
-      mod.manager.trigger({ graveness: categoryNum })
+      if (!noUpdate && mod.manager !== undefined) mod.manager.trigger({ graveness: categoryNum })
       bar
         .transition()
         .duration(200)
         .style("opacity", i => i === idx ? 1.0 : 0.4)
       mod.focusedBar = idx;
     } else { // focus all again
-      mod.manager.trigger({ graveness: undefined })
+      if (!noUpdate && mod.manager !== undefined) mod.manager.trigger({ graveness: undefined })
       bar
         .transition()
         .duration(200)
@@ -1211,11 +1241,11 @@ function BarChartH(data, {
       .on("click", (e, cat) => mod.clickBar(gravenessMeanings.indexOf(cat)))
 
   mod.update = function(data) {
-    data = get_data_object_bar_chart(data, countGraveness);
-    data.map(get_meaning)
+    const barData = get_data_object_bar_chart(data, countGraveness);
+    barData.map(get_meaning)
 
     // update bar heigth
-    const X = d3.map(data, x);
+    const X = d3.map(barData, x);
     xDomain = [0, d3.max(X)]
     const xScale =  d3.scaleLinear(xDomain, xRange);
 
@@ -1260,6 +1290,11 @@ function BarChartH(data, {
     return this
   }
 
+  mod.reset = function() {
+    if (this.focusedBar === undefined) return;
+    mod.clickBar(this.focusedBar, true)
+  }
+
   return mod;
 }
 # %%--- [javascript]
@@ -1275,6 +1310,7 @@ var moduleGravenessChart = BarChartH(data, {
   xLabel: "Anzahl →",
   width: 500,
   height: 300, // think about deceptive design
+  xFormat: ",.0f",
   marginLeft: 80,
   divName: "gravenessDiagramm",
   //title: "Gesamtanzahl der Unfälle per Beteiligte",
@@ -1433,7 +1469,6 @@ function RaincloudPlot(data) {
   return svg.node();
 }
 # %% [html]
-
 <div id="test_violin"></div>
 # %%--- [javascript]
 # properties:
@@ -1465,18 +1500,19 @@ var manager = {
     this.currentFilters = {...this.currentFilters, ...info}
     // we use this to prefilter the data to do less work later when filtering for every member separately
     const currentDataToFilterFurther = filterData(this.initData, {...this.currentFilters, ...this.combinedIgnores})
-    console.log(`Number of currently filtered data points: ${filterData(this.initData, this.currentFilters).length}`)
+    const totalFocused = filterData(this.initData, this.currentFilters).length
+    console.log(`Number of currently filtered data points: ${totalFocused}`)
     console.log(`Size of the prefiltered data: ${currentDataToFilterFurther.length}`)
     console.log("trigger called. updating all plots...")
     for (member of this.members) {
       const filteredData = filterData(currentDataToFilterFurther, {...this.currentFilters, ...member.ignore})
       if (!member.noUpdate) member.module.update(filteredData)
     }
-    this.updateInfoText()
+    this.updateInfoText(totalFocused)
     console.log("Update finished.")
   },
 
-  updateInfoText() {
+  updateInfoText(totalFocused) {
     const f = this.currentFilters
     const area = f.lor === undefined ? "ganz Berlin" : lorNames[f.lor]
     const gs = f.graveness === undefined ? "Alle" : `${gravenessMeanings[f.graveness - 1]}e`
@@ -1484,18 +1520,32 @@ var manager = {
     if (f.involved.length > 0) {
       const category = involvedNames[f.involved[0]]
       if (category == "Sonstige") {
-        inv = `mit Beteiligung <span style="color: #7f11e0">Sonstiger</span>`
+        inv = `mit Beteiligung <span style="color: #7f11e0">Sonstiger</span> <br>`
       } else {
-        inv = `mit <span style="color: #7f11e0">${category}</span>-Beteiligung`
+        inv = `mit <span style="color: #7f11e0">${category}</span>-Beteiligung <br>`
       }
     }
-    console.log(inv)
     const text = `<p style="font-size:20px; color:#000000; font-weight:bold;">
                   Momentan im Fokus: <br>
                   <span style="color: #2222ff">${gs}</span> Unfälle in <span style="color: #bb2727cc">${area}</span> <br>
-                  ${inv}
+                  ${inv} (${totalFocused} Unfälle)
                 </p>`
     this.infoTextDiv.innerHTML = text
+  },
+
+  resetAll() {
+    this.currentFilters = {
+      lor: undefined,
+      graveness: undefined,
+      involved: []
+    }
+
+    for (member of this.members) {
+      member.module.reset()
+      member.module.update(this.initData)
+    }
+
+    this.updateInfoText(this.initData.length)
   },
 
   // add a module to be kept in the update loop to the members
@@ -1514,10 +1564,11 @@ var manager = {
   }
 }
 
-manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }, noUpdate: false}) // seems a little leaky
-manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }, noUpdate: false}) // seems leaky
-manager.addMember(mapModule, {ignoreFilter: {lor: undefined}})
-manager.updateInfoText()
+manager.addMember(moduleGravenessChart, { ignoreFilter: { graveness: undefined }})
+manager.addMember(moduleInvolvedChart, { ignoreFilter: { involved: [] }})
+manager.addMember(mapModule, { ignoreFilter: { lor: undefined }})
+manager.updateInfoText(data.length)
+document.getElementById("resetAll").onclick = () => { manager.resetAll() }
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
 mapModule.map.remove()
@@ -1566,18 +1617,23 @@ body {
 
 #infoText {
   height: 10%;
-  margin: 20px;
+  margin: 15px;
   text-align: center;
 }
 
 #gravenessDiagramm {
   height: 35%;
-  margin: 20px;
+  margin: 15px;
 }
 
 #involvedDiagramm {
-  height: 50%;
-  margin: 20px;
+  height: 40%;
+  margin: 15px;
+}
+
+#resetAll {
+  margin-left: 25px;
+  margin-top: 20px;
 }
 
 /*
