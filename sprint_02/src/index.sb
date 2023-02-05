@@ -907,7 +907,8 @@ function LeafletAccidentMap(data, {
     this.states.forEach(p => {
       const id = stateId(p)
       p.setStyle({fillColor: scaler(id)})
-      p.bindTooltip(`${stateTitle(p)} (${counts[id]} Unfälle)`) // TODO: maybe handle case count == 1?
+      let countsOrZero = counts[id] === undefined ? 0 : counts[id]
+      p.bindTooltip(`${stateTitle(p)} (${countsOrZero} Unfälle)`) // TODO: maybe handle case count == 1?
     })
 
     // update color legend (by replacing it completely)
