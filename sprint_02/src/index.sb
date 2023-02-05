@@ -1689,14 +1689,17 @@ var manager = {
     const f = this.currentFilters
     const area = f.lor === undefined ? "ganz Berlin" : lorNames[f.lor]
     const gs = f.graveness === undefined ? "Alle" : `${gravenessMeanings[f.graveness - 1]}e`
+    const involvedSpan = text => `<span style="color: #7f11e0">${text}</span>`
     let inv = ""
     if (f.involved.length > 0) {
       const category = involvedNames[f.involved[0]]
       if (category == "Sonstige") {
-        inv = `mit Beteiligung <span style="color: #7f11e0">Sonstiger</span> <br>`
+        inv = `mit Beteiligung ${involvedSpan("Sonstiger")} <br>`
       } else {
-        inv = `mit <span style="color: #7f11e0">${category}</span>-Beteiligung <br>`
+        inv = `mit ${involvedSpan(category)}-Beteiligung <br>`
       }
+    } else {
+      inv = `mit ${involvedSpan("beliebiger")} Beteiligung`
     }
     const text = `<p style="font-size:20px; color:#000000; font-weight:bold;">
                   Momentan im Fokus: <br>
