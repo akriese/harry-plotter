@@ -627,7 +627,7 @@ a {
                Diese Darstellung beschreibt, wie viele Verkehrsteilnehmer einer bestimmten Gruppe in Unfälle verwickelt waren. Ähnlich wie bei dem darüberliegenden Graphen, können Sie auch hier
                einen der Balken anklicken, um sich z.B. nur Unfälle mit PKW-Beteiligung anzeigen zu lassen, wobei dies auch Unfälle miteinschließt, an denen z.B. PKWs und Fahrradfahrer beteiligt waren. Sowohl die Karte,
                als auch das Balkendiagramm mit Schweregraden werden dadurch aktualisiert. Falls Sie nicht mehr sicher sein sollten, was Sie im Moment ausgewählt haben, wird Ihnen diese Information
-               in der rechten oberen Ecke der Gesamtdarstellung angezeigt.
+               in der rechten oberen Ecke der Gesamtdarstellung angezeigt. Sämtliche Daten wurden der Website daten.berlin.de entnommen.
                <p class= "reveal" style="text-align:center">
                <p></p>
                <a  class="button">Weiter</a>
