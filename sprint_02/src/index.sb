@@ -425,7 +425,7 @@ section .text-container .text-box{
       <div class="right-content reveal">
         Hier sehen Sie die Verteilung der Unfälle über Tage und Stunden. Besonders auffällig ist, dass am Wochenende (insbesondere am Sonntag) die 
         wenigsten Unfälle stattfinden. An Werktagen lassen sich zwischen 7-9 Uhr und zwischen 15-18 Uhr zwei Peaks erkennen, die in etwa den Zeiten 
-        entsprechen, zu denen viele Menschen zur Arbeit/von der Arbeit nach Hause fahren. Allerdingsfinden auch dazwischen recht viele Unfälle statt.
+        entsprechen, zu denen viele Menschen zur Arbeit/von der Arbeit nach Hause fahren. Allerdings finden auch dazwischen recht viele Unfälle statt.
         Zu Zeiten, zu denen üblicherweise geschlafen wird und somit auch auf den Straßen wenig los ist, finden - wie zu erwarten - kaum Unfälle statt.
         </div>
     </div>
@@ -448,7 +448,7 @@ section .text-container .text-box{
       <div class="right-content reveal">
         Das Hauptelement der Darstellung ist eine Karte. Sie können darin wie gewohnt rein- und rauszoomen indem Sie scrollen, und die Karte mit der linken Maustaste bewegen. Die Farbe der eingezeichneten 
         lebensorientierten Räume (LOR) zeigt die unnormierte Anzahl der Verkehrsunfälle in dem jeweiligen LOR an. Durch Klicken auf einen LOR wird in diesen hereingezoomt und die seitlichen Grafiken werden
-        aktualisiert, um nur Daten aus diesem LOR anzuzeigen. Erneutes klicken auf den LOR hebt die Auswahl wieder auf. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem 
+        aktualisiert, um nur Daten aus diesem LOR anzuzeigen. Erneutes Klicken auf den LOR hebt die Auswahl wieder auf. Die farbigen Kreise auf der Karte fassen einzelne Unfallpunkte zusammen, die bei dem 
         momentanen Zoomlevel nah beieinander liegen. Durch reinzoomen werden diese in der Regel in kleinere Agglomerationen aufgeteilt, bis ab einem gewissen Zoomfaktor nur die einzelnen Unfallstellen 
         sichtbar sind. Um die einzelnen Unfallstellen sichtbar zu machen, kann auch auf einen der farbigen Kreise geklickt werden. Wenn Sie mit der Maus über einem der LORs oder einer einzelnen Unfallstelle
         hovern, erscheint ein Tooltip mit näheren Informationen.
@@ -485,7 +485,7 @@ section .text-container .text-box{
   <section>
       <div  class="left-content">
     	<h1 class= "reveal"  style="text-align:center">Welche Orte sind besonders gefährlich - und für wen?
-        <br><br>Wo bedarf es zusätzlicher Schutzmaßnahmen?</h1>
+        <br><br>Wo bedarf es zusätzlicher Maßnahmen zur Verkehrssicherheit?</h1>
     </div> 
       </section>
 
