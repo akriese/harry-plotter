@@ -322,9 +322,6 @@ section{
   justify-content: center;
   align-items: center;
 }
-section:nth-child(1){
-  color: #ff0808;
-  }
 
 section .container{
   margin: 100px;
@@ -334,9 +331,7 @@ section h1{
   font-size: 3rem;
   margin: 20px;
 }
-section h2{
 
-}
 section .text-container{
    display: flex;
 }
@@ -369,7 +364,7 @@ section .text-container .text-box{
 
 .left-container {
   float: left;
-  width: 50%;
+  width: 60%;
   height:90%;
 }
 
@@ -381,13 +376,15 @@ section .text-container .text-box{
   align-items: center;
   justify-content: space-around;
   height:90%;
-  width: 50%;
+  width: 40%;
   float: left;
   font-size: 18px;
 }
 
 .right-content {
-  max-width: 50%;}
+  max-width: 90%;
+
+  }
 
 .button, #resetAll {
   position: relative;
@@ -501,7 +498,6 @@ a {
 }
 # %%--- [html]
 # properties:
-#   run_on_load: true
 #   top_hidden: true
 # ---%%
 <body>
@@ -580,10 +576,10 @@ a {
    </section>
    <section>
       <div class="container">
-         <h2 class= "reveal" style="text-align:center">Übersicht der Visualization</h2>
+         <h2 class= "reveal" style="text-align:center">Übersicht der Visualisierung</h2>
       <div id="map_e" class="left-container">
     	 <div class="left-content center">
-      		<img class= "reveal" src="https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/final_viz_all.png" width="800" height="425">
+      		<img class= "reveal" src="https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/final_viz_all.png" width="1000" height="430">
         </div>
     </div>
     <div class="right-container">
@@ -599,10 +595,10 @@ a {
    </section>
    <section>
       <div class="container">
-         <h2 style="text-align:center">Übersicht der Visualization</h2>
+         <h2 style="text-align:center">Übersicht der Visualisierung</h2>
       <div id="map_e" class="left-container">
     	 <div class="left-content center"  >
-      		<img class= "reveal" src="https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/final_viz_filtered.png" width="800" height="425">
+      		<img class= "reveal" src="https://raw.githubusercontent.com/akriese/harry-plotter/main/sprint_02/data/final_viz_filtered.png" width="900" height="430">
         </div>
     </div>
     <div class="right-container">
@@ -1248,15 +1244,15 @@ var moduleInvolvedChart = BarChart(data, {
 # %%--- [javascript]
 # properties:
 #   bottom_hidden: true
-#   top_hidden: true
 #   run_on_load: true
+#   top_hidden: true
 # ---%%
 var moduleInvolvedChartTutorial = BarChart(data, {
 x: d => d.category, // x=> xScale(X\[i\])). axis -> category
 y: d => d.count, // counts
 yLabel: "↑ Anzahl",
-width: 500,
-height: 400, // think about deceptive design
+width: 700,
+height: 600, // think about deceptive design
 divName: "involvedDiagrammTutorial",
 //title: "Anzahl der Unfälle per Beteiligte",
 })
@@ -1268,7 +1264,7 @@ divName: "involvedDiagrammTutorial",
 # ---%%
 moduleInvolvedChartTutorial.clickBar = () => {}
 # %% [markdown]
-## Graveness chart
+##  \n  \n Graveness chart
 # %%--- [javascript]
 # properties:
 #   top_hidden: true
@@ -1511,14 +1507,13 @@ var moduleGravenessChart = BarChartH(data, {
 # properties:
 #   run_on_load: true
 #   bottom_hidden: true
-#   top_hidden: true
 # ---%%
 var moduleGravenessChartTutorial = BarChartH(data, {
   x: d => d.count, // x axis -> counts
   y: d => d.category, // y-axis -> counts
   xLabel: "Anzahl →",
-  width: 500,
-  height: 300, // think about deceptive design
+  width: 700,
+  height: 500, // think about deceptive design
   marginLeft: 80,
   divName: "gravenessDiagrammTutorial",
   //title: "Gesamtanzahl der Unfälle per Beteiligte",
@@ -1531,7 +1526,7 @@ var moduleGravenessChartTutorial = BarChartH(data, {
 # ---%%
 moduleGravenessChartTutorial.clickBar = () => {}
 # %% [markdown]
-## Violin plot for amount of crash per days and hour
+##  \n  \n Violin plot for amount of crash per days and hour
 
 * https://d3-graph-gallery.com/graph/violin_jitter.html
 
@@ -1767,7 +1762,10 @@ document.getElementById("resetAll").onclick = () => { manager.resetAll() }
 # %% [javascript]
 // Uncomment and execute to be able to reload the map
 mapModule.map.remove()
-# %% [css]
+# %%--- [css]
+# properties:
+#   top_hidden: true
+# ---%%
 /* We need this to make all cells wider */
 :root {
   --cell-base-width: 1600px;
@@ -1780,7 +1778,7 @@ body {
 }
 
 #main {
-  height: 850px;
+  height: 950px;
   width: 1600px;
   display: flex;
   border-color: black;
@@ -1812,7 +1810,7 @@ body {
 }
 
 #infoText {
-  height: 10%;
+  height: 12%;
   margin: 15px;
   text-align: center;
   border-bottom-color: #c8c8c8;
@@ -1821,7 +1819,7 @@ body {
 }
 
 #gravenessDiagramm {
-  height: 35%;
+  height: 30%;
   margin: 15px;
   border-bottom-color: #c8c8c8;
   border-bottom-width: 1px;
