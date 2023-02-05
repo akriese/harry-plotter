@@ -392,7 +392,7 @@ section .text-container .text-box{
 .right-content {
   max-width: 50%;}
 
-.button{
+.button, #resetAll {
   position: relative;
   background-color: black;
   border-radius: 4em;
@@ -407,6 +407,14 @@ section .text-container .text-box{
   transition-duration: 0.4s;
   -webkit-transition-duration: 0.4s; /* Safari */
 }
+
+#resetAll {
+  font-size: 12px;
+  border-radius: 3em;
+  padding: 0.6em 1.2em;
+  background-color: gray;
+}
+
 a:hover {
   color:  white;
 }
